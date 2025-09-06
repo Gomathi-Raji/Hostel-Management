@@ -14,7 +14,7 @@ const VacatingForm = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
-  };
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault();
