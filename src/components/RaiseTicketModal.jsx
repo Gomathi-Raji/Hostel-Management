@@ -71,9 +71,10 @@ const RaiseTicketModal = ({ isOpen, onClose, onSubmit }) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* Title */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-foreground mb-2">
-              Title *
+              Title <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -87,9 +88,10 @@ const RaiseTicketModal = ({ isOpen, onClose, onSubmit }) => {
             />
           </div>
 
+          {/* Category */}
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-foreground mb-2">
-              Category *
+              Category <span className="text-red-500">*</span>
             </label>
             <select
               id="category"
@@ -108,9 +110,10 @@ const RaiseTicketModal = ({ isOpen, onClose, onSubmit }) => {
             </select>
           </div>
 
+          {/* Priority */}
           <div>
             <label htmlFor="priority" className="block text-sm font-medium text-foreground mb-2">
-              Priority *
+              Priority <span className="text-red-500">*</span>
             </label>
             <select
               id="priority"
@@ -129,9 +132,10 @@ const RaiseTicketModal = ({ isOpen, onClose, onSubmit }) => {
             </select>
           </div>
 
+          {/* Description */}
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-foreground mb-2">
-              Description *
+              Description <span className="text-red-500">*</span>
             </label>
             <textarea
               id="description"

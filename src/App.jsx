@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -10,7 +10,9 @@ import VacatingForm from "./pages/VacatingForm";
 import NotFound from "./pages/NotFound";
 import UserLayout from "./components/UserLayout";
 import AdminLayout from "./components/AdminLayout";
-import AdminDashboard from "./pages/admin/TempDashboard";
+
+// Admin Pages
+import AdminDashboard from "./pages/admin/TempDashboard"; 
 import TenantManagement from "./pages/admin/TenantManagement";
 import PaymentTracking from "./pages/admin/PaymentTracking";
 import PaymentTicketing from "./pages/admin/PaymentTicketing";
@@ -19,38 +21,119 @@ import AddNewTicket from "./pages/admin/AddNewTicket";
 import ReportsAnalytics from "./pages/admin/TempReportsAnalytics";
 import RoomOccupancy from "./pages/admin/RoomOccupancy";
 import Settings from "./pages/admin/Settings";
+import AdminTickets from "./pages/admin/AdminTickets"; // NEW: Admin Tickets Page
+
+import ForgotPassword from "./pages/ForgotPassword";
 
 const App = () => {
+  // No persistent authentication - always start fresh
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState("user");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Clear any existing auth data and start fresh
+  useEffect(() => {
+    const initializeApp = () => {
+      try {
+        // Always clear authentication data on app start
+        console.log("🔄 Clearing previous session data...");
+        localStorage.removeItem("isAuthenticated");
+        localStorage.removeItem("userType");
+        localStorage.removeItem("authToken");
+        sessionStorage.clear();
+        
+        // Always start with fresh state
+        setIsAuthenticated(false);
+        setUserType("user");
+        
+        console.log("✅ App initialized - User must login");
+      } catch (error) {
+        console.error("Error initializing app:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeApp();
+  }, []);
+
+  // Don't persist auth state - keep it session-only
+  const handleSetIsAuthenticated = (value) => {
+    console.log("🔑 Setting authentication to:", value);
+    setIsAuthenticated(value);
+    
+    // No persistence at all - user has to login every time
+  };
+
+  // Set user type without persistence
+  const handleSetUserType = (type) => {
+    console.log("🔄 Setting user type to:", type);
+    setUserType(type);
+    
+    // No persistence - user type is only kept in memory
+    // This ensures fresh login selection every time
+  };
+
+  // Logout function
+  const handleLogout = () => {
+    console.log("🚪 Logging out user");
+    setIsAuthenticated(false);
+    setUserType("user"); // Reset to default
+    localStorage.clear();
+    sessionStorage.clear();
+  };
+
+  // DEBUG: Show current state values
+  console.log("🔍 Current App State:", { 
+    isAuthenticated, 
+    userType, 
+    isLoading,
+    currentPath: window.location.pathname 
+  });
+
+  // Show loading spinner while initializing
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-background">
         <Routes>
-          {/* LOGIN ROUTE */}
+          {/* LOGIN - Always show if not authenticated */}
           <Route
             path="/login"
             element={
               !isAuthenticated ? (
                 <Login
-                  setIsAuthenticated={setIsAuthenticated}
-                  setUserType={setUserType}
+                  setIsAuthenticated={handleSetIsAuthenticated}
+                  setUserType={handleSetUserType}
                 />
               ) : (
-                <Navigate to="/dashboard" replace />
+                // Redirect based on userType after login
+                <Navigate to={userType === "admin" ? "/admin/dashboard" : "/dashboard"} replace />
               )
             }
           />
 
-          {/* REGISTER ROUTE */}
+          {/* FORGOT PASSWORD */}
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+
+          {/* REGISTER */}
           <Route
             path="/register"
             element={
               !isAuthenticated ? (
                 <Register />
               ) : (
-                <Navigate to="/dashboard" replace />
+                <Navigate to={userType === "admin" ? "/admin/dashboard" : "/dashboard"} replace />
               )
             }
           />
@@ -63,7 +146,7 @@ const App = () => {
                 userType === "admin" ? (
                   <Navigate to="/admin/dashboard" replace />
                 ) : (
-                  <UserLayout>
+                  <UserLayout onLogout={handleLogout}>
                     <Dashboard userType={userType} />
                   </UserLayout>
                 )
@@ -77,8 +160,8 @@ const App = () => {
           <Route
             path="/invoices"
             element={
-              isAuthenticated ? (
-                <UserLayout>
+              isAuthenticated && userType === "user" ? (
+                <UserLayout onLogout={handleLogout}>
                   <Invoices />
                 </UserLayout>
               ) : (
@@ -86,12 +169,11 @@ const App = () => {
               )
             }
           />
-
           <Route
             path="/tickets"
             element={
-              isAuthenticated ? (
-                <UserLayout>
+              isAuthenticated && userType === "user" ? (
+                <UserLayout onLogout={handleLogout}>
                   <Tickets />
                 </UserLayout>
               ) : (
@@ -99,12 +181,11 @@ const App = () => {
               )
             }
           />
-
           <Route
             path="/raise-ticket"
             element={
-              isAuthenticated ? (
-                <UserLayout>
+              isAuthenticated && userType === "user" ? (
+                <UserLayout onLogout={handleLogout}>
                   <RaiseTicket />
                 </UserLayout>
               ) : (
@@ -112,12 +193,11 @@ const App = () => {
               )
             }
           />
-
           <Route
             path="/vacating-form"
             element={
-              isAuthenticated ? (
-                <UserLayout>
+              isAuthenticated && userType === "user" ? (
+                <UserLayout onLogout={handleLogout}>
                   <VacatingForm />
                 </UserLayout>
               ) : (
@@ -128,124 +208,45 @@ const App = () => {
 
           {/* ADMIN ROUTES */}
           <Route
-            path="/admin/dashboard"
+            path="/admin"
             element={
               isAuthenticated && userType === "admin" ? (
-                <AdminLayout>
-                  <AdminDashboard />
-                </AdminLayout>
+                <AdminLayout onLogout={handleLogout} />
               ) : (
                 <Navigate to="/login" replace />
               )
             }
-          />
+          >
+            <Route index element={<Navigate to="/admin/dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="tenant-management" element={<TenantManagement />} />
+            <Route path="payment-tracking" element={<PaymentTracking />} />
+            <Route path="payment-ticketing" element={<PaymentTicketing />} />
+            <Route
+              path="payment-ticket-detail/:ticketId"
+              element={<PaymentTicketDetail />}
+            />
+            <Route path="add-new-ticket" element={<AddNewTicket />} />
+            {/* NEW: Admin Tickets Route */}
+            <Route path="tickets" element={<AdminTickets />} />
+            <Route path="room-occupancy" element={<RoomOccupancy />} />
+            <Route path="reports-analytics" element={<ReportsAnalytics />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
 
-          <Route
-            path="/admin/tenant-management"
+          {/* DEFAULT ROUTE - Always redirect to login if not authenticated */}
+          <Route 
+            path="/" 
             element={
-              isAuthenticated && userType === "admin" ? (
-                <AdminLayout>
-                  <TenantManagement />
-                </AdminLayout>
+              isAuthenticated ? (
+                <Navigate to={userType === "admin" ? "/admin/dashboard" : "/dashboard"} replace />
               ) : (
                 <Navigate to="/login" replace />
               )
-            }
+            } 
           />
-
-          <Route
-            path="/admin/payment-tracking"
-            element={
-              isAuthenticated && userType === "admin" ? (
-                <AdminLayout>
-                  <PaymentTracking />
-                </AdminLayout>
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
-          <Route
-            path="/admin/payment-ticketing"
-            element={
-              isAuthenticated && userType === "admin" ? (
-                <AdminLayout>
-                  <PaymentTicketing />
-                </AdminLayout>
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
-          <Route
-            path="/admin/payment-ticket-detail/:ticketId"
-            element={
-              isAuthenticated && userType === "admin" ? (
-                <AdminLayout>
-                  <PaymentTicketDetail />
-                </AdminLayout>
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
-          <Route
-            path="/admin/add-new-ticket"
-            element={
-              isAuthenticated && userType === "admin" ? (
-                <AdminLayout>
-                  <AddNewTicket />
-                </AdminLayout>
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
-          <Route
-            path="/admin/room-occupancy"
-            element={
-              isAuthenticated && userType === "admin" ? (
-                <AdminLayout>
-                  <RoomOccupancy />
-                </AdminLayout>
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
-          <Route
-            path="/admin/reports-analytics"
-            element={
-              isAuthenticated && userType === "admin" ? (
-                <AdminLayout>
-                  <ReportsAnalytics />
-                </AdminLayout>
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
-          <Route
-            path="/admin/settings"
-            element={
-              isAuthenticated && userType === "admin" ? (
-                <AdminLayout>
-                  <Settings />
-                </AdminLayout>
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-
-          {/* DEFAULT ROUTE */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          
+          {/* 404 Page */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

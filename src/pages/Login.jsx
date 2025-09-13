@@ -12,8 +12,14 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setIsAuthenticated(true);
-    setUserType(activeTab);
+    
+    // ✅ IMPORTANT: Set user type BEFORE setting authentication
+    console.log("🔑 Logging in as:", activeTab); // DEBUG LOG
+    setUserType(activeTab); // Set the user type first
+    setIsAuthenticated(true); // Then set authentication
+    
+    // ✅ Additional debugging
+    console.log("✅ Login successful - User type:", activeTab);
   };
 
   const handleInputChange = (e) => {
@@ -23,6 +29,11 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
     });
   };
 
+  const handleTabChange = (tabType) => {
+    console.log("🔄 Tab changed to:", tabType); // DEBUG LOG
+    setActiveTab(tabType);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="max-w-md w-full">
@@ -30,7 +41,7 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
         <div className="flex mb-8 bg-muted rounded-lg p-1">
           <button
             type="button"
-            onClick={() => setActiveTab("user")}
+            onClick={() => handleTabChange("user")}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
               activeTab === "user"
                 ? "bg-light-green text-light-green-foreground shadow-sm"
@@ -41,7 +52,7 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab("admin")}
+            onClick={() => handleTabChange("admin")}
             className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
               activeTab === "admin"
                 ? "bg-light-green text-light-green-foreground shadow-sm"
@@ -54,6 +65,15 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
 
         {/* Login Form */}
         <div className="bg-card shadow-card rounded-lg p-8 border border-border">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold text-center text-foreground">
+              Login as {activeTab === "admin" ? "Administrator" : "User"}
+            </h2>
+            <p className="text-sm text-center text-muted-foreground mt-2">
+              {activeTab === "admin" ? "Access admin panel" : "Access your account"}
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="number" className="block text-sm font-medium text-foreground mb-2">
@@ -65,8 +85,8 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
                 name="number"
                 value={formData.number}
                 onChange={handleInputChange}
-                placeholder="Your registered number"
-                className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                placeholder="Your Mobile Number"
+                className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
             </div>
@@ -83,7 +103,7 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
                   value={formData.password}
                   onChange={handleInputChange}
                   placeholder="Enter your password"
-                  className="w-full px-3 py-2 pr-10 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                  className="w-full px-3 py-2 pr-10 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
                 <button
@@ -96,11 +116,23 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
               </div>
             </div>
 
+            {/* Forgot Password Link */}
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                Forgot Password?
+              </Link>
+            </div>
+
+            {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-mustard-orange hover:bg-mustard-orange/90 text-mustard-orange-foreground font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-mustard-orange focus:ring-offset-2"
+              className={`w-full font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                activeTab === "admin"
+                  ? "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500"
+                  : "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500"
+              }`}
             >
-              Login
+              Login as {activeTab === "admin" ? "Administrator" : "User"}
             </button>
           </form>
 
@@ -109,7 +141,7 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
             <p className="text-sm text-muted-foreground">
               Don't have an account?{" "}
               <Link to="/register" className="text-blue-600 hover:underline">
-                Sign In
+                Sign Up
               </Link>
             </p>
           </div>

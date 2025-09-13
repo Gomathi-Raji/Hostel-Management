@@ -16,7 +16,7 @@ const Navbar = () => {
     { path: "/invoices", label: "Invoices", icon: FileText },
     { path: "/tickets", label: "Tickets", icon: HelpCircle },
     { path: "/vacating-form", label: "Vacating Form", icon: FileText },
-    { path: "/raise-ticket", label: "Raise Ticket", icon: HelpCircle }
+   
   ];
 
   return (

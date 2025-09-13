@@ -224,7 +224,7 @@ const Settings = () => {
               {[
                 { id: "light", label: "Light", icon: Sun, desc: "Bright" },
                 { id: "dark", label: "Dark", icon: Moon, desc: "Eye-friendly" },
-                { id: "system", label: "System", icon: Monitor, desc: "Follow device" },
+                
               ].map((option) => (
                 <button
                   key={option.id}

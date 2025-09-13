@@ -14,12 +14,11 @@ const VacatingForm = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
-  }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Submitting vacating request:", formData);
-    // Here you would typically send the data to your backend
     alert("Vacating request submitted successfully!");
   };
 
@@ -36,9 +35,13 @@ const VacatingForm = () => {
       {/* Form */}
       <div className="bg-card shadow-card rounded-lg border border-border p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Full Name */}
           <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-foreground mb-2">
-              Full Name *
+            <label
+              htmlFor="fullName"
+              className="block text-sm font-medium text-foreground mb-2"
+            >
+              Full Name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -51,9 +54,13 @@ const VacatingForm = () => {
             />
           </div>
 
+          {/* Room Number */}
           <div>
-            <label htmlFor="roomNumber" className="block text-sm font-medium text-foreground mb-2">
-              Room Number *
+            <label
+              htmlFor="roomNumber"
+              className="block text-sm font-medium text-foreground mb-2"
+            >
+              Room Number <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -66,9 +73,13 @@ const VacatingForm = () => {
             />
           </div>
 
+          {/* Vacating Date */}
           <div>
-            <label htmlFor="vacatingDate" className="block text-sm font-medium text-foreground mb-2">
-              Intended Vacating Date *
+            <label
+              htmlFor="vacatingDate"
+              className="block text-sm font-medium text-foreground mb-2"
+            >
+              Intended Vacating Date <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -84,9 +95,13 @@ const VacatingForm = () => {
             </div>
           </div>
 
+          {/* Reason */}
           <div>
-            <label htmlFor="reason" className="block text-sm font-medium text-foreground mb-2">
-              Reason for Vacating *
+            <label
+              htmlFor="reason"
+              className="block text-sm font-medium text-foreground mb-2"
+            >
+              Reason for Vacating <span className="text-red-500">*</span>
             </label>
             <textarea
               id="reason"
@@ -104,7 +119,7 @@ const VacatingForm = () => {
           <div className="pt-4">
             <button
               type="submit"
-              className="w-full bg-mustard-orange hover:bg-mustard-orange/90 text-mustard-orange-foreground font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-mustard-orange focus:ring-offset-2"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
               Submit Request
             </button>

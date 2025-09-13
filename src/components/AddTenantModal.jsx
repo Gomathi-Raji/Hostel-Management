@@ -7,6 +7,7 @@ const AddTenantModal = ({ onClose }) => {
     lastName: "",
     email: "",
     phone: "",
+    aadhar: "",
     room: "",
     moveInDate: "",
     emergencyContact: "",
@@ -19,9 +20,24 @@ const AddTenantModal = ({ onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Aadhaar Validation (12-digit number)
+    const aadhaarRegex = /^[2-9]{1}[0-9]{11}$/;
+    if (!aadhaarRegex.test(formData.aadhar)) {
+      alert("Please enter a valid 12-digit Aadhaar number!");
+      return;
+    }
+
     console.log("Tenant Data:", formData);
     onClose();
   };
+
+  // Helper to display labels with *
+  const RequiredLabel = ({ children }) => (
+    <span>
+      {children} <span className="text-red-600">*</span>
+    </span>
+  );
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50">
@@ -45,7 +61,9 @@ const AddTenantModal = ({ onClose }) => {
           {/* First & Last Name */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">First Name *</label>
+              <label className="block text-sm font-medium mb-1">
+                <RequiredLabel>First Name</RequiredLabel>
+              </label>
               <input
                 name="firstName"
                 type="text"
@@ -56,7 +74,9 @@ const AddTenantModal = ({ onClose }) => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Last Name *</label>
+              <label className="block text-sm font-medium mb-1">
+                <RequiredLabel>Last Name</RequiredLabel>
+              </label>
               <input
                 name="lastName"
                 type="text"
@@ -71,7 +91,9 @@ const AddTenantModal = ({ onClose }) => {
           {/* Email & Phone */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Email Address *</label>
+              <label className="block text-sm font-medium mb-1">
+                <RequiredLabel>Email Address</RequiredLabel>
+              </label>
               <input
                 name="email"
                 type="email"
@@ -82,21 +104,44 @@ const AddTenantModal = ({ onClose }) => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Phone Number</label>
+              <label className="block text-sm font-medium mb-1">
+                <RequiredLabel>Phone Number</RequiredLabel>
+              </label>
               <input
                 name="phone"
                 type="text"
                 value={formData.phone}
                 onChange={handleChange}
+                required
+                maxLength="10"
                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
 
+          {/* Aadhaar Number */}
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              <RequiredLabel>Aadhaar Number</RequiredLabel>
+            </label>
+            <input
+              name="aadhar"
+              type="text"
+              value={formData.aadhar}
+              onChange={handleChange}
+              required
+              maxLength="12"
+              placeholder="Enter 12-digit Aadhaar Number"
+              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
           {/* Room & Move-in Date */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Room Assignment *</label>
+              <label className="block text-sm font-medium mb-1">
+                <RequiredLabel>Room Assignment</RequiredLabel>
+              </label>
               <select
                 name="room"
                 value={formData.room}
@@ -111,7 +156,9 @@ const AddTenantModal = ({ onClose }) => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Move-in Date *</label>
+              <label className="block text-sm font-medium mb-1">
+                <RequiredLabel>Move-in Date</RequiredLabel>
+              </label>
               <input
                 name="moveInDate"
                 type="date"
@@ -171,4 +218,6 @@ const AddTenantModal = ({ onClose }) => {
 };
 
 export default AddTenantModal;
+
+
 
