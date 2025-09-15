@@ -22,7 +22,7 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
     { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/tenant-management", label: "Tenant Management", icon: Users },
     { path: "/admin/payment-tracking", label: "Payment Tracking", icon: CreditCard },
-    { path: "/admin/payment-ticketing", label: "Payment Ticketing", icon: FileText },
+
     { 
       path: "/admin/tickets", 
       label: "Tickets", 

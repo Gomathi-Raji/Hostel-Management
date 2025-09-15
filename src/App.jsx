@@ -15,7 +15,7 @@ import AdminLayout from "./components/AdminLayout";
 import AdminDashboard from "./pages/admin/TempDashboard"; 
 import TenantManagement from "./pages/admin/TenantManagement";
 import PaymentTracking from "./pages/admin/PaymentTracking";
-import PaymentTicketing from "./pages/admin/PaymentTicketing";
+
 import PaymentTicketDetail from "./pages/admin/PaymentTicketDetail";
 import AddNewTicket from "./pages/admin/AddNewTicket";
 import ReportsAnalytics from "./pages/admin/TempReportsAnalytics";
@@ -221,7 +221,7 @@ const App = () => {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="tenant-management" element={<TenantManagement />} />
             <Route path="payment-tracking" element={<PaymentTracking />} />
-            <Route path="payment-ticketing" element={<PaymentTicketing />} />
+
             <Route
               path="payment-ticket-detail/:ticketId"
               element={<PaymentTicketDetail />}
