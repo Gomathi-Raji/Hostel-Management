@@ -2,12 +2,17 @@ import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, FileText, HelpCircle, LogOut, Menu, X } from "lucide-react";
 
-const Navbar = () => {
+const Navbar = ({ onLogout }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
+    // Call the logout function passed from parent (UserLayout -> App.jsx)
+    if (onLogout) {
+      onLogout();
+    }
+    // Navigate to login page
     navigate("/login");
   };
 

@@ -160,10 +160,10 @@ const AdminLayout = ({ onLogout }) => {
                 {/* Brand */}
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">DH</span>
+                    <span className="text-white font-bold text-sm">SL</span>
                   </div>
                   <div>
-                    <h1 className="text-lg font-bold text-gray-900">DataHub Pro</h1>
+                    <h1 className="text-lg font-bold text-gray-900">Stay Leap</h1>
                     <p className="text-xs text-gray-500">Data Management</p>
                   </div>
                 </div>
