@@ -10,24 +10,31 @@ import {
   LogOut,
   X,
   AlertTriangle,
+  ClipboardList,
 } from "lucide-react";
 
 const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
   const navigate = useNavigate();
 
-  // Mock pending tickets count - in real app, this would come from API/state
+  // Mock counts - in real app, these would come from API/state
   const pendingTicketsCount = 3;
+  const pendingFormsCount = 5; // NEW: Form requests count
 
   const menuItems = [
     { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/admin/tenant-management", label: "Tenant Management", icon: Users },
     { path: "/admin/payment-tracking", label: "Payment Tracking", icon: CreditCard },
-
     { 
       path: "/admin/tickets", 
       label: "Tickets", 
       icon: AlertTriangle, 
       badge: pendingTicketsCount > 0 ? pendingTicketsCount : null 
+    },
+    { 
+      path: "/admin/form-requests", 
+      label: "Form Requests", 
+      icon: ClipboardList, 
+      badge: pendingFormsCount > 0 ? pendingFormsCount : null 
     },
     { path: "/admin/room-occupancy", label: "Room Occupancy", icon: Building2 },
     { path: "/admin/reports-analytics", label: "Reports & Analytics", icon: FileText },
@@ -45,7 +52,7 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
     <>
       {/* Mobile Overlay */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black bg-opacity-50 dark:bg-black dark:bg-opacity-70 z-40 lg:hidden transition-opacity duration-300 ${
           isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setIsMobileMenuOpen(false)}
@@ -53,27 +60,27 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed left-0 top-0 h-full bg-white z-40 transition-all duration-300 lg:relative lg:translate-x-0 w-64 border-r border-gray-200 shadow-sm ${
+        className={`fixed left-0 top-0 h-full bg-white dark:bg-gray-800 z-40 transition-all duration-300 lg:relative lg:translate-x-0 w-64 border-r border-gray-200 dark:border-gray-700 shadow-sm ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+              <div className="w-10 h-10 bg-blue-600 dark:bg-blue-500 rounded-lg flex items-center justify-center shadow-sm">
                 <LayoutDashboard className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-800">Admin Panel</h2>
-                <p className="text-xs text-gray-500">Management</p>
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Admin Panel</h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Management</p>
               </div>
             </div>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
-              className="p-2 rounded-md hover:bg-gray-100 transition-colors lg:hidden"
+              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors lg:hidden"
             >
-              <X className="h-5 w-5 text-gray-500" />
+              <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
             </button>
           </div>
 
@@ -87,8 +94,8 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
                   className={({ isActive }) =>
                     `flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-300 ${
                       isActive
-                        ? "bg-blue-600 text-white shadow"
-                        : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                        ? "bg-blue-600 dark:bg-blue-600 text-white shadow"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400"
                     }`
                   }
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -110,10 +117,10 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
           </nav>
 
           {/* Logout */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-300 text-red-600 hover:bg-red-50"
+              className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-300 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
             >
               <LogOut className="h-5 w-5" />
               <span className="text-sm">Logout</span>

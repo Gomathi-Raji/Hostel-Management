@@ -7,6 +7,7 @@ import Invoices from "./pages/Invoices";
 import Tickets from "./pages/Tickets";
 import RaiseTicket from "./pages/RaiseTicket";
 import VacatingForm from "./pages/VacatingForm";
+import ExchangeForm from "./pages/ExchangeForm";
 import NotFound from "./pages/NotFound";
 import UserLayout from "./components/UserLayout";
 import AdminLayout from "./components/AdminLayout";
@@ -15,34 +16,30 @@ import AdminLayout from "./components/AdminLayout";
 import AdminDashboard from "./pages/admin/TempDashboard"; 
 import TenantManagement from "./pages/admin/TenantManagement";
 import PaymentTracking from "./pages/admin/PaymentTracking";
-
 import PaymentTicketDetail from "./pages/admin/PaymentTicketDetail";
 import AddNewTicket from "./pages/admin/AddNewTicket";
 import ReportsAnalytics from "./pages/admin/TempReportsAnalytics";
 import RoomOccupancy from "./pages/admin/RoomOccupancy";
 import Settings from "./pages/admin/Settings";
-import AdminTickets from "./pages/admin/AdminTickets"; // NEW: Admin Tickets Page
+import AdminTickets from "./pages/admin/AdminTickets";
+import FormRequests from "./pages/admin/FormRequests"; // NEW: Form Requests Page
 
 import ForgotPassword from "./pages/ForgotPassword";
 
 const App = () => {
-  // No persistent authentication - always start fresh
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userType, setUserType] = useState("user");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Clear any existing auth data and start fresh
   useEffect(() => {
     const initializeApp = () => {
       try {
-        // Always clear authentication data on app start
         console.log("🔄 Clearing previous session data...");
         localStorage.removeItem("isAuthenticated");
         localStorage.removeItem("userType");
         localStorage.removeItem("authToken");
         sessionStorage.clear();
         
-        // Always start with fresh state
         setIsAuthenticated(false);
         setUserType("user");
         
@@ -57,41 +54,24 @@ const App = () => {
     initializeApp();
   }, []);
 
-  // Don't persist auth state - keep it session-only
   const handleSetIsAuthenticated = (value) => {
     console.log("🔑 Setting authentication to:", value);
     setIsAuthenticated(value);
-    
-    // No persistence at all - user has to login every time
   };
 
-  // Set user type without persistence
   const handleSetUserType = (type) => {
     console.log("🔄 Setting user type to:", type);
     setUserType(type);
-    
-    // No persistence - user type is only kept in memory
-    // This ensures fresh login selection every time
   };
 
-  // Logout function
   const handleLogout = () => {
     console.log("🚪 Logging out user");
     setIsAuthenticated(false);
-    setUserType("user"); // Reset to default
+    setUserType("user");
     localStorage.clear();
     sessionStorage.clear();
   };
 
-  // DEBUG: Show current state values
-  console.log("🔍 Current App State:", { 
-    isAuthenticated, 
-    userType, 
-    isLoading,
-    currentPath: window.location.pathname 
-  });
-
-  // Show loading spinner while initializing
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -107,7 +87,7 @@ const App = () => {
     <BrowserRouter>
       <div className="min-h-screen bg-background">
         <Routes>
-          {/* LOGIN - Always show if not authenticated */}
+          {/* LOGIN */}
           <Route
             path="/login"
             element={
@@ -117,7 +97,6 @@ const App = () => {
                   setUserType={handleSetUserType}
                 />
               ) : (
-                // Redirect based on userType after login
                 <Navigate to={userType === "admin" ? "/admin/dashboard" : "/dashboard"} replace />
               )
             }
@@ -193,12 +172,26 @@ const App = () => {
               )
             }
           />
+          
+          {/* FORM ROUTES - Both Vacating and Exchange Forms */}
           <Route
             path="/vacating-form"
             element={
               isAuthenticated && userType === "user" ? (
                 <UserLayout onLogout={handleLogout}>
                   <VacatingForm />
+                </UserLayout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/exchange-form"
+            element={
+              isAuthenticated && userType === "user" ? (
+                <UserLayout onLogout={handleLogout}>
+                  <ExchangeForm />
                 </UserLayout>
               ) : (
                 <Navigate to="/login" replace />
@@ -221,20 +214,20 @@ const App = () => {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="tenant-management" element={<TenantManagement />} />
             <Route path="payment-tracking" element={<PaymentTracking />} />
-
             <Route
               path="payment-ticket-detail/:ticketId"
               element={<PaymentTicketDetail />}
             />
             <Route path="add-new-ticket" element={<AddNewTicket />} />
-            {/* NEW: Admin Tickets Route */}
             <Route path="tickets" element={<AdminTickets />} />
+            {/* NEW: Form Requests Route */}
+            <Route path="form-requests" element={<FormRequests />} />
             <Route path="room-occupancy" element={<RoomOccupancy />} />
             <Route path="reports-analytics" element={<ReportsAnalytics />} />
             <Route path="settings" element={<Settings />} />
           </Route>
 
-          {/* DEFAULT ROUTE - Always redirect to login if not authenticated */}
+          {/* DEFAULT ROUTE */}
           <Route 
             path="/" 
             element={
