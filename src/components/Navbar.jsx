@@ -30,6 +30,12 @@ const Navbar = ({ onLogout }) => {
     };
   }, []);
 
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsFormsDropdownOpen(false);
+  }, [location.pathname]);
+
   const navItems = [
     { path: "/dashboard", label: "Home", icon: Home },
     { path: "/invoices", label: "Invoices", icon: FileText },
@@ -43,6 +49,17 @@ const Navbar = ({ onLogout }) => {
 
   // Check if any forms dropdown item is active
   const isFormsDropdownActive = formsDropdownItems.some(item => location.pathname === item.path);
+
+  // Handle mobile form link click
+  const handleMobileFormLinkClick = (path) => {
+    console.log("Mobile form link clicked:", path);
+    setIsFormsDropdownOpen(false);
+    setIsMobileMenuOpen(false);
+    // Small delay to ensure state is updated before navigation
+    setTimeout(() => {
+      navigate(path);
+    }, 10);
+  };
 
   return (
     <nav className="bg-card shadow-card border-b border-border">
@@ -139,7 +156,7 @@ const Navbar = ({ onLogout }) => {
 
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
-        <div className="md:hidden border-t border-border">
+        <div className="md:hidden border-t border-border bg-card">
           <div className="px-2 pt-2 pb-3 space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -147,7 +164,6 @@ const Navbar = ({ onLogout }) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     location.pathname === item.path
                       ? "bg-light-green text-light-green-foreground"
@@ -161,7 +177,7 @@ const Navbar = ({ onLogout }) => {
             })}
 
             {/* Forms Dropdown - Mobile */}
-            <div>
+            <div className="space-y-1">
               <button
                 onClick={() => setIsFormsDropdownOpen(!isFormsDropdownOpen)}
                 className={`flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -183,23 +199,19 @@ const Navbar = ({ onLogout }) => {
 
               {/* Mobile Dropdown Items */}
               {isFormsDropdownOpen && (
-                <div className="ml-6 mt-2 space-y-1">
+                <div className="ml-6 space-y-1 bg-muted/50 rounded-lg p-1">
                   {formsDropdownItems.map((item) => (
-                    <Link
+                    <button
                       key={item.path}
-                      to={item.path}
-                      onClick={() => {
-                        setIsFormsDropdownOpen(false);
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      onClick={() => handleMobileFormLinkClick(item.path)}
+                      className={`block w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                         location.pathname === item.path
                           ? "bg-light-green text-light-green-foreground"
                           : "text-muted-foreground hover:text-foreground hover:bg-muted"
                       }`}
                     >
                       {item.label}
-                    </Link>
+                    </button>
                   ))}
                 </div>
               )}
