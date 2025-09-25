@@ -22,7 +22,9 @@ import ReportsAnalytics from "./pages/admin/TempReportsAnalytics";
 import RoomOccupancy from "./pages/admin/RoomOccupancy";
 import Settings from "./pages/admin/Settings";
 import AdminTickets from "./pages/admin/AdminTickets";
-import FormRequests from "./pages/admin/FormRequests"; // NEW: Form Requests Page
+import FormRequests from "./pages/admin/FormRequests";
+import ExpensesManagement from "./pages/admin/ExpensesManagement"; // NEW: Expenses Management
+import StaffPayrollManagement from "./pages/admin/StaffPayrollManagement"; // NEW: Staff & Payroll
 
 import ForgotPassword from "./pages/ForgotPassword";
 
@@ -173,7 +175,7 @@ const App = () => {
             }
           />
           
-          {/* FORM ROUTES - Both Vacating and Exchange Forms */}
+          {/* FORM ROUTES */}
           <Route
             path="/vacating-form"
             element={
@@ -220,8 +222,10 @@ const App = () => {
             />
             <Route path="add-new-ticket" element={<AddNewTicket />} />
             <Route path="tickets" element={<AdminTickets />} />
-            {/* NEW: Form Requests Route */}
             <Route path="form-requests" element={<FormRequests />} />
+            {/* NEW: Expenses and Staff Management Routes */}
+            <Route path="expenses" element={<ExpensesManagement />} />
+            <Route path="staff-payroll" element={<StaffPayrollManagement />} />
             <Route path="room-occupancy" element={<RoomOccupancy />} />
             <Route path="reports-analytics" element={<ReportsAnalytics />} />
             <Route path="settings" element={<Settings />} />

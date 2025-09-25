@@ -16,6 +16,8 @@ import {
   User,
   ChevronDown,
   ClipboardList,
+  Receipt,
+  UserCheck,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -25,7 +27,9 @@ const AdminLayout = ({ onLogout }) => {
 
   // Mock counts - in real app, these would come from API/state
   const pendingTicketsCount = 3;
-  const pendingFormsCount = 5; // NEW: Form requests count
+  const pendingFormsCount = 5;
+  const overdueExpensesCount = 2;
+  const pendingPayrollCount = 4;
 
   const menuItems = [
     { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -43,6 +47,19 @@ const AdminLayout = ({ onLogout }) => {
       icon: ClipboardList, 
       badge: pendingFormsCount > 0 ? pendingFormsCount : null 
     },
+    { 
+      path: "/admin/expenses", 
+      label: "Expenses Management", 
+      isMultiline: true,
+      icon: Receipt, 
+      badge: overdueExpensesCount > 0 ? overdueExpensesCount : null 
+    },
+    { 
+      path: "/admin/staff-payroll", 
+      label: "Staff & Payroll", 
+      icon: UserCheck, 
+      badge: pendingPayrollCount > 0 ? pendingPayrollCount : null 
+    },
     { path: "/admin/room-occupancy", label: "Room Occupancy", icon: Building2 },
     { path: "/admin/reports-analytics", label: "Reports & Analytics", icon: FileText },
     { path: "/admin/settings", label: "Settings", icon: Settings },
@@ -55,6 +72,9 @@ const AdminLayout = ({ onLogout }) => {
     navigate("/login");
   };
 
+  // Calculate total pending notifications
+  const totalPendingNotifications = pendingTicketsCount + pendingFormsCount + overdueExpensesCount + pendingPayrollCount;
+
   return (
     <div className="h-screen flex overflow-hidden bg-gray-100 dark:bg-gray-900 transition-colors duration-200">
       {/* Mobile Overlay */}
@@ -65,7 +85,7 @@ const AdminLayout = ({ onLogout }) => {
         onClick={() => setIsMobileMenuOpen(false)}
       />
 
-      {/* Fixed Sidebar - Full Height, Never Scrolls */}
+      {/* Fixed Sidebar - Consistent Width */}
       <div
         className={`
           fixed lg:static 
@@ -76,6 +96,7 @@ const AdminLayout = ({ onLogout }) => {
           shadow-sm 
           transform transition-all duration-300 
           z-50 lg:translate-x-0
+          flex-shrink-0
           ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
@@ -99,33 +120,50 @@ const AdminLayout = ({ onLogout }) => {
             </button>
           </div>
 
-          {/* Navigation - Fixed, No Scrolling */}
-          <nav className="flex-1 p-4 bg-white dark:bg-gray-800">
+          {/* Navigation - Scrollable if needed */}
+          <nav className="flex-1 p-4 bg-white dark:bg-gray-800 overflow-y-auto">
             <div className="space-y-1">
               {menuItems.map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `flex items-center justify-between px-3 py-2 rounded-md transition-colors duration-200 ${
-                      isActive
-                        ? "bg-blue-600 dark:bg-blue-600 text-white"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400"
-                    }`
-                  }
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <div className="flex items-center gap-3">
-                    <item.icon className="h-5 w-5" />
-                    <span className="text-sm">{item.label}</span>
-                  </div>
-                  {/* Badge for pending count */}
+                <div key={item.path} className="relative">
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
+                        isActive
+                          ? "bg-blue-600 dark:bg-blue-600 text-white"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400"
+                      }`
+                    }
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {/* Left side: Icon and Text */}
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        {item.isMultiline ? (
+                          <div className="text-sm font-medium">
+                            <div className="leading-tight">Expenses</div>
+                            <div className="leading-tight">Management</div>
+                          </div>
+                        ) : (
+                          <span className="text-sm truncate block">{item.label}</span>
+                        )}
+                      </div>
+                    </div>
+                  </NavLink>
+
+                  {/* Badge - Fixed positioning */}
                   {item.badge && (
-                    <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {item.badge}
-                    </span>
+                    <div 
+                      className="absolute right-3 pointer-events-none"
+                      style={{ top: '8px' }}
+                    >
+                      <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center flex-shrink-0 font-bold">
+                        {item.badge}
+                      </span>
+                    </div>
                   )}
-                </NavLink>
+                </div>
               ))}
             </div>
           </nav>
@@ -149,7 +187,7 @@ const AdminLayout = ({ onLogout }) => {
       </div>
 
       {/* Main Content Area with Top Navigation */}
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 min-w-0">
         {/* Top Navigation Bar - Always Visible Across All Admin Pages */}
         <header className="flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm z-30">
           <div className="px-6 py-4">
@@ -197,9 +235,11 @@ const AdminLayout = ({ onLogout }) => {
                   <button className="relative p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
                     <Bell className="h-6 w-6" />
                     {/* Notification badge - showing total pending items */}
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {pendingTicketsCount + pendingFormsCount}
-                    </span>
+                    {totalPendingNotifications > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {totalPendingNotifications}
+                      </span>
+                    )}
                   </button>
                 </div>
 

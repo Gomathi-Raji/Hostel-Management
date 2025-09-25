@@ -11,6 +11,8 @@ import {
   X,
   AlertTriangle,
   ClipboardList,
+  Receipt,
+  UserCheck,
 } from "lucide-react";
 
 const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
@@ -18,12 +20,26 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
 
   // Mock counts - in real app, these would come from API/state
   const pendingTicketsCount = 3;
-  const pendingFormsCount = 5; // NEW: Form requests count
+  const pendingFormsCount = 5;
+  const overdueExpensesCount = 2;
+  const pendingPayrollCount = 4;
 
   const menuItems = [
-    { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { path: "/admin/tenant-management", label: "Tenant Management", icon: Users },
-    { path: "/admin/payment-tracking", label: "Payment Tracking", icon: CreditCard },
+    { 
+      path: "/admin/dashboard", 
+      label: "Dashboard", 
+      icon: LayoutDashboard 
+    },
+    { 
+      path: "/admin/tenant-management", 
+      label: "Tenant Management", 
+      icon: Users 
+    },
+    { 
+      path: "/admin/payment-tracking", 
+      label: "Payment Tracking", 
+      icon: CreditCard 
+    },
     { 
       path: "/admin/tickets", 
       label: "Tickets", 
@@ -36,9 +52,34 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
       icon: ClipboardList, 
       badge: pendingFormsCount > 0 ? pendingFormsCount : null 
     },
-    { path: "/admin/room-occupancy", label: "Room Occupancy", icon: Building2 },
-    { path: "/admin/reports-analytics", label: "Reports & Analytics", icon: FileText },
-    { path: "/admin/settings", label: "Settings", icon: Settings },
+    { 
+      path: "/admin/expenses", 
+      label: "Expenses Management", 
+      isMultiline: true,
+      icon: Receipt, 
+      badge: overdueExpensesCount > 0 ? overdueExpensesCount : null
+    },
+    { 
+      path: "/admin/staff-payroll", 
+      label: "Staff & Payroll", 
+      icon: UserCheck, 
+      badge: pendingPayrollCount > 0 ? pendingPayrollCount : null 
+    },
+    { 
+      path: "/admin/room-occupancy", 
+      label: "Room Occupancy", 
+      icon: Building2 
+    },
+    { 
+      path: "/admin/reports-analytics", 
+      label: "Reports & Analytics", 
+      icon: FileText 
+    },
+    { 
+      path: "/admin/settings", 
+      label: "Settings", 
+      icon: Settings 
+    },
   ];
 
   const handleLogout = () => {
@@ -58,15 +99,15 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
         onClick={() => setIsMobileMenuOpen(false)}
       />
 
-      {/* Sidebar */}
+      {/* Sidebar - Fixed Width */}
       <aside
-        className={`fixed left-0 top-0 h-full bg-white dark:bg-gray-800 z-40 transition-all duration-300 lg:relative lg:translate-x-0 w-64 border-r border-gray-200 dark:border-gray-700 shadow-sm ${
+        className={`fixed left-0 top-0 h-full bg-white dark:bg-gray-800 z-40 transition-all duration-300 lg:relative lg:translate-x-0 w-64 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 shadow-sm ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-blue-600 dark:bg-blue-500 rounded-lg flex items-center justify-center shadow-sm">
                 <LayoutDashboard className="h-5 w-5 text-white" />
@@ -85,39 +126,56 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6">
+          <nav className="flex-1 px-4 py-6 overflow-y-auto">
             <div className="space-y-2">
               {menuItems.map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-300 ${
-                      isActive
-                        ? "bg-blue-600 dark:bg-blue-600 text-white shadow"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400"
-                    }`
-                  }
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  end
-                >
-                  <div className="flex items-center gap-4">
-                    <item.icon className="h-5 w-5" />
-                    <span className="text-sm">{item.label}</span>
-                  </div>
-                  {/* Badge for pending count */}
+                <div key={item.path} className="relative">
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `flex items-center px-4 py-3 rounded-lg transition-all duration-300 ${
+                        isActive
+                          ? "bg-blue-600 dark:bg-blue-600 text-white shadow"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400"
+                      }`
+                    }
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    end
+                  >
+                    {/* Left side: Icon and Text */}
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        {item.isMultiline ? (
+                          <div className="text-sm font-medium">
+                            <div className="leading-tight">Expenses</div>
+                            <div className="leading-tight">Management</div>
+                          </div>
+                        ) : (
+                          <span className="text-sm font-medium truncate block">{item.label}</span>
+                        )}
+                      </div>
+                    </div>
+                  </NavLink>
+                  
+                  {/* Badge - Consistent positioning */}
                   {item.badge && (
-                    <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {item.badge}
-                    </span>
+                    <div 
+                      className="absolute right-4 pointer-events-none"
+                      style={{ top: '12px' }}
+                    >
+                      <span className="inline-flex items-center justify-center w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full">
+                        {item.badge}
+                      </span>
+                    </div>
                   )}
-                </NavLink>
+                </div>
               ))}
             </div>
           </nav>
 
           {/* Logout */}
-          <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-300 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
