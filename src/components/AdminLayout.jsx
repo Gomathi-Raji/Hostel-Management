@@ -18,6 +18,7 @@ import {
   ClipboardList,
   Receipt,
   UserCheck,
+  Mic,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
 
@@ -61,6 +62,7 @@ const AdminLayout = ({ onLogout }) => {
       badge: pendingPayrollCount > 0 ? pendingPayrollCount : null 
     },
     { path: "/admin/room-occupancy", label: "Room Occupancy", icon: Building2 },
+    { path: "/admin/voice-assistant", label: "Voice Assistant", icon: Mic },
     { path: "/admin/reports-analytics", label: "Reports & Analytics", icon: FileText },
     { path: "/admin/settings", label: "Settings", icon: Settings },
   ];

@@ -23,8 +23,9 @@ import RoomOccupancy from "./pages/admin/RoomOccupancy";
 import Settings from "./pages/admin/Settings";
 import AdminTickets from "./pages/admin/AdminTickets";
 import FormRequests from "./pages/admin/FormRequests";
-import ExpensesManagement from "./pages/admin/ExpensesManagement"; // NEW: Expenses Management
-import StaffPayrollManagement from "./pages/admin/StaffPayrollManagement"; // NEW: Staff & Payroll
+import ExpensesManagement from "./pages/admin/ExpensesManagement"; // Expenses Management
+import StaffPayrollManagement from "./pages/admin/StaffPayrollManagement"; // Staff & Payroll
+import VoiceAssistantPage from "./pages/admin/VoiceAssistantPage"; // NEW: Voice Assistant
 
 import ForgotPassword from "./pages/ForgotPassword";
 
@@ -223,10 +224,12 @@ const App = () => {
             <Route path="add-new-ticket" element={<AddNewTicket />} />
             <Route path="tickets" element={<AdminTickets />} />
             <Route path="form-requests" element={<FormRequests />} />
-            {/* NEW: Expenses and Staff Management Routes */}
+            {/* Expenses and Staff Management Routes */}
             <Route path="expenses" element={<ExpensesManagement />} />
             <Route path="staff-payroll" element={<StaffPayrollManagement />} />
             <Route path="room-occupancy" element={<RoomOccupancy />} />
+            {/* NEW: Voice Assistant Route */}
+            <Route path="voice-assistant" element={<VoiceAssistantPage />} />
             <Route path="reports-analytics" element={<ReportsAnalytics />} />
             <Route path="settings" element={<Settings />} />
           </Route>

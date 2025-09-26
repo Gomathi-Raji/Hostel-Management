@@ -13,6 +13,7 @@ import {
   ClipboardList,
   Receipt,
   UserCheck,
+  Mic,
 } from "lucide-react";
 
 const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
@@ -69,6 +70,11 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
       path: "/admin/room-occupancy", 
       label: "Room Occupancy", 
       icon: Building2 
+    },
+    { 
+      path: "/admin/voice-assistant", 
+      label: "Voice Assistant", 
+      icon: Mic 
     },
     { 
       path: "/admin/reports-analytics", 
