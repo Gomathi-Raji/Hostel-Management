@@ -21,73 +21,7 @@ const FormRequests = () => {
   const [typeFilter, setTypeFilter] = useState("All");
 
   // Mock form requests data
-  const [formRequests, setFormRequests] = useState([
-    {
-      id: 1,
-      type: "Vacating",
-      tenantName: "John Doe",
-      tenantEmail: "john.doe@email.com",
-      roomNumber: "A-101",
-      submittedDate: "2024-01-15",
-      vacatingDate: "2024-02-15",
-      reason: "Job relocation to another city",
-      status: "Pending",
-      priority: "Medium",
-      documents: ["ID Proof", "Room Condition Photos"],
-    },
-    {
-      id: 2,
-      type: "Exchange",
-      tenantName: "Jane Smith",
-      tenantEmail: "jane.smith@email.com",
-      roomNumber: "B-205",
-      submittedDate: "2024-01-14",
-      preferredRoom: "C-301",
-      reason: "Need larger room for family visit",
-      status: "Approved",
-      priority: "Low",
-      documents: ["Medical Certificate"],
-    },
-    {
-      id: 3,
-      type: "Vacating",
-      tenantName: "Mike Johnson",
-      tenantEmail: "mike.j@email.com",
-      roomNumber: "C-301",
-      submittedDate: "2024-01-13",
-      vacatingDate: "2024-01-31",
-      reason: "Completed studies",
-      status: "Rejected",
-      priority: "High",
-      documents: ["Certificate", "Clearance Form"],
-    },
-    {
-      id: 4,
-      type: "Exchange",
-      tenantName: "Sarah Wilson",
-      tenantEmail: "sarah.w@email.com",
-      roomNumber: "D-402",
-      submittedDate: "2024-01-12",
-      preferredRoom: "A-203",
-      reason: "Closer to workspace",
-      status: "Pending",
-      priority: "High",
-      documents: ["Work Certificate"],
-    },
-    {
-      id: 5,
-      type: "Vacating",
-      tenantName: "David Brown",
-      tenantEmail: "david.brown@email.com",
-      roomNumber: "B-108",
-      submittedDate: "2024-01-11",
-      vacatingDate: "2024-03-01",
-      reason: "Marriage - moving with spouse",
-      status: "Pending",
-      priority: "Low",
-      documents: ["Marriage Certificate", "Address Proof"],
-    },
-  ]);
+  const [formRequests, setFormRequests] = useState([]);
 
   // Filter requests
   const filteredRequests = formRequests.filter((request) => {

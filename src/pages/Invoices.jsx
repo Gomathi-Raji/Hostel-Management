@@ -5,13 +5,7 @@ const Invoices = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const invoices = [
-    { id: 1, period: "December 2024", amount: "₹12,000", dueDate: "2024-12-05", paidDate: "2024-12-01", status: "Paid" },
-    { id: 2, period: "November 2024", amount: "₹12,000", dueDate: "2024-11-05", paidDate: "2024-11-03", status: "Paid" },
-    { id: 3, period: "October 2024", amount: "₹12,000", dueDate: "2024-10-05", paidDate: null, status: "Overdue" },
-    { id: 4, period: "September 2024", amount: "₹12,000", dueDate: "2024-09-05", paidDate: null, status: "Pending" },
-    { id: 5, period: "August 2024", amount: "₹12,000", dueDate: "2024-08-05", paidDate: "2024-08-02", status: "Paid" }
-  ];
+  const invoices = [];
 
   const getStatusBadge = (status) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-medium";

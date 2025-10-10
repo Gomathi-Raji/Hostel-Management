@@ -2,11 +2,7 @@ import React, { useState } from 'react';
 import { Search, Filter, Plus, Download, Eye, Edit, Trash2, X } from 'lucide-react';
 
 const TenantManagement = () => {
-  const [tenants, setTenants] = useState([
-    { id: 1, name: "John Doe", email: "john.doe@email.com", phone: "+91 9876543210", room: "A-101", moveInDate: "2024-01-15", status: "Active", securityDeposit: 15000, aadharNumber: "123412341234" },
-    { id: 2, name: "Jane Smith", email: "jane.smith@email.com", phone: "+91 9876543211", room: "B-205", moveInDate: "2024-01-20", status: "Active", securityDeposit: 15000, aadharNumber: "567856785678" },
-    { id: 3, name: "Mike Johnson", email: "mike.johnson@email.com", phone: "+91 9876543212", room: "C-301", moveInDate: "2023-12-10", status: "Vacated", securityDeposit: 15000, aadharNumber: "789078907890" }
-  ]);
+  const [tenants, setTenants] = useState([]);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");

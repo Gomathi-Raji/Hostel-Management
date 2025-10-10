@@ -14,30 +14,7 @@ const RoomOccupancy = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [showModal, setShowModal] = useState(false);
 
-  const [rooms, setRooms] = useState([
-    {
-      id: 1,
-      roomNumber: "A-101",
-      floor: "A",
-      type: "Single",
-      status: "Occupied",
-      tenants: ["John Doe", "Jane Smith"], // <-- Now supports multiple tenants
-      members: 2,
-      rentAmount: 15000,
-      moveInDate: "2024-01-15",
-    },
-    {
-      id: 2,
-      roomNumber: "A-102",
-      floor: "A",
-      type: "Single",
-      status: "Vacant",
-      tenants: [],
-      members: 0,
-      rentAmount: 15000,
-      moveInDate: null,
-    },
-  ]);
+  const [rooms, setRooms] = useState([]);
 
   const [formData, setFormData] = useState({
     roomNumber: "",

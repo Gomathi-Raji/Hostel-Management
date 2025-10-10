@@ -5,44 +5,7 @@ import RaiseTicketModal from "../components/RaiseTicketModal";
 const Tickets = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const tickets = [
-    {
-      id: 1,
-      title: "AC not working in room 101",
-      description: "The air conditioning unit has stopped working. It's not cooling the room at all.",
-      category: "Electrical",
-      priority: "High",
-      status: "In-progress",
-      createdDate: "2024-12-15T10:30:00Z"
-    },
-    {
-      id: 2,
-      title: "Wi-Fi issues",
-      description: "Internet connection is very slow and keeps disconnecting frequently.",
-      category: "Network",
-      priority: "Medium",
-      status: "Open",
-      createdDate: "2024-12-14T16:45:00Z"
-    },
-    {
-      id: 3,
-      title: "Leaking tap in bathroom",
-      description: "The bathroom tap is constantly dripping water.",
-      category: "Plumbing",
-      priority: "Low",
-      status: "Resolved",
-      createdDate: "2024-12-12T09:15:00Z"
-    },
-    {
-      id: 4,
-      title: "Broken door lock",
-      description: "The main door lock is not working properly, difficult to lock/unlock.",
-      category: "Security",
-      priority: "High",
-      status: "Open",
-      createdDate: "2024-12-10T14:20:00Z"
-    }
-  ];
+  const tickets = [];
 
   const getStatusBadge = (status) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-medium";

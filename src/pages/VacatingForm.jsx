@@ -3,8 +3,8 @@ import { Calendar } from "lucide-react";
 
 const VacatingForm = () => {
   const [formData, setFormData] = useState({
-    fullName: "John Smith", // Pre-filled
-    roomNumber: "101", // Pre-filled
+    fullName: "",
+    roomNumber: "",
     vacatingDate: "",
     reason: ""
   });

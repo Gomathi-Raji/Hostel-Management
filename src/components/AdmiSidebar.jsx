@@ -20,10 +20,10 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
   const navigate = useNavigate();
 
   // Mock counts - in real app, these would come from API/state
-  const pendingTicketsCount = 3;
-  const pendingFormsCount = 5;
-  const overdueExpensesCount = 2;
-  const pendingPayrollCount = 4;
+  const pendingTicketsCount = 0;
+  const pendingFormsCount = 0;
+  const overdueExpensesCount = 0;
+  const pendingPayrollCount = 0;
 
   const menuItems = [
     { 

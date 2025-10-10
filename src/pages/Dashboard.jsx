@@ -10,29 +10,18 @@ import {
 } from "lucide-react";
 
 const Dashboard = () => {
-  const userName = "John Smith";
-  const currentRent = "₹12,000";
-  const dueDate = "5th";
-  const activeIssues = 2;
-  const roomNumber = "101";
+  const userName = "";
+  const currentRent = "₹0";
+  const dueDate = "";
+  const activeIssues = 0;
+  const roomNumber = "";
 
   // State for showing more/less invoices
   const [showAllInvoices, setShowAllInvoices] = useState(false);
 
-  const recentInvoices = [
-    { month: "December 2024", amount: "₹12,000", status: "Paid", paidDate: "2024-12-01" },
-    { month: "November 2024", amount: "₹12,000", status: "Paid", paidDate: "2024-11-03" },
-    { month: "October 2024", amount: "₹12,000", status: "Overdue", paidDate: null },
-    { month: "September 2024", amount: "₹12,000", status: "Pending", paidDate: null },
-    { month: "August 2024", amount: "₹12,000", status: "Paid", paidDate: "2024-08-02" },
-    { month: "July 2024", amount: "₹12,000", status: "Paid", paidDate: "2024-07-01" },
-    { month: "June 2024", amount: "₹12,000", status: "Overdue", paidDate: null },
-  ];
+  const recentInvoices = [];
 
-  const activeTickets = [
-    { id: 1, title: "AC not working", status: "In-progress", priority: "High", createdDate: "2024-12-15" },
-    { id: 2, title: "Wi-Fi issues", status: "Open", priority: "Medium", createdDate: "2024-12-14" },
-  ];
+  const activeTickets = [];
 
   // Get invoices to display based on show more/less state
   const displayedInvoices = showAllInvoices ? recentInvoices : recentInvoices.slice(0, 3);

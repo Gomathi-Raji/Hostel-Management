@@ -12,13 +12,7 @@ const AddNewTicket = () => {
     image: null
   });
 
-  const tenantOptions = [
-    "John Doe - A-101",
-    "Jane Smith - B-205", 
-    "Mike Johnson - C-301",
-    "Sarah Wilson - A-102",
-    "David Brown - B-203"
-  ];
+  const tenantOptions = [];
 
   const categoryOptions = [
     "Plumbing",

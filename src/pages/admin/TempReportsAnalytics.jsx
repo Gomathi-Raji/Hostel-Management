@@ -5,8 +5,8 @@ const ReportsAnalytics = () => {
   const [selectedReport, setSelectedReport] = useState("overview");
 
   // Mock data
-  const keyMetrics = { totalTenants: 45, occupancyRate: 85, monthlyRevenue: 675000 };
-  const recentActivity = { newTenants: 5, paymentsReceived: 38 };
+  const keyMetrics = { totalTenants: 0, occupancyRate: 0, monthlyRevenue: 0 };
+  const recentActivity = { newTenants: 0, paymentsReceived: 0 };
   const analyticsCards = [
     { title: "Payment Data", description: "Detailed payment analytics and trends", icon: DollarSign, color: "text-primary" },
     { title: "Full Report", description: "Comprehensive hostel management report", icon: FileText, color: "text-accent" },
@@ -112,9 +112,9 @@ const ReportsAnalytics = () => {
             <div className="border-t border-gray-200 pt-3">
               <h3 className="text-sm font-medium text-gray-900 mb-2">Quick Insights</h3>
               <div className="space-y-1 text-sm">
-                <div className="flex justify-between"><span className="text-gray-500">Revenue Growth</span><span className="text-blue-600 font-medium">+12.5%</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Occupancy Change</span><span className="text-blue-600 font-medium">+3.2%</span></div>
-                <div className="flex justify-between"><span className="text-gray-500">Payment Collection</span><span className="text-blue-600 font-medium">94.8%</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Revenue Growth</span><span className="text-blue-600 font-medium">0%</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Occupancy Change</span><span className="text-blue-600 font-medium">0%</span></div>
+                <div className="flex justify-between"><span className="text-gray-500">Payment Collection</span><span className="text-blue-600 font-medium">0%</span></div>
               </div>
             </div>
           </div>

@@ -18,63 +18,13 @@ const VoiceAssistantPage = () => {
 
   // Mock data - in a real app, this would come from API
   const stats = {
-    totalCommands: 847,
-    successRate: 94.2,
-    pendingCommands: 12,
-    avgResponseTime: 2.3
+    totalCommands: 0,
+    successRate: 0,
+    pendingCommands: 0,
+    avgResponseTime: 0
   };
 
-  const recentCommands = [
-    {
-      id: 1,
-      command: "Show me the occupancy report for Building A",
-      timestamp: "2024-01-15 10:30 AM",
-      status: "completed",
-      responseTime: 1.8
-    },
-    {
-      id: 2,
-      command: "Create maintenance ticket for Room 204",
-      timestamp: "2024-01-15 09:45 AM",
-      status: "completed",
-      responseTime: 2.1
-    },
-    {
-      id: 3,
-      command: "Generate payment reminder for overdue tenants",
-      timestamp: "2024-01-15 09:20 AM",
-      status: "pending",
-      responseTime: null
-    },
-    {
-      id: 4,
-      command: "Update tenant information for John Smith",
-      timestamp: "2024-01-15 08:55 AM",
-      status: "completed",
-      responseTime: 3.2
-    },
-    {
-      id: 5,
-      command: "Schedule room cleaning for vacant units",
-      timestamp: "2024-01-15 08:30 AM",
-      status: "failed",
-      responseTime: 4.1
-    },
-    {
-      id: 6,
-      command: "Export monthly revenue report",
-      timestamp: "2024-01-15 08:15 AM",
-      status: "completed",
-      responseTime: 2.7
-    },
-    {
-      id: 7,
-      command: "Check available rooms for next week",
-      timestamp: "2024-01-15 07:50 AM",
-      status: "completed",
-      responseTime: 1.5
-    }
-  ];
+  const recentCommands = [];
 
   const displayedCommands = showAllCommands ? recentCommands : recentCommands.slice(0, 3);
 

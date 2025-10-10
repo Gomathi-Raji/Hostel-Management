@@ -9,24 +9,20 @@ const PaymentTicketDetail = () => {
 
   // Mock ticket data
   const ticketData = {
-    id: ticketId || "PT001",
-    tenantName: "John Doe",
-    roomNumber: "A-101",
-    issueType: "Monthly Rent",
-    totalAmount: 15000,
+    id: ticketId || "",
+    tenantName: "",
+    roomNumber: "",
+    issueType: "",
+    totalAmount: 0,
     paidAmount: 0,
-    remainingBalance: 15000,
-    paymentDueDate: "2024-02-15",
-    status: "Pending",
-    generatedDate: "2024-01-15",
-    description: "Monthly rent payment for February 2024"
+    remainingBalance: 0,
+    paymentDueDate: "",
+    status: "",
+    generatedDate: "",
+    description: ""
   };
 
-  const paymentHistory = [
-    { id: "PAY001", date: "2024-01-15", amount: 15000, mode: "Bank Transfer" },
-    { id: "PAY002", date: "2023-12-15", amount: 15000, mode: "Cash" },
-    { id: "PAY003", date: "2023-11-15", amount: 15000, mode: "Online Payment" }
-  ];
+  const paymentHistory = [];
 
   const handleMarkAsPaid = () => {
     setIsPaid(true);

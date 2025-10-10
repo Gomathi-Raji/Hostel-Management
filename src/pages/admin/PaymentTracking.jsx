@@ -7,19 +7,13 @@ const PaymentTracking = () => {
 
   // Mock data
   const paymentStats = {
-    totalAmount: 450000,
-    paid: 380000,
-    pending: 45000,
-    overdue: 25000
+    totalAmount: 0,
+    paid: 0,
+    pending: 0,
+    overdue: 0
   };
 
-  const paymentRecords = [
-    { id: 1, tenantName: "John Doe", tenantEmail: "john.doe@email.com", amount: 15000, status: "Paid", date: "2024-02-01", dueDate: "2024-02-01", room: "A-101" },
-    { id: 2, tenantName: "Jane Smith", tenantEmail: "jane.smith@email.com", amount: 15000, status: "Pending", date: "2024-02-12", dueDate: "2024-02-05", room: "B-205" },
-    { id: 3, tenantName: "Mike Johnson", tenantEmail: "mike.johnson@email.com", amount: 15000, status: "Overdue", date: "2024-02-10", dueDate: "2024-01-30", room: "C-301" },
-    { id: 4, tenantName: "Sarah Wilson", tenantEmail: "sarah.wilson@email.com", amount: 15000, status: "Paid", date: "2024-01-28", dueDate: "2024-01-30", room: "A-102" },
-    { id: 5, tenantName: "David Brown", tenantEmail: "david.brown@email.com", amount: 15000, status: "Pending", date: "2024-02-20", dueDate: "2024-02-15", room: "B-203" }
-  ];
+  const paymentRecords = [];
 
   const getStatusBadge = (status) => {
     const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";

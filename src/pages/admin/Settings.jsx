@@ -21,11 +21,11 @@ const Settings = () => {
   const [theme, setTheme] = useState("light");
 
   const [profileData, setProfileData] = useState({
-    firstName: "Admin",
-    lastName: "User",
-    email: "admin@datahubpro.com",
-    phone: "+91 98765 43210",
-    organization: "DataHub Pro",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    organization: "",
   });
 
   const [passwordData, setPasswordData] = useState({

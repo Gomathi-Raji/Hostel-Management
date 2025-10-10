@@ -35,52 +35,26 @@ const AdminDashboard = () => {
 
   // ✅ Mock stats data
   const stats = {
-    totalTenants: 45,
-    monthlyRevenue: 125000,
-    occupancyRate: 85,
-    overduePayments: 3,
+    totalTenants: 0,
+    monthlyRevenue: 0,
+    occupancyRate: 0,
+    overduePayments: 0,
   };
 
   // ✅ Dummy Data
-  const revenueData = [
-    { month: "Jan", revenue: 40000 },
-    { month: "Feb", revenue: 30000 },
-    { month: "Mar", revenue: 50000 },
-    { month: "Apr", revenue: 45000 },
-    { month: "May", revenue: 60000 },
-    { month: "Jun", revenue: 70000 },
-  ];
+  const revenueData = [];
 
-  const tenantGrowthData = [
-    { month: "Jan", tenants: 10 },
-    { month: "Feb", tenants: 20 },
-    { month: "Mar", tenants: 25 },
-    { month: "Apr", tenants: 35 },
-    { month: "May", tenants: 45 },
-    { month: "Jun", tenants: 55 },
-  ];
+  const tenantGrowthData = [];
 
-  const recentActivity = [
-    { id: 1, name: "John Doe", room: "101", status: "Active" },
-    { id: 2, name: "Jane Smith", room: "102", status: "Pending" },
-    { id: 3, name: "Mike Johnson", room: "103", status: "Overdue" },
-    { id: 4, name: "Emily Davis", room: "104", status: "Active" },
-    { id: 5, name: "Chris Wilson", room: "105", status: "Pending" },
-    { id: 6, name: "Sophia Brown", room: "106", status: "Active" },
-  ];
+  const recentActivity = [];
 
-  const recentPayments = [
-    { tenant: "John Doe", date: "2025-09-10", amount: 5000 },
-    { tenant: "Jane Smith", date: "2025-09-09", amount: 3000 },
-    { tenant: "Mike Johnson", date: "2025-09-08", amount: 4500 },
-    { tenant: "Emily Davis", date: "2025-09-07", amount: 6000 },
-  ];
+  const recentPayments = [];
 
   const roomOccupancy = {
-    available: 10,
-    occupied: 25,
-    maintenance: 5,
-    total: 40,
+    available: 0,
+    occupied: 0,
+    maintenance: 0,
+    total: 0,
   };
 
   const systemStatus = [
