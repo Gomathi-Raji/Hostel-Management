@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Home,
   Plus,
@@ -7,36 +7,54 @@ import {
   Wrench,
   X,
 } from "lucide-react";
+import apiFetch from '@/lib/apiClient';
 
 const RoomOccupancy = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [showModal, setShowModal] = useState(false);
-
   const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
     roomNumber: "",
     roomType: "",
     capacity: "",
     rentAmount: "",
-    tenants: [""], // <-- For multiple tenant names
-    members: "",
-    moveInDate: "",
-    status: "Available",
+    status: "available",
   });
 
   const roomTypes = ["Single", "Shared", "Deluxe"];
 
+  // Load rooms on component mount
+  useEffect(() => {
+    loadRooms();
+  }, []);
+
+  const loadRooms = async () => {
+    try {
+      setLoading(true);
+      const response = await apiFetch('/rooms');
+      setRooms(response.rooms || []);
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'Failed to load rooms');
+      console.error('Error loading rooms:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getStatusBadge = (status) => {
     const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
     switch (status) {
-      case "Occupied":
+      case "occupied":
         return `${baseClasses} bg-green-100 text-green-700 border border-green-300`;
-      case "Vacant":
+      case "available":
         return `${baseClasses} bg-blue-100 text-blue-700 border border-blue-300`;
-      case "Maintenance":
+      case "maintenance":
         return `${baseClasses} bg-yellow-100 text-yellow-700 border border-yellow-300`;
       default:
         return `${baseClasses} bg-gray-100 text-gray-700 border border-gray-300`;
@@ -45,11 +63,11 @@ const RoomOccupancy = () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case "Occupied":
+      case "occupied":
         return <Users className="h-4 w-4" />;
-      case "Vacant":
+      case "available":
         return <Home className="h-4 w-4" />;
-      case "Maintenance":
+      case "maintenance":
         return <Wrench className="h-4 w-4" />;
       default:
         return <Home className="h-4 w-4" />;
@@ -60,53 +78,46 @@ const RoomOccupancy = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle dynamic tenant name inputs
-  const handleTenantChange = (index, value) => {
-    const updatedTenants = [...formData.tenants];
-    updatedTenants[index] = value;
-    setFormData({ ...formData, tenants: updatedTenants });
-  };
-
-  // Update tenant fields based on members
-  const handleMembersChange = (e) => {
-    const members = parseInt(e.target.value) || 0;
-    const updatedTenants = Array(members).fill("").map((_, i) => formData.tenants[i] || "");
-    setFormData({ ...formData, members, tenants: updatedTenants });
-  };
-
-  const handleAddRoom = (e) => {
+  const handleAddRoom = async (e) => {
     e.preventDefault();
 
-    const newRoom = {
-      id: rooms.length + 1,
-      roomNumber: formData.roomNumber,
-      floor: formData.roomNumber.charAt(0),
-      type: formData.roomType,
-      status: formData.status,
-      tenants: formData.tenants.filter((t) => t.trim() !== ""), // Store only non-empty names
-      members: parseInt(formData.members),
-      rentAmount: parseInt(formData.rentAmount),
-      moveInDate: formData.moveInDate,
-    };
+    try {
+      const roomData = {
+        number: formData.roomNumber,
+        type: formData.roomType,
+        capacity: parseInt(formData.capacity),
+        rentAmount: parseFloat(formData.rentAmount),
+        status: formData.status,
+      };
 
-    setRooms([...rooms, newRoom]);
+      await apiFetch('/rooms', {
+        method: 'POST',
+        body: roomData
+      });
+
+      alert('Room added successfully!');
+      setShowModal(false);
+      resetForm();
+      loadRooms(); // Reload the rooms list
+    } catch (err) {
+      console.error('Error adding room:', err);
+      alert(err.message || 'Failed to add room');
+    }
+  };
+
+  const resetForm = () => {
     setFormData({
       roomNumber: "",
       roomType: "",
       capacity: "",
       rentAmount: "",
-      tenants: [""],
-      members: "",
-      moveInDate: "",
-      status: "Available",
+      status: "available",
     });
-    setShowModal(false);
   };
 
   const filteredRooms = rooms.filter((room) => {
     const matchesSearch =
-      room.roomNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      room.floor.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      room.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (room.tenants &&
         room.tenants.some((tenant) =>
           tenant.toLowerCase().includes(searchTerm.toLowerCase())
@@ -163,8 +174,8 @@ const RoomOccupancy = () => {
               className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="all">All Status</option>
+              <option value="available">Available</option>
               <option value="occupied">Occupied</option>
-              <option value="vacant">Vacant</option>
               <option value="maintenance">Maintenance</option>
             </select>
           </div>
@@ -186,18 +197,22 @@ const RoomOccupancy = () => {
       </div>
 
       {/* Rooms Grid */}
-      {filteredRooms.length > 0 ? (
+      {loading ? (
+        <p className="text-center text-gray-500 mt-10">Loading rooms...</p>
+      ) : error ? (
+        <p className="text-center text-red-500 mt-10">{error}</p>
+      ) : filteredRooms.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredRooms.map((room) => (
             <div
-              key={room.id}
+              key={room._id}
               className="bg-white rounded-lg border shadow hover:shadow-lg transition"
             >
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
                   <div className="flex items-center gap-2">
                     {getStatusIcon(room.status)}
-                    <h3 className="text-lg font-semibold">{room.roomNumber}</h3>
+                    <h3 className="text-lg font-semibold">{room.number}</h3>
                   </div>
                   <span className={getStatusBadge(room.status)}>
                     {room.status}
@@ -209,14 +224,14 @@ const RoomOccupancy = () => {
                     <span>{room.type}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span>Members:</span>
-                    <span>{room.members}</span>
+                    <span>Capacity:</span>
+                    <span>{room.capacity}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Rent:</span>
-                    <span>₹{room.rentAmount.toLocaleString()}</span>
+                    <span>₹{room.rentAmount ? room.rentAmount.toLocaleString() : 'N/A'}</span>
                   </div>
-                  {room.tenants.length > 0 && (
+                  {room.tenants && room.tenants.length > 0 && (
                     <div className="flex flex-col text-sm">
                       <span>Tenants:</span>
                       <ul className="list-disc list-inside">
@@ -279,37 +294,19 @@ const RoomOccupancy = () => {
                 ))}
               </select>
 
-              {/* No. of Members */}
+              {/* Capacity */}
               <label className="block text-sm font-medium">
-                No. of Members <span className="text-red-500">*</span>
+                Capacity <span className="text-red-500">*</span>
               </label>
               <input
-                name="members"
+                name="capacity"
                 type="number"
-                value={formData.members}
-                onChange={handleMembersChange}
-                placeholder="No. of Members"
+                value={formData.capacity}
+                onChange={handleInputChange}
+                placeholder="Room Capacity"
                 required
                 className="w-full border px-3 py-2 rounded-lg"
               />
-
-              {/* Dynamic Tenant Names */}
-              {formData.members > 0 &&
-                Array.from({ length: formData.members }).map((_, index) => (
-                  <div key={index}>
-                    <label className="block text-sm font-medium">
-                      Tenant Name {index + 1}
-                    </label>
-                    <input
-                      value={formData.tenants[index] || ""}
-                      onChange={(e) =>
-                        handleTenantChange(index, e.target.value)
-                      }
-                      placeholder={`Tenant Name ${index + 1}`}
-                      className="w-full border px-3 py-2 rounded-lg"
-                    />
-                  </div>
-                ))}
 
               {/* Rent Amount */}
               <label className="block text-sm font-medium">
@@ -325,16 +322,6 @@ const RoomOccupancy = () => {
                 className="w-full border px-3 py-2 rounded-lg"
               />
 
-              {/* Move-in Date */}
-              <label className="block text-sm font-medium">Move-in Date</label>
-              <input
-                name="moveInDate"
-                type="date"
-                value={formData.moveInDate}
-                onChange={handleInputChange}
-                className="w-full border px-3 py-2 rounded-lg"
-              />
-
               {/* Status */}
               <label className="block text-sm font-medium">Status</label>
               <select
@@ -343,9 +330,9 @@ const RoomOccupancy = () => {
                 onChange={handleInputChange}
                 className="w-full border px-3 py-2 rounded-lg"
               >
-                <option value="Available">Available</option>
-                <option value="Occupied">Occupied</option>
-                <option value="Maintenance">Maintenance</option>
+                <option value="available">Available</option>
+                <option value="occupied">Occupied</option>
+                <option value="maintenance">Maintenance</option>
               </select>
 
               {/* Submit Buttons */}

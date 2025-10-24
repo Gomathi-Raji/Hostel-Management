@@ -1,14 +1,31 @@
 import React, { useState } from "react";
-import { MessageCircle, Mic, MicOff } from "lucide-react";
+import { MessageCircle, Mic, MicOff, X } from "lucide-react";
 import Navbar from "./Navbar";
+import Chatbot from "./Chatbot";
 
 const UserLayout = ({ children, onLogout }) => {
   const [isListening, setIsListening] = useState(false);
+  const [showChatbot, setShowChatbot] = useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
       <Navbar onLogout={onLogout} />
       <main className="p-6">{children}</main>
+
+      {/* Chatbot Modal */}
+      {showChatbot && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-4 max-w-lg w-full mx-4 relative">
+            <button
+              onClick={() => setShowChatbot(false)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            <Chatbot />
+          </div>
+        </div>
+      )}
 
       {/* ChatbotVoiceButtons - Always visible floating buttons */}
       <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
@@ -43,7 +60,7 @@ const UserLayout = ({ children, onLogout }) => {
 
         {/* Chatbot Button */}
         <button
-          onClick={() => console.log("Chatbot opened")}
+          onClick={() => setShowChatbot(true)}
           className="w-14 h-14 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 sm:w-12 sm:h-12"
           aria-label="Chatbot"
           title="Chatbot"

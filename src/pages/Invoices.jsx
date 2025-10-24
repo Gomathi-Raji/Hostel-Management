@@ -1,31 +1,58 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Download, Search, Filter, Lock } from "lucide-react";
+import apiFetch from "@/lib/apiClient";
 
 const Invoices = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const invoices = [];
+  useEffect(() => {
+    fetchInvoices();
+  }, []);
+
+  const fetchInvoices = async () => {
+    try {
+      setLoading(true);
+      const data = await apiFetch("/payments/tenant/my-payments");
+      setInvoices(data.payments || []);
+    } catch (err) {
+      setError(err.message || "Failed to load invoices");
+      console.error("Invoices fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR'
+    }).format(amount);
+  };
 
   const getStatusBadge = (status) => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-medium";
-    switch (status.toLowerCase()) {
-      case "paid":
+    switch (status?.toLowerCase()) {
+      case "completed":
         return `${baseClasses} bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400`;
       case "pending":
         return `${baseClasses} bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400`;
-      case "overdue":
+      case "failed":
         return `${baseClasses} bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400`;
       default:
         return `${baseClasses} bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300`;
     }
   };
 
-  const isInvoicePaid = (invoice) => invoice.status.toLowerCase() === "paid";
+  const isInvoicePaid = (invoice) => invoice.status?.toLowerCase() === "completed";
 
   const filteredInvoices = invoices.filter(invoice => {
-    const matchesSearch = invoice.period.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || invoice.status.toLowerCase() === statusFilter.toLowerCase();
+    const matchesSearch = invoice.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         invoice.reference?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === "all" || invoice.status?.toLowerCase() === statusFilter.toLowerCase();
     return matchesSearch && matchesStatus;
   });
 
@@ -40,13 +67,53 @@ const Invoices = () => {
 
   const handleDownloadInvoice = (invoice) => {
     if (isInvoicePaid(invoice)) {
-      alert(`Downloading invoice for ${invoice.period}...`);
+      alert(`Downloading invoice for ${invoice.type} - ${formatCurrency(invoice.amount)}...`);
     } else {
-      alert(`Invoice for ${invoice.period} cannot be downloaded. Payment is required first.`);
+      alert(`Invoice cannot be downloaded. Payment is required first.`);
     }
   };
 
   const paidInvoicesCount = invoices.filter(isInvoicePaid).length;
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 mb-6">
+            <div className="h-10 bg-gray-200 rounded mb-4"></div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <div className="h-12 bg-gray-200 rounded mb-4"></div>
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-16 bg-gray-200 rounded mb-2"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">Error loading invoices</h3>
+              <div className="mt-2 text-sm text-red-700">{error}</div>
+              <button
+                onClick={fetchInvoices}
+                className="mt-2 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -94,9 +161,9 @@ const Invoices = () => {
               className="pl-10 pr-8 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent appearance-none"
             >
               <option value="all">All Status</option>
-              <option value="paid">Paid</option>
+              <option value="completed">Paid</option>
               <option value="pending">Pending</option>
-              <option value="overdue">Overdue</option>
+              <option value="failed">Failed</option>
             </select>
           </div>
         </div>
@@ -108,7 +175,7 @@ const Invoices = () => {
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Period</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Due Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Paid Date</th>
@@ -120,12 +187,18 @@ const Invoices = () => {
               {filteredInvoices.map((invoice) => {
                 const isPaid = isInvoicePaid(invoice);
                 return (
-                  <tr key={invoice.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{invoice.period}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{invoice.amount}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{new Date(invoice.dueDate).toLocaleDateString()}</td>
+                  <tr key={invoice._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                      {invoice.type === 'rent' ? 'Monthly Rent' : invoice.type}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {invoice.paidDate ? new Date(invoice.paidDate).toLocaleDateString() : "-"}
+                      {formatCurrency(invoice.amount)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : "-"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      {invoice.paidAt ? new Date(invoice.paidAt).toLocaleDateString() : "-"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={getStatusBadge(invoice.status)}>{invoice.status}</span>
@@ -163,7 +236,9 @@ const Invoices = () => {
 
       {filteredInvoices.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-gray-600 dark:text-gray-400">No invoices found matching your criteria.</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            {invoices.length === 0 ? "No invoices found." : "No invoices found matching your criteria."}
+          </p>
         </div>
       )}
     </div>

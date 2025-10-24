@@ -1,0 +1,24 @@
+2025-10-13T14:27:45.021Z - To: +1234567890, Type: overdue, Status: failed, Error: Invalid 'To' Phone Number: +123456XXXX
+Message: ⚠️ OVERDUE: Hi John Doe, your rent of ₹15000 was due on Wed Oct 08 2025. Please pay immediately.
+
+2025-10-13T14:27:45.637Z - To: +1234567891, Type: overdue, Status: failed, Error: Invalid 'To' Phone Number: +123456XXXX
+Message: ⚠️ OVERDUE: Hi Jane Smith, your rent of ₹12000 was due on Fri Oct 03 2025. Please pay immediately.
+
+2025-10-13T14:27:46.019Z - To: +1234567892, Type: reminder, Status: failed, Error: Invalid 'To' Phone Number: +123456XXXX
+Message: 🔔 REMINDER: Hi Bob Johnson, your rent of ₹18000 for Blue Horizon PG is due on Tue Oct 14 2025.
+
+2025-10-13T14:27:46.382Z - To: +1234567893, Type: reminder, Status: failed, Error: Invalid 'To' Phone Number: +123456XXXX
+Message: 🔔 REMINDER: Hi Alice Brown, your rent of ₹14000 for Sunrise Apartments is due on Wed Oct 15 2025.
+
+2025-10-13T14:48:07.076Z - To: +1234567890, Type: overdue, Status: failed, Error: Invalid 'To' Phone Number: +123456XXXX
+Message: ⚠️ OVERDUE: Hi John Doe, your rent of ₹15000 was due on Wed Oct 08 2025. Please pay immediately.
+
+2025-10-13T14:48:08.566Z - To: +1234567891, Type: overdue, Status: failed, Error: Invalid 'To' Phone Number: +123456XXXX
+Message: ⚠️ OVERDUE: Hi Jane Smith, your rent of ₹12000 was due on Fri Oct 03 2025. Please pay immediately.
+
+2025-10-13T14:48:08.948Z - To: +1234567892, Type: reminder, Status: failed, Error: Invalid 'To' Phone Number: +123456XXXX
+Message: 🔔 REMINDER: Hi Bob Johnson, your rent of ₹18000 for Blue Horizon PG is due on Tue Oct 14 2025.
+
+2025-10-13T14:48:09.295Z - To: +1234567893, Type: reminder, Status: failed, Error: Invalid 'To' Phone Number: +123456XXXX
+Message: 🔔 REMINDER: Hi Alice Brown, your rent of ₹14000 for Sunrise Apartments is due on Wed Oct 15 2025.
+

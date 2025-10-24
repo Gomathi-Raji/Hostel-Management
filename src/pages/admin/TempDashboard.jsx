@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Send,
@@ -28,40 +28,181 @@ import {
   Bar,
   ResponsiveContainer,
 } from "recharts";
+import apiFetch from "@/lib/apiClient";
 
 const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // ✅ Mock stats data
-  const stats = {
+  // ✅ Real stats data from API
+  const [stats, setStats] = useState({
     totalTenants: 0,
     monthlyRevenue: 0,
     occupancyRate: 0,
     overduePayments: 0,
-  };
+  });
 
-  // ✅ Dummy Data
-  const revenueData = [];
-
-  const tenantGrowthData = [];
-
-  const recentActivity = [];
-
-  const recentPayments = [];
-
-  const roomOccupancy = {
+  // ✅ Real data from APIs
+  const [revenueData, setRevenueData] = useState([]);
+  const [tenantGrowthData, setTenantGrowthData] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [recentPayments, setRecentPayments] = useState([]);
+  const [roomOccupancy, setRoomOccupancy] = useState({
     available: 0,
     occupied: 0,
     maintenance: 0,
     total: 0,
-  };
+  });
 
   const systemStatus = [
     { name: "Database", icon: Database },
     { name: "Server", icon: Server },
     { name: "WiFi", icon: Wifi },
   ];
+
+  // Fetch dashboard data
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch all data in parallel
+      const [
+        tenantsRes,
+        paymentsRes,
+        roomsRes,
+        expensesRes,
+        ticketsRes
+      ] = await Promise.all([
+        apiFetch("/tenants"),
+        apiFetch("/payments"),
+        apiFetch("/rooms"),
+        apiFetch("/expenses"),
+        apiFetch("/tickets")
+      ]);
+
+      // Calculate stats
+      const totalTenants = tenantsRes.tenants?.length || 0;
+      const totalPayments = paymentsRes.payments || [];
+      const monthlyRevenue = totalPayments
+        .filter(p => p.status === 'completed')
+        .reduce((sum, p) => sum + (p.amount || 0), 0);
+
+      const rooms = roomsRes.rooms || [];
+      const occupiedRooms = rooms.filter(r => r.status === 'occupied').length;
+      const totalRooms = rooms.length;
+      const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
+
+      // Mock overdue payments (in real app, calculate based on due dates)
+      const overduePayments = totalPayments.filter(p =>
+        p.status === 'pending' &&
+        new Date(p.dueDate || p.paidAt) < new Date()
+      ).length;
+
+      setStats({
+        totalTenants,
+        monthlyRevenue,
+        occupancyRate,
+        overduePayments,
+      });
+
+      // Set room occupancy
+      setRoomOccupancy({
+        available: rooms.filter(r => r.status === 'available').length,
+        occupied: occupiedRooms,
+        maintenance: rooms.filter(r => r.status === 'maintenance').length,
+        total: totalRooms,
+      });
+
+      // Process recent payments (last 5)
+      const recentPaymentsData = totalPayments
+        .slice(-5)
+        .reverse()
+        .map(payment => ({
+          id: payment._id,
+          tenant: payment.tenant?.firstName ?
+            `${payment.tenant.firstName} ${payment.tenant.lastName || ''}`.trim() :
+            'Unknown Tenant',
+          amount: payment.amount || 0,
+          date: new Date(payment.paidAt || payment.createdAt).toLocaleDateString(),
+          method: payment.method || 'N/A',
+          status: payment.status || 'pending',
+        }));
+      setRecentPayments(recentPaymentsData);
+
+      // Process recent tenant activity (recent tenants and tickets)
+      const recentTenants = tenantsRes.tenants?.slice(-5).reverse().map(tenant => ({
+        id: tenant._id,
+        name: `${tenant.firstName} ${tenant.lastName || ''}`.trim(),
+        room: tenant.room?.number || 'N/A',
+        status: tenant.active ? 'Active' : 'Inactive',
+        joinDate: new Date(tenant.moveInDate || tenant.createdAt).toLocaleDateString(),
+      })) || [];
+
+      const recentTickets = ticketsRes.tickets?.slice(-3).map(ticket => ({
+        id: ticket._id,
+        name: ticket.tenant?.firstName ?
+          `${ticket.tenant.firstName} ${ticket.tenant.lastName || ''}`.trim() :
+          'Unknown Tenant',
+        room: ticket.tenant?.room?.number || 'N/A',
+        status: ticket.status === 'open' ? 'Pending' :
+                ticket.status === 'in_progress' ? 'In Progress' :
+                ticket.status === 'resolved' ? 'Resolved' : 'Closed',
+        type: 'Ticket',
+        description: ticket.title,
+      })) || [];
+
+      setRecentActivity([...recentTenants, ...recentTickets]);
+
+      // Generate revenue data (mock monthly data based on payments)
+      const monthlyRevenueData = [];
+      const currentDate = new Date();
+      for (let i = 5; i >= 0; i--) {
+        const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+        const monthPayments = totalPayments.filter(p => {
+          const paymentDate = new Date(p.paidAt || p.createdAt);
+          return paymentDate.getMonth() === monthDate.getMonth() &&
+                 paymentDate.getFullYear() === monthDate.getFullYear();
+        });
+        const monthRevenue = monthPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+        monthlyRevenueData.push({
+          month: monthDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+          revenue: monthRevenue,
+        });
+      }
+      setRevenueData(monthlyRevenueData);
+
+      // Generate tenant growth data
+      const tenantGrowth = [];
+      for (let i = 5; i >= 0; i--) {
+        const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+        const monthTenants = tenantsRes.tenants?.filter(t => {
+          const joinDate = new Date(t.moveInDate || t.createdAt);
+          return joinDate.getMonth() === monthDate.getMonth() &&
+                 joinDate.getFullYear() === monthDate.getFullYear();
+        }).length || 0;
+
+        tenantGrowth.push({
+          month: monthDate.toLocaleDateString('en-US', { month: 'short' }),
+          tenants: monthTenants,
+        });
+      }
+      setTenantGrowthData(tenantGrowth);
+
+    } catch (err) {
+      setError(err.message || "Failed to fetch dashboard data");
+      console.error("Dashboard error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
   // ✅ Filter tenants
   const filteredTenants = recentActivity.filter((tenant) => {
@@ -72,6 +213,35 @@ const AdminDashboard = () => {
       filterStatus === "All" || tenant.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
+
+  if (loading) {
+    return (
+      <div className="p-6 bg-gray-100 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 bg-gray-100 min-h-screen flex items-center justify-center">
+        <div className="text-center text-red-600">
+          <AlertTriangle className="h-12 w-12 mx-auto mb-4" />
+          <p className="text-lg font-semibold mb-2">Error Loading Dashboard</p>
+          <p>{error}</p>
+          <button
+            onClick={fetchDashboardData}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen space-y-6">

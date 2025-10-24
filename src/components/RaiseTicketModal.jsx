@@ -10,19 +10,19 @@ const RaiseTicketModal = ({ isOpen, onClose, onSubmit }) => {
   });
 
   const categories = [
-    "Electrical",
-    "Plumbing",
-    "Network",
-    "Security",
-    "Cleaning",
-    "Maintenance",
-    "Other"
+    { value: "technical", label: "Technical Issue" },
+    { value: "payment", label: "Payment Issue" },
+    { value: "maintenance", label: "Maintenance" },
+    { value: "complaint", label: "Complaint" },
+    { value: "security", label: "Security" },
+    { value: "plumbing", label: "Plumbing" },
+    { value: "other", label: "Other" }
   ];
 
   const priorities = [
-    { value: "High", label: "High" },
-    { value: "Medium", label: "Medium" },
-    { value: "Low", label: "Low" }
+    { value: "low", label: "Low" },
+    { value: "medium", label: "Medium" },
+    { value: "high", label: "High" }
   ];
 
   const handleInputChange = (e) => {
@@ -103,8 +103,8 @@ const RaiseTicketModal = ({ isOpen, onClose, onSubmit }) => {
             >
               <option value="">Select a category</option>
               {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
+                <option key={category.value} value={category.value}>
+                  {category.label}
                 </option>
               ))}
             </select>

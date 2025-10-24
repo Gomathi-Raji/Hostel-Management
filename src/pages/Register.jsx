@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import apiFetch, { setToken } from "@/lib/apiClient";
 
 const Register = () => {
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     number: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
+    role: "user"
   });
 
   const handleChange = (e) => {
@@ -19,7 +22,19 @@ const Register = () => {
       alert("Passwords do not match!");
       return;
     }
-    alert("Account created successfully!");
+    (async () => {
+      try {
+        const res = await apiFetch("/auth/register", {
+          method: "POST",
+          body: { name: formData.name, email: formData.email, phone: formData.number, password: formData.password, role: formData.role },
+        });
+        if (res.token) setToken(res.token);
+        alert("Account created successfully!");
+      } catch (err) {
+        console.error(err);
+        alert(err?.message || "Registration failed");
+      }
+    })();
   };
 
   return (
@@ -41,7 +56,20 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Number</label>
+            <label className="block text-sm font-medium text-foreground mb-2">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">Phone Number</label>
             <input
               type="text"
               name="number"
@@ -51,6 +79,21 @@ const Register = () => {
               className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2">Role</label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+              required
+            >
+              <option value="user">User</option>
+              <option value="staff">Staff</option>
+              <option value="admin">Admin</option>
+            </select>
           </div>
 
           <div>

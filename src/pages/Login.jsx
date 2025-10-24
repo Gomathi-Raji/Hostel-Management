@@ -1,25 +1,34 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
+import apiFetch, { setToken } from "@/lib/apiClient";
 
 const Login = ({ setIsAuthenticated, setUserType }) => {
   const [activeTab, setActiveTab] = useState("user");
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    number: "",
+    email: "",
     password: ""
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // ✅ IMPORTANT: Set user type BEFORE setting authentication
-    console.log("🔑 Logging in as:", activeTab); // DEBUG LOG
-    setUserType(activeTab); // Set the user type first
-    setIsAuthenticated(true); // Then set authentication
-    
-    // ✅ Additional debugging
-    console.log("✅ Login successful - User type:", activeTab);
+    // Call backend login
+    (async () => {
+      try {
+        const payload = { email: formData.email, password: formData.password };
+        const res = await apiFetch("/auth/login", { method: "POST", body: payload });
+        // save token and update app state
+        if (res.token) {
+          setToken(res.token);
+        }
+        setUserType(activeTab);
+        setIsAuthenticated(true);
+      } catch (err) {
+        console.error(err);
+        alert(err?.message || "Login failed");
+      }
+    })();
   };
 
   const handleInputChange = (e) => {
@@ -76,16 +85,16 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="number" className="block text-sm font-medium text-foreground mb-2">
-                Number
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+                Email
               </label>
               <input
-                type="text"
-                id="number"
-                name="number"
-                value={formData.number}
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
                 onChange={handleInputChange}
-                placeholder="Your Mobile Number"
+                placeholder="Your Email Address"
                 className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />

@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Filter, Plus, Download, Eye, Edit, Trash2, X } from 'lucide-react';
+import apiFetch from '@/lib/apiClient';
 
 const TenantManagement = () => {
   const [tenants, setTenants] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,14 +27,42 @@ const TenantManagement = () => {
   });
 
   const [errors, setErrors] = useState({});
-  const rooms = ["A-101", "A-102", "A-103", "B-201", "B-202", "B-203", "C-301", "C-302"];
+
+  // Load tenants and rooms on component mount
+  useEffect(() => {
+    loadTenants();
+    loadRooms();
+  }, []);
+
+  const loadTenants = async () => {
+    try {
+      setLoading(true);
+      const response = await apiFetch('/tenants');
+      setTenants(response.tenants || []);
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'Failed to load tenants');
+      console.error('Error loading tenants:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadRooms = async () => {
+    try {
+      const response = await apiFetch('/rooms');
+      setRooms(response.rooms || []);
+    } catch (err) {
+      console.error('Error loading rooms:', err);
+    }
+  };
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" }); // Clear errors while typing
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     let newErrors = {};
 
@@ -50,21 +82,38 @@ const TenantManagement = () => {
       return; // Stop form submission if there are errors
     }
 
-    const newTenant = {
-      id: tenants.length + 1,
-      name: `${formData.firstName} ${formData.lastName}`,
-      email: formData.email,
-      phone: formData.phone,
-      aadharNumber: formData.aadharNumber,
-      room: formData.roomAssignment,
-      moveInDate: formData.moveInDate,
-      status: "Active",
-      securityDeposit: formData.securityDeposit
-    };
+    try {
+      const tenantData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        aadharNumber: formData.aadharNumber,
+        room: formData.roomAssignment, // This is now the room ID
+        moveInDate: formData.moveInDate,
+        emergencyContactName: formData.emergencyContactName,
+        emergencyContactRelationship: formData.emergencyContactRelationship,
+        emergencyContactPhone: formData.emergencyContactPhone,
+        securityDeposit: parseFloat(formData.securityDeposit)
+      };
 
-    setTenants([...tenants, newTenant]);
-    setShowAddModal(false);
+      await apiFetch('/tenants', {
+        method: 'POST',
+        body: tenantData
+      });
 
+      alert('Tenant added successfully!');
+      setShowAddModal(false);
+      resetForm();
+      loadTenants(); // Reload the tenants list
+      loadRooms(); // Reload available rooms
+    } catch (err) {
+      console.error('Error adding tenant:', err);
+      alert(err.message || 'Failed to add tenant');
+    }
+  };
+
+  const resetForm = () => {
     setFormData({
       firstName: "",
       lastName: "",
@@ -78,6 +127,7 @@ const TenantManagement = () => {
       emergencyContactPhone: "",
       securityDeposit: ""
     });
+    setErrors({});
   };
 
   const getStatusBadge = (status) => {
@@ -86,10 +136,13 @@ const TenantManagement = () => {
   };
 
   const filteredTenants = tenants.filter(tenant => {
-    const matchesSearch = tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const fullName = `${tenant.firstName} ${tenant.lastName}`.toLowerCase();
+    const matchesSearch = fullName.includes(searchTerm.toLowerCase()) ||
       tenant.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tenant.room.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === "all" || tenant.status.toLowerCase() === filterStatus.toLowerCase();
+      (tenant.room?.number || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterStatus === "all" ||
+      (filterStatus === "active" && tenant.active) ||
+      (filterStatus === "vacated" && !tenant.active);
     return matchesSearch && matchesFilter;
   });
 
@@ -142,17 +195,21 @@ const TenantManagement = () => {
 
       {/* Tenant Cards */}
       <div className="flex flex-col gap-4">
-        {filteredTenants.length > 0 ? filteredTenants.map(tenant => (
-          <div key={tenant.id} className="bg-white rounded-xl shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        {loading ? (
+          <p className="text-center text-gray-500 p-4">Loading tenants...</p>
+        ) : error ? (
+          <p className="text-center text-red-500 p-4">{error}</p>
+        ) : filteredTenants.length > 0 ? filteredTenants.map(tenant => (
+          <div key={tenant._id} className="bg-white rounded-xl shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex-1">
-              <p className="text-gray-800 font-medium">{tenant.name}</p>
+              <p className="text-gray-800 font-medium">{tenant.firstName} {tenant.lastName}</p>
               <p className="text-gray-600 text-sm">{tenant.email}</p>
               <p className="text-gray-600 text-sm">{tenant.phone}</p>
               <p className="text-gray-600 text-sm">Aadhaar: {tenant.aadharNumber}</p>
-              <p className="text-gray-800 text-sm">{tenant.room} | Move-in: {tenant.moveInDate}</p>
+              <p className="text-gray-800 text-sm">{tenant.room?.number || 'No room assigned'} | Move-in: {tenant.moveInDate ? new Date(tenant.moveInDate).toLocaleDateString() : 'N/A'}</p>
             </div>
             <div className="flex items-center gap-2 mt-2 sm:mt-0">
-              <span className={getStatusBadge(tenant.status)}>{tenant.status}</span>
+              <span className={getStatusBadge(tenant.active ? "Active" : "Inactive")}>{tenant.active ? "Active" : "Inactive"}</span>
               <button className="p-1 text-gray-500 hover:text-blue-500"><Eye className="h-4 w-4" /></button>
               <button className="p-1 text-gray-500 hover:text-blue-500"><Edit className="h-4 w-4" /></button>
               <button className="p-1 text-gray-500 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
@@ -264,8 +321,8 @@ const TenantManagement = () => {
                     className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.roomAssignment ? "border-red-500" : ""}`}
                   >
                     <option value="">Select Room</option>
-                    {rooms.map(room => (
-                      <option key={room} value={room}>{room}</option>
+                    {rooms.filter(room => room.status === 'available').map(room => (
+                      <option key={room._id} value={room._id}>{room.number}</option>
                     ))}
                   </select>
                   {errors.roomAssignment && <p className="text-red-500 text-xs mt-1">{errors.roomAssignment}</p>}

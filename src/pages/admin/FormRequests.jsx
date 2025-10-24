@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ClipboardList,
   Search,
@@ -13,15 +13,86 @@ import {
   Clock,
   MessageSquare,
   Download,
+  AlertCircle,
+  Check,
+  X,
 } from "lucide-react";
+import apiFetch from "@/lib/apiClient";
 
 const FormRequests = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [typeFilter, setTypeFilter] = useState("All");
-
-  // Mock form requests data
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [formRequests, setFormRequests] = useState([]);
+  const [actionLoading, setActionLoading] = useState(null);
+
+  // Fetch form requests
+  const fetchFormRequests = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch both vacating and exchange requests
+      const [vacatingRes, exchangeRes] = await Promise.all([
+        apiFetch("/vacating-requests"),
+        apiFetch("/exchange-requests")
+      ]);
+
+      // Transform vacating requests
+      const vacatingRequests = vacatingRes.requests.map(req => ({
+        id: req._id,
+        type: "Vacating",
+        tenantName: `${req.tenant.firstName} ${req.tenant.lastName}`,
+        tenantEmail: req.tenant.email,
+        roomNumber: req.tenant.room?.number || "N/A",
+        reason: req.reason,
+        vacatingDate: new Date(req.vacatingDate).toLocaleDateString(),
+        submittedDate: new Date(req.createdAt).toLocaleDateString(),
+        status: req.status.charAt(0).toUpperCase() + req.status.slice(1),
+        priority: "Medium", // Default priority
+        additionalNotes: req.additionalNotes,
+        approvedBy: req.approvedBy,
+        approvedAt: req.approvedAt,
+        documents: [] // No documents for now
+      }));
+
+      // Transform exchange requests
+      const exchangeRequests = exchangeRes.requests.map(req => ({
+        id: req._id,
+        type: "Exchange",
+        tenantName: `${req.tenant.firstName} ${req.tenant.lastName}`,
+        tenantEmail: req.tenant.email,
+        roomNumber: req.currentRoom?.number || req.currentRoom || "N/A",
+        preferredRoom: req.desiredRoom?.number || req.desiredRoom || "N/A",
+        reason: req.reason,
+        submittedDate: new Date(req.createdAt).toLocaleDateString(),
+        status: req.status.charAt(0).toUpperCase() + req.status.slice(1),
+        priority: "Medium", // Default priority
+        additionalNotes: req.additionalNotes,
+        approvedBy: req.approvedBy,
+        approvedAt: req.approvedAt,
+        documents: [] // No documents for now
+      }));
+
+      // Combine and sort by creation date (newest first)
+      const allRequests = [...vacatingRequests, ...exchangeRequests].sort(
+        (a, b) => new Date(b.submittedDate) - new Date(a.submittedDate)
+      );
+
+      setFormRequests(allRequests);
+    } catch (err) {
+      setError(err.message || "Failed to fetch form requests");
+      console.error("Form requests error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFormRequests();
+  }, []);
 
   // Filter requests
   const filteredRequests = formRequests.filter((request) => {
@@ -35,13 +106,30 @@ const FormRequests = () => {
     return matchesSearch && matchesStatus && matchesType;
   });
 
-  // Update request status
-  const updateRequestStatus = (requestId, newStatus) => {
-    setFormRequests((prevRequests) =>
-      prevRequests.map((request) =>
-        request.id === requestId ? { ...request, status: newStatus } : request
-      )
-    );
+  // Handle approve/reject actions
+  const handleRequestAction = async (requestId, action, type, reason = "") => {
+    try {
+      setActionLoading(requestId);
+
+      const endpoint = type === "Vacating"
+        ? `/vacating-requests/${requestId}/${action}`
+        : `/exchange-requests/${requestId}/${action}`;
+
+      const body = action === "reject" ? { reason } : {};
+
+      await apiFetch(endpoint, {
+        method: "PUT",
+        body
+      });
+
+      // Refresh the requests
+      await fetchFormRequests();
+    } catch (err) {
+      setError(`Failed to ${action} request: ${err.message}`);
+      console.error(`Request ${action} error:`, err);
+    } finally {
+      setActionLoading(null);
+    }
   };
 
   // Get status badge styling
@@ -50,6 +138,7 @@ const FormRequests = () => {
       Pending: "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400",
       Approved: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400",
       Rejected: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400",
+      Completed: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400",
     };
     return styles[status] || "bg-gray-100 text-gray-800 border-gray-200";
   };
@@ -79,6 +168,14 @@ const FormRequests = () => {
     exchange: formRequests.filter((r) => r.type === "Exchange").length,
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -89,7 +186,26 @@ const FormRequests = () => {
             Manage tenant vacating and room exchange requests
           </p>
         </div>
+        <button
+          onClick={fetchFormRequests}
+          className="mt-4 sm:mt-0 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Refresh
+        </button>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <AlertCircle className="h-5 w-5 text-red-400 mr-3" />
+            <div>
+              <h3 className="text-sm font-medium text-red-800">Error</h3>
+              <div className="mt-2 text-sm text-red-700">{error}</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -151,6 +267,7 @@ const FormRequests = () => {
                 <option value="Pending">Pending</option>
                 <option value="Approved">Approved</option>
                 <option value="Rejected">Rejected</option>
+                <option value="Completed">Completed</option>
               </select>
             </div>
 
@@ -212,7 +329,7 @@ const FormRequests = () => {
 
                 {/* Details */}
                 <h3 className="text-sm sm:text-lg font-medium text-gray-900 dark:text-white mb-1">
-                  {request.type} Request #{request.id}
+                  {request.type} Request #{request.id.slice(-6)}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2">
                   <strong>Reason:</strong> {request.reason}
@@ -252,33 +369,49 @@ const FormRequests = () => {
                   )}
                 </div>
 
-                {/* Documents */}
-                {request.documents?.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {request.documents.map((doc, idx) => (
-                      <span
-                        key={idx}
-                        className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-                      >
-                        <FileText className="h-3 w-3 mr-1" />
-                        {doc}
-                      </span>
-                    ))}
+                {/* Additional Notes */}
+                {request.additionalNotes && (
+                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                    <strong>Notes:</strong> {request.additionalNotes}
                   </div>
                 )}
               </div>
 
               {/* Actions */}
               <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-2">
-                <select
-                  value={request.status}
-                  onChange={(e) => updateRequestStatus(request.id, e.target.value)}
-                  className="text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="Approved">Approved</option>
-                  <option value="Rejected">Rejected</option>
-                </select>
+                {request.status === "Pending" && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleRequestAction(request.id, "approve", request.type)}
+                      disabled={actionLoading === request.id}
+                      className="flex items-center px-3 py-1 bg-green-600 text-white text-xs rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                    >
+                      {actionLoading === request.id ? (
+                        <div className="animate-spin rounded-full h-3 w-3 border-b border-white mr-1"></div>
+                      ) : (
+                        <Check className="h-3 w-3 mr-1" />
+                      )}
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => {
+                        const reason = prompt("Enter rejection reason:");
+                        if (reason) {
+                          handleRequestAction(request.id, "reject", request.type, reason);
+                        }
+                      }}
+                      disabled={actionLoading === request.id}
+                      className="flex items-center px-3 py-1 bg-red-600 text-white text-xs rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                    >
+                      {actionLoading === request.id ? (
+                        <div className="animate-spin rounded-full h-3 w-3 border-b border-white mr-1"></div>
+                      ) : (
+                        <X className="h-3 w-3 mr-1" />
+                      )}
+                      Reject
+                    </button>
+                  </div>
+                )}
 
                 <div className="flex gap-1 sm:flex-col">
                   <button className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="View Details">
@@ -286,9 +419,6 @@ const FormRequests = () => {
                   </button>
                   <button className="p-1 text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors" title="Send Message">
                     <MessageSquare className="h-4 w-4" />
-                  </button>
-                  <button className="p-1 text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors" title="Download Documents">
-                    <Download className="h-4 w-4" />
                   </button>
                 </div>
               </div>

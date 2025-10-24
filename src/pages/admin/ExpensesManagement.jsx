@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Receipt,
   Plus,
@@ -23,12 +23,26 @@ import {
   X,
   Save,
 } from "lucide-react";
+import apiFetch from '@/lib/apiClient';
 
 const ExpensesManagement = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [expenses, setExpenses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [stats, setStats] = useState({
+    total: 0,
+    totalAmount: 0,
+    paid: 0,
+    paidAmount: 0,
+    pending: 0,
+    pendingAmount: 0,
+    approved: 0,
+    approvedAmount: 0
+  });
   
   // Form state
   const [formData, setFormData] = useState({
@@ -67,7 +81,45 @@ const ExpensesManagement = () => {
   const paymentMethods = ["Cash", "Bank Transfer", "Cheque", "UPI", "Credit Card", "Debit Card"];
 
   const [customCategories, setCustomCategories] = useState([]);
-  const [expenses, setExpenses] = useState([]);
+
+  // Load expenses and stats on component mount
+  useEffect(() => {
+    loadExpenses();
+    loadExpenseStats();
+  }, []);
+
+  const loadExpenses = async () => {
+    try {
+      setLoading(true);
+      const response = await apiFetch('/expenses');
+      setExpenses(response.expenses || []);
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'Failed to load expenses');
+      console.error('Error loading expenses:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadExpenseStats = async () => {
+    try {
+      const response = await apiFetch('/expenses/stats');
+      const statsData = response;
+      setStats({
+        total: statsData.total || 0,
+        totalAmount: statsData.totalAmount || 0,
+        paid: statsData.byStatus?.find(s => s._id === 'paid')?.count || 0,
+        paidAmount: statsData.byStatus?.find(s => s._id === 'paid')?.total || 0,
+        pending: statsData.byStatus?.find(s => s._id === 'pending')?.count || 0,
+        pendingAmount: statsData.byStatus?.find(s => s._id === 'pending')?.total || 0,
+        approved: statsData.byStatus?.find(s => s._id === 'approved')?.count || 0,
+        approvedAmount: statsData.byStatus?.find(s => s._id === 'approved')?.total || 0
+      });
+    } catch (err) {
+      console.error('Error loading expense stats:', err);
+    }
+  };
 
   // Get all categories (default + custom)
   const allCategories = [...defaultCategories, ...customCategories];
@@ -146,19 +198,23 @@ const ExpensesManagement = () => {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const newExpense = {
-        id: Math.max(...expenses.map(e => e.id)) + 1,
+      // Prepare data for API
+      const expenseData = {
         ...formData,
         amount: parseFloat(formData.amount),
-        documents: [],
-        createdAt: new Date().toISOString().split('T')[0],
-        paidDate: formData.status === "Paid" ? new Date().toISOString().split('T')[0] : null
+        date: new Date(formData.date),
+        dueDate: formData.dueDate ? new Date(formData.dueDate) : undefined,
+        paymentMethod: formData.paymentMethod.toLowerCase().replace(' ', '_')
       };
 
-      setExpenses(prev => [newExpense, ...prev]);
+      await apiFetch('/expenses', {
+        method: 'POST',
+        body: expenseData
+      });
+      
+      // Reload expenses and stats
+      loadExpenses();
+      loadExpenseStats();
       
       // Reset form
       setFormData({
@@ -170,7 +226,7 @@ const ExpensesManagement = () => {
         paymentMethod: "Bank Transfer",
         date: "",
         dueDate: "",
-        status: "Pending"
+        status: "pending"
       });
 
       setShowAddModal(false);
@@ -178,7 +234,7 @@ const ExpensesManagement = () => {
 
     } catch (error) {
       console.error("Error adding expense:", error);
-      alert("Error adding expense. Please try again.");
+      alert(error.message || "Error adding expense. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -201,14 +257,14 @@ const ExpensesManagement = () => {
     setShowAddModal(false);
   };
 
-  // Filter expenses
+  // Filter expenses (client-side filtering for additional local filtering)
   const filteredExpenses = expenses.filter(expense => {
     const matchesSearch = 
       expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      expense.supplier.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      expense.subcategory.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = categoryFilter === "All" || expense.category === categoryFilter;
-    const matchesStatus = statusFilter === "All" || expense.status === statusFilter;
+      (expense.supplier || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (expense.subcategory || '').toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = categoryFilter === "All" || expense.category === categoryFilter.toLowerCase();
+    const matchesStatus = statusFilter === "All" || expense.status === statusFilter.toLowerCase();
     
     return matchesSearch && matchesCategory && matchesStatus;
   });
@@ -222,9 +278,10 @@ const ExpensesManagement = () => {
   // Get status badge styling
   const getStatusBadge = (status) => {
     const styles = {
-      "Paid": "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400",
-      "Pending": "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400",
-      "Overdue": "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400"
+      "paid": "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400",
+      "pending": "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400",
+      "approved": "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400",
+      "cancelled": "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400"
     };
     return styles[status] || "bg-gray-100 text-gray-800 border-gray-200";
   };
@@ -232,56 +289,61 @@ const ExpensesManagement = () => {
   // Get status icon
   const getStatusIcon = (status) => {
     switch(status) {
-      case "Paid": return <CheckCircle className="h-4 w-4" />;
-      case "Pending": return <Clock className="h-4 w-4" />;
-      case "Overdue": return <AlertTriangle className="h-4 w-4" />;
+      case "paid": return <CheckCircle className="h-4 w-4" />;
+      case "pending": return <Clock className="h-4 w-4" />;
+      case "approved": return <CheckCircle className="h-4 w-4" />;
+      case "cancelled": return <AlertTriangle className="h-4 w-4" />;
       default: return <Clock className="h-4 w-4" />;
     }
   };
 
-  // Calculate statistics
-  const stats = {
-    total: expenses.length,
-    totalAmount: expenses.reduce((sum, exp) => sum + exp.amount, 0),
-    paid: expenses.filter(e => e.status === "Paid").length,
-    pending: expenses.filter(e => e.status === "Pending").length,
-    overdue: expenses.filter(e => e.status === "Overdue").length,
-    paidAmount: expenses.filter(e => e.status === "Paid").reduce((sum, exp) => sum + exp.amount, 0),
-    pendingAmount: expenses.filter(e => e.status === "Pending").reduce((sum, exp) => sum + exp.amount, 0),
-    overdueAmount: expenses.filter(e => e.status === "Overdue").reduce((sum, exp) => sum + exp.amount, 0)
-  };
-
   // Update expense status
-  const updateExpenseStatus = (expenseId, newStatus) => {
-    setExpenses(prevExpenses =>
-      prevExpenses.map(expense =>
-        expense.id === expenseId ? { 
-          ...expense, 
-          status: newStatus,
-          paidDate: newStatus === "Paid" ? new Date().toISOString().split('T')[0] : null
-        } : expense
-      )
-    );
+  const updateExpenseStatus = async (expenseId, newStatus) => {
+    try {
+      await apiFetch(`/expenses/${expenseId}`, {
+        method: 'PUT',
+        body: { status: newStatus.toLowerCase() }
+      });
+      // Reload expenses and stats
+      loadExpenses();
+      loadExpenseStats();
+    } catch (err) {
+      console.error('Error updating expense status:', err);
+      alert(err.message || 'Failed to update expense status');
+    }
   };
 
   // Export functions
   const exportToCSV = () => {
     const csvData = filteredExpenses.map(expense => ({
-      ID: expense.id,
+      ID: expense._id,
       Category: getCategoryInfo(expense.category).name,
-      Subcategory: expense.subcategory,
+      Subcategory: expense.subcategory || 'N/A',
       Amount: expense.amount,
       Description: expense.description,
-      Supplier: expense.supplier,
-      'Payment Method': expense.paymentMethod,
-      Date: expense.date,
-      'Due Date': expense.dueDate,
-      Status: expense.status,
-      'Paid Date': expense.paidDate || 'N/A'
+      Supplier: expense.supplier || 'N/A',
+      'Payment Method': expense.paymentMethod?.replace('_', ' ').toUpperCase() || 'N/A',
+      Date: expense.date ? new Date(expense.date).toLocaleDateString() : 'N/A',
+      'Due Date': expense.dueDate ? new Date(expense.dueDate).toLocaleDateString() : 'N/A',
+      Status: expense.status?.toUpperCase() || 'N/A',
+      'Created At': expense.createdAt ? new Date(expense.createdAt).toLocaleDateString() : 'N/A'
     }));
     
-    console.log("Exporting CSV:", csvData);
-    alert("CSV export started! Check your downloads folder.");
+    const headers = Object.keys(csvData[0] || {});
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => headers.map(header => `"${row[header]}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `expenses_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const exportToPDF = () => {
@@ -374,11 +436,11 @@ const ExpensesManagement = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1 pr-3">
-                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Overdue</p>
-                  <p className="text-xl sm:text-2xl font-bold text-red-600">{stats.overdue}</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 truncate">₹{stats.overdueAmount.toLocaleString()}</p>
+                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Approved</p>
+                  <p className="text-xl sm:text-2xl font-bold text-blue-600">{stats.approved}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 truncate">₹{stats.approvedAmount.toLocaleString()}</p>
                 </div>
-                <AlertTriangle className="h-6 w-6 sm:h-8 sm:w-8 text-red-600 flex-shrink-0" />
+                <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 flex-shrink-0" />
               </div>
             </div>
           </div>
@@ -421,9 +483,10 @@ const ExpensesManagement = () => {
                 className="w-full sm:w-auto border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white text-sm"
               >
                 <option value="All">All Status</option>
-                <option value="Paid">Paid</option>
-                <option value="Pending">Pending</option>
-                <option value="Overdue">Overdue</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="paid">Paid</option>
+                <option value="cancelled">Cancelled</option>
               </select>
             </div>
           </div>
@@ -621,9 +684,10 @@ const ExpensesManagement = () => {
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-white"
                   >
-                    <option value="Pending">Pending</option>
-                    <option value="Paid">Paid</option>
-                    <option value="Overdue">Overdue</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="paid">Paid</option>
+                    <option value="cancelled">Cancelled</option>
                   </select>
                 </div>
 
@@ -670,12 +734,16 @@ const ExpensesManagement = () => {
           {/* Mobile Card View for smaller screens */}
           <div className="block lg:hidden">
             <div className="p-4 space-y-4">
-              {filteredExpenses.map((expense) => {
+              {loading ? (
+                <p className="text-center text-gray-500">Loading expenses...</p>
+              ) : error ? (
+                <p className="text-center text-red-500">{error}</p>
+              ) : filteredExpenses.length > 0 ? filteredExpenses.map((expense) => {
                 const categoryInfo = getCategoryInfo(expense.category);
                 const CategoryIcon = categoryInfo.icon;
                 
                 return (
-                  <div key={expense.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
+                  <div key={expense._id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <CategoryIcon className={`h-5 w-5 ${categoryInfo.color} mr-2 flex-shrink-0`} />
@@ -684,13 +752,13 @@ const ExpensesManagement = () => {
                             {categoryInfo.name}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {expense.subcategory}
+                            {expense.subcategory || 'N/A'}
                           </div>
                         </div>
                       </div>
                       <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(expense.status)}`}>
                         {getStatusIcon(expense.status)}
-                        <span className="ml-1">{expense.status}</span>
+                        <span className="ml-1">{expense.status?.toUpperCase() || 'N/A'}</span>
                       </div>
                     </div>
 
@@ -699,7 +767,7 @@ const ExpensesManagement = () => {
                         {expense.description}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        {expense.supplier}
+                        {expense.supplier || 'N/A'}
                       </div>
                     </div>
 
@@ -709,15 +777,15 @@ const ExpensesManagement = () => {
                           ₹{expense.amount.toLocaleString()}
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {expense.paymentMethod}
+                          {expense.paymentMethod?.replace('_', ' ').toUpperCase() || 'N/A'}
                         </div>
                       </div>
                       <div className="text-right">
                         <div className="text-sm text-gray-900 dark:text-white">
-                          {expense.date}
+                          {expense.date ? new Date(expense.date).toLocaleDateString() : 'N/A'}
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                          Due: {expense.dueDate}
+                          Due: {expense.dueDate ? new Date(expense.dueDate).toLocaleDateString() : 'N/A'}
                         </div>
                       </div>
                     </div>
@@ -725,12 +793,13 @@ const ExpensesManagement = () => {
                     <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
                       <select
                         value={expense.status}
-                        onChange={(e) => updateExpenseStatus(expense.id, e.target.value)}
+                        onChange={(e) => updateExpenseStatus(expense._id, e.target.value)}
                         className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 dark:text-white"
                       >
-                        <option value="Pending">Pending</option>
-                        <option value="Paid">Paid</option>
-                        <option value="Overdue">Overdue</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="paid">Paid</option>
+                        <option value="cancelled">Cancelled</option>
                       </select>
                       
                       <div className="flex items-center space-x-2">
@@ -750,7 +819,9 @@ const ExpensesManagement = () => {
                     </div>
                   </div>
                 );
-              })}
+              }) : (
+                <p className="text-center text-gray-500">No expenses found.</p>
+              )}
             </div>
           </div>
 
@@ -783,12 +854,24 @@ const ExpensesManagement = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {filteredExpenses.map((expense) => {
+                    {loading ? (
+                      <tr>
+                        <td colSpan="6" className="p-8 text-center text-gray-500">
+                          Loading expenses...
+                        </td>
+                      </tr>
+                    ) : error ? (
+                      <tr>
+                        <td colSpan="6" className="p-8 text-center text-red-500">
+                          {error}
+                        </td>
+                      </tr>
+                    ) : filteredExpenses.length > 0 ? filteredExpenses.map((expense) => {
                       const categoryInfo = getCategoryInfo(expense.category);
                       const CategoryIcon = categoryInfo.icon;
                       
                       return (
-                        <tr key={expense.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <tr key={expense._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                           {/* Category Column */}
                           <td className="px-4 py-4 whitespace-nowrap">
                             <div className="flex items-center">
@@ -798,7 +881,7 @@ const ExpensesManagement = () => {
                                   {categoryInfo.name}
                                 </div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                                  {expense.subcategory}
+                                  {expense.subcategory || 'N/A'}
                                 </div>
                               </div>
                             </div>
@@ -811,7 +894,7 @@ const ExpensesManagement = () => {
                                 {expense.description}
                               </div>
                               <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                                {expense.supplier}
+                                {expense.supplier || 'N/A'}
                               </div>
                             </div>
                           </td>
@@ -822,17 +905,17 @@ const ExpensesManagement = () => {
                               ₹{expense.amount.toLocaleString()}
                             </div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {expense.paymentMethod}
+                              {expense.paymentMethod?.replace('_', ' ').toUpperCase() || 'N/A'}
                             </div>
                           </td>
                           
                           {/* Date Column */}
                           <td className="px-4 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900 dark:text-white">
-                              {expense.date}
+                              {expense.date ? new Date(expense.date).toLocaleDateString() : 'N/A'}
                             </div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">
-                              Due: {expense.dueDate}
+                              Due: {expense.dueDate ? new Date(expense.dueDate).toLocaleDateString() : 'N/A'}
                             </div>
                           </td>
                           
@@ -840,7 +923,7 @@ const ExpensesManagement = () => {
                           <td className="px-4 py-4 whitespace-nowrap">
                             <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(expense.status)}`}>
                               {getStatusIcon(expense.status)}
-                              <span className="ml-1">{expense.status}</span>
+                              <span className="ml-1">{expense.status?.toUpperCase() || 'N/A'}</span>
                             </div>
                           </td>
                           
@@ -848,15 +931,16 @@ const ExpensesManagement = () => {
                           <td className="px-4 py-4 whitespace-nowrap">
                             <div className="flex flex-col space-y-2">
                               {/* Status Update Dropdown */}
-                              <select
-                                value={expense.status}
-                                onChange={(e) => updateExpenseStatus(expense.id, e.target.value)}
-                                className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 dark:text-white w-full"
-                              >
-                                <option value="Pending">Pending</option>
-                                <option value="Paid">Paid</option>
-                                <option value="Overdue">Overdue</option>
-                              </select>
+                      <select
+                        value={expense.status}
+                        onChange={(e) => updateExpenseStatus(expense._id, e.target.value)}
+                        className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 dark:text-white w-full"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="paid">Paid</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
                               
                               {/* Action Buttons */}
                               <div className="flex items-center justify-center space-x-1">
@@ -877,7 +961,13 @@ const ExpensesManagement = () => {
                           </td>
                         </tr>
                       );
-                    })}
+                    }) : (
+                      <tr>
+                        <td colSpan="6" className="p-8 text-center text-gray-500">
+                          {searchQuery || categoryFilter !== "All" || statusFilter !== "All" ? "No expenses found." : "No expenses available."}
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
