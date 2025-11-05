@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { setToken } from "@/lib/apiClient";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -25,9 +27,11 @@ import AdminTickets from "./pages/admin/AdminTickets";
 import FormRequests from "./pages/admin/FormRequests";
 import ExpensesManagement from "./pages/admin/ExpensesManagement"; // Expenses Management
 import StaffPayrollManagement from "./pages/admin/StaffPayrollManagement"; // Staff & Payroll
-import VoiceAssistantPage from "./pages/admin/VoiceAssistantPage"; // NEW: Voice Assistant
+import AdminProfile from "./pages/admin/AdminProfile"; // Admin Profile
 
 import ForgotPassword from "./pages/ForgotPassword";
+import Profile from "./pages/Profile";
+import TenantOnboarding from "./pages/TenantOnboarding";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -74,20 +78,28 @@ const App = () => {
     localStorage.clear();
     sessionStorage.clear();
   };
+  
+  // Ensure token is cleared when logging out
+  useEffect(() => {
+    if (!isAuthenticated) {
+      try { setToken(null); } catch (e) {}
+    }
+  }, [isAuthenticated]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
       <div className="min-h-screen bg-background">
         <Routes>
           {/* LOGIN */}
@@ -120,6 +132,18 @@ const App = () => {
             }
           />
 
+          {/* TENANT ONBOARDING */}
+          <Route
+            path="/onboarding"
+            element={
+              isAuthenticated && userType === "user" ? (
+                <TenantOnboarding />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+
           {/* USER DASHBOARD */}
           <Route
             path="/dashboard"
@@ -145,6 +169,18 @@ const App = () => {
               isAuthenticated && userType === "user" ? (
                 <UserLayout onLogout={handleLogout}>
                   <Invoices />
+                </UserLayout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              isAuthenticated && userType === "user" ? (
+                <UserLayout onLogout={handleLogout}>
+                  <Profile onLogout={handleLogout} />
                 </UserLayout>
               ) : (
                 <Navigate to="/login" replace />
@@ -228,10 +264,9 @@ const App = () => {
             <Route path="expenses" element={<ExpensesManagement />} />
             <Route path="staff-payroll" element={<StaffPayrollManagement />} />
             <Route path="room-occupancy" element={<RoomOccupancy />} />
-            {/* NEW: Voice Assistant Route */}
-            <Route path="voice-assistant" element={<VoiceAssistantPage />} />
             <Route path="reports-analytics" element={<ReportsAnalytics />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="profile" element={<AdminProfile />} />
           </Route>
 
           {/* DEFAULT ROUTE */}
@@ -251,6 +286,7 @@ const App = () => {
         </Routes>
       </div>
     </BrowserRouter>
+    </ThemeProvider>
   );
 };
 

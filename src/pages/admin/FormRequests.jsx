@@ -150,7 +150,7 @@ const FormRequests = () => {
       Medium: "bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/20 dark:text-orange-400",
       Low: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400",
     };
-    return styles[priority] || "bg-gray-50 text-gray-700 border-gray-200";
+  return styles[priority] || "bg-background text-foreground border-border";
   };
 
   // Get type icon and color

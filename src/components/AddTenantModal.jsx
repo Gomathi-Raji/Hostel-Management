@@ -41,15 +41,15 @@ const AddTenantModal = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl relative">
+  <div className="bg-card rounded-xl shadow-2xl w-full max-w-2xl relative">
         {/* Modal Header */}
-        <div className="flex justify-between items-center border-b px-6 py-4 bg-gray-50 rounded-t-xl">
-          <h2 className="text-lg font-semibold text-gray-800">Add New Tenant</h2>
+        <div className="flex justify-between items-center border-b px-6 py-4 bg-background rounded-t-xl">
+          <h2 className="text-lg font-semibold text-foreground">Add New Tenant</h2>
           <button
             onClick={onClose}
-            className="hover:bg-gray-200 p-1 rounded-full transition"
+            className="hover:bg-muted p-1 rounded-full transition"
           >
-            <X className="h-5 w-5 text-gray-600" />
+            <X className="h-5 w-5 text-muted-foreground" />
           </button>
         </div>
 
@@ -200,7 +200,7 @@ const AddTenantModal = ({ onClose }) => {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+              className="px-4 py-2 rounded-lg border border-border hover:bg-muted"
             >
               Cancel
             </button>

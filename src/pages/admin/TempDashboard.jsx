@@ -216,10 +216,10 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="p-6 bg-gray-100 min-h-screen flex items-center justify-center">
+      <div className="p-6 bg-background min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading dashboard data...</p>
+          <p className="text-muted-foreground">Loading dashboard data...</p>
         </div>
       </div>
     );
@@ -227,7 +227,7 @@ const AdminDashboard = () => {
 
   if (error) {
     return (
-      <div className="p-6 bg-gray-100 min-h-screen flex items-center justify-center">
+      <div className="p-6 bg-background min-h-screen flex items-center justify-center">
         <div className="text-center text-red-600">
           <AlertTriangle className="h-12 w-12 mx-auto mb-4" />
           <p className="text-lg font-semibold mb-2">Error Loading Dashboard</p>
@@ -244,52 +244,52 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen space-y-6">
-      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+    <div className="p-6 bg-background min-h-screen space-y-6">
+      <h1 className="text-2xl font-bold mb-6 text-foreground">Admin Dashboard</h1>
 
       {/* ✅ 1. Stats Cards */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* Total Tenants */}
-        <div className="flex items-center bg-white p-6 rounded-xl shadow-lg border border-gray-200 space-x-4 hover:scale-105 transition-transform duration-200">
+        <div className="flex items-center bg-card p-6 rounded-xl shadow-lg border border-border space-x-4 hover:scale-105 transition-transform duration-200">
           <Users className="h-10 w-10 text-blue-600" />
           <div>
-            <p className="text-sm font-medium text-gray-500">Total Tenants</p>
-            <h3 className="text-2xl font-bold text-gray-900">
+            <p className="text-sm font-medium text-muted-foreground">Total Tenants</p>
+            <h3 className="text-2xl font-bold text-foreground">
               {stats.totalTenants}
             </h3>
           </div>
         </div>
 
         {/* Monthly Revenue */}
-        <div className="flex items-center bg-white p-6 rounded-xl shadow-lg border border-gray-200 space-x-4 hover:scale-105 transition-transform duration-200">
+        <div className="flex items-center bg-card p-6 rounded-xl shadow-lg border border-border space-x-4 hover:scale-105 transition-transform duration-200">
           <DollarSign className="h-10 w-10 text-green-600" />
           <div>
-            <p className="text-sm font-medium text-gray-500">Monthly Revenue</p>
-            <h3 className="text-2xl font-bold text-gray-900">
+            <p className="text-sm font-medium text-muted-foreground">Monthly Revenue</p>
+            <h3 className="text-2xl font-bold text-foreground">
               ₹{stats.monthlyRevenue.toLocaleString()}
             </h3>
           </div>
         </div>
 
         {/* Occupancy Rate */}
-        <div className="flex items-center bg-white p-6 rounded-xl shadow-lg border border-gray-200 space-x-4 hover:scale-105 transition-transform duration-200">
+        <div className="flex items-center bg-card p-6 rounded-xl shadow-lg border border-border space-x-4 hover:scale-105 transition-transform duration-200">
           <Home className="h-10 w-10 text-indigo-600" />
           <div>
-            <p className="text-sm font-medium text-gray-500">Vacant Rooms</p>
-            <h3 className="text-2xl font-bold text-gray-900">
+            <p className="text-sm font-medium text-muted-foreground">Vacant Rooms</p>
+            <h3 className="text-2xl font-bold text-foreground">
               {stats.occupancyRate}%
             </h3>
           </div>
         </div>
 
         {/* Overdue Payments */}
-        <div className="flex items-center bg-white p-6 rounded-xl shadow-lg border border-gray-200 space-x-4 hover:scale-105 transition-transform duration-200">
+        <div className="flex items-center bg-card p-6 rounded-xl shadow-lg border border-border space-x-4 hover:scale-105 transition-transform duration-200">
           <AlertTriangle className="h-10 w-10 text-red-600" />
           <div>
-            <p className="text-sm font-medium text-gray-500">
+            <p className="text-sm font-medium text-muted-foreground">
               Overdue Payments
             </p>
-            <h3 className="text-2xl font-bold text-gray-900">
+            <h3 className="text-2xl font-bold text-foreground">
               {stats.overduePayments}
             </h3>
           </div>
@@ -299,9 +299,9 @@ const AdminDashboard = () => {
       {/* ✅ 2. Analytics Charts */}
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Revenue Analytics */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
+  <div className="bg-card rounded-xl shadow-lg p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-foreground">
               Revenue Analytics
             </h3>
             <BarChart3 className="h-5 w-5 text-blue-600" />
@@ -325,9 +325,9 @@ const AdminDashboard = () => {
         </div>
 
         {/* Tenant Growth */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
+  <div className="bg-card rounded-xl shadow-lg p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-foreground">
               Tenant Growth
             </h3>
             <TrendingUp className="h-5 w-5 text-green-600" />
@@ -345,24 +345,24 @@ const AdminDashboard = () => {
       </section>
 
       {/* ✅ 3. Recent Tenant Activity */}
-      <section className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+  <section className="bg-card rounded-xl shadow-lg border border-border p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-          <h3 className="text-xl font-bold">Recent Tenant Activity</h3>
+          <h3 className="text-xl font-bold text-foreground">Recent Tenant Activity</h3>
           <div className="flex gap-3 w-full md:w-auto">
             <div className="relative flex-1 md:w-80">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
               <input
                 type="text"
                 placeholder="Search by tenant name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full border rounded-lg pl-10 pr-3 py-2 focus:ring-2 focus:ring-blue-500 text-gray-700"
+                className="w-full border border-border rounded-lg pl-10 pr-3 py-2 focus:ring-2 focus:ring-blue-500 bg-background text-foreground"
               />
             </div>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+              className="border border-border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 bg-background text-foreground"
             >
               <option value="All">All</option>
               <option value="Active">Active</option>
@@ -375,11 +375,11 @@ const AdminDashboard = () => {
           {filteredTenants.map((tenant) => (
             <div
               key={tenant.id}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              className="flex items-center justify-between p-3 bg-muted rounded-lg"
             >
               <div>
-                <div className="font-medium text-gray-900">{tenant.name}</div>
-                <div className="text-sm text-gray-500">Room {tenant.room}</div>
+                <div className="font-medium text-foreground">{tenant.name}</div>
+                <div className="text-sm text-muted-foreground">Room {tenant.room}</div>
               </div>
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -398,17 +398,17 @@ const AdminDashboard = () => {
       </section>
 
       {/* ✅ 4. Recent Payments */}
-      <section className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-        <h3 className="text-xl font-bold mb-6">Recent Payments</h3>
+  <section className="bg-card rounded-xl shadow-lg border border-border p-6">
+        <h3 className="text-xl font-bold mb-6 text-foreground">Recent Payments</h3>
         <div className="space-y-4">
           {recentPayments.map((payment, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              className="flex items-center justify-between p-3 bg-muted rounded-lg"
             >
               <div>
-                <div className="font-medium text-gray-900">{payment.tenant}</div>
-                <div className="text-sm text-gray-500">{payment.date}</div>
+                <div className="font-medium text-foreground">{payment.tenant}</div>
+                <div className="text-sm text-muted-foreground">{payment.date}</div>
               </div>
               <span className="text-green-600 font-semibold">
                 ₹{payment.amount}
@@ -419,34 +419,34 @@ const AdminDashboard = () => {
       </section>
 
       {/* ✅ 5. Room Occupancy */}
-      <section className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-6">
+  <section className="bg-card rounded-xl shadow-lg border border-border p-6">
+        <h3 className="text-xl font-bold text-foreground mb-6">
           Room Occupancy Status
         </h3>
         <div className="space-y-4">
-          <div className="flex justify-between items-center p-3 bg-gray-100 rounded-lg">
-            <span className="text-sm font-medium text-gray-700">Available</span>
-            <span className="text-lg font-bold text-gray-600 bg-green-100 px-2 py-1 rounded">
+          <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
+            <span className="text-sm font-medium text-foreground">Available</span>
+            <span className="text-lg font-bold text-muted-foreground bg-green-100 px-2 py-1 rounded">
               {roomOccupancy.available}
             </span>
           </div>
           <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-            <span className="text-sm font-medium text-gray-700">Occupied</span>
+            <span className="text-sm font-medium text-foreground">Occupied</span>
             <span className="text-lg font-bold text-blue-600">
               {roomOccupancy.occupied}
             </span>
           </div>
           <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
-            <span className="text-sm font-medium text-gray-700">
+            <span className="text-sm font-medium text-foreground">
               Maintenance
             </span>
             <span className="text-lg font-bold text-yellow-600">
               {roomOccupancy.maintenance}
             </span>
           </div>
-          <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border-t border-gray-200">
-            <span className="text-sm font-medium text-gray-700">Total</span>
-            <span className="text-lg font-bold text-gray-900">
+          <div className="flex justify-between items-center p-3 bg-muted rounded-lg border-t border-border">
+            <span className="text-sm font-medium text-foreground">Total</span>
+            <span className="text-lg font-bold text-foreground">
               {roomOccupancy.total}
             </span>
           </div>
@@ -454,8 +454,8 @@ const AdminDashboard = () => {
       </section>
 
       {/* ✅ 6. Quick Actions */}
-      <section className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-        <h3 className="text-xl font-bold mb-6">Quick Actions</h3>
+  <section className="bg-card rounded-xl shadow-lg border border-border p-6">
+        <h3 className="text-xl font-bold mb-6 text-foreground">Quick Actions</h3>
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
           {[
             { icon: Plus, label: "Add Tenant" },
@@ -466,10 +466,10 @@ const AdminDashboard = () => {
           ].map((action, index) => (
             <button
               key={index}
-              className="flex flex-col items-center p-4 bg-gray-100 rounded-xl shadow-sm hover:scale-105 transition-transform duration-200"
+              className="flex flex-col items-center p-4 bg-muted rounded-xl shadow-sm hover:scale-105 transition-transform duration-200"
             >
-              <action.icon className="h-6 w-6 mb-2 text-gray-700" />
-              <span className="text-sm font-medium text-gray-800">
+              <action.icon className="h-6 w-6 mb-2 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">
                 {action.label}
               </span>
             </button>
@@ -478,17 +478,17 @@ const AdminDashboard = () => {
       </section>
 
       {/* ✅ 7. System Status */}
-      <section className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-        <h3 className="text-xl font-bold mb-6">System Status</h3>
+      <section className="bg-card rounded-xl shadow-lg border border-border p-6">
+        <h3 className="text-xl font-bold mb-6 text-foreground">System Status</h3>
         <div className="space-y-3">
           {systemStatus.map((service, index) => (
             <div
               key={index}
-              className="flex items-center justify-between p-3 rounded-lg bg-gray-50"
+              className="flex items-center justify-between p-3 rounded-lg bg-muted"
             >
               <div className="flex items-center space-x-3">
-                <service.icon className="h-5 w-5 text-gray-600" />
-                <span className="text-sm font-medium text-gray-900">
+                <service.icon className="h-5 w-5 text-muted-foreground" />
+                <span className="text-sm font-medium text-foreground">
                   {service.name}
                 </span>
               </div>

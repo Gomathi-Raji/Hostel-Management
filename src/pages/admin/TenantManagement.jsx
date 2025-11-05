@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Plus, Download, Eye, Edit, Trash2, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import apiFetch from '@/lib/apiClient';
 
 const TenantManagement = () => {
+  const { t } = useTranslation();
   const [tenants, setTenants] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,14 +69,14 @@ const TenantManagement = () => {
     let newErrors = {};
 
     // ✅ Validation for required fields
-    if (!formData.firstName.trim()) newErrors.firstName = "First Name is required";
-    if (!formData.lastName.trim()) newErrors.lastName = "Last Name is required";
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    if (!formData.phone.trim()) newErrors.phone = "Phone is required";
-    if (!formData.aadharNumber.trim()) newErrors.aadharNumber = "Aadhaar is required";
-    if (!formData.roomAssignment.trim()) newErrors.roomAssignment = "Room selection is required";
-    if (!formData.moveInDate.trim()) newErrors.moveInDate = "Move-in date is required";
-    if (!formData.securityDeposit.trim()) newErrors.securityDeposit = "Security Deposit is required";
+    if (!formData.firstName.trim()) newErrors.firstName = `${t('tenantManagement.firstName')} ${t('tenantManagement.required')}`;
+    if (!formData.lastName.trim()) newErrors.lastName = `${t('tenantManagement.lastName')} ${t('tenantManagement.required')}`;
+    if (!formData.email.trim()) newErrors.email = `${t('tenantManagement.email')} ${t('tenantManagement.required')}`;
+    if (!formData.phone.trim()) newErrors.phone = `${t('tenantManagement.phone')} ${t('tenantManagement.required')}`;
+    if (!formData.aadharNumber.trim()) newErrors.aadharNumber = `${t('tenantManagement.aadharNumber')} ${t('tenantManagement.required')}`;
+    if (!formData.roomAssignment.trim()) newErrors.roomAssignment = t('tenantManagement.roomSelectionRequired');
+    if (!formData.moveInDate.trim()) newErrors.moveInDate = `${t('tenantManagement.moveInDateLabel')} ${t('tenantManagement.required')}`;
+    if (!formData.securityDeposit.trim()) newErrors.securityDeposit = `${t('tenantManagement.securityDeposit')} ${t('tenantManagement.required')}`;
 
     setErrors(newErrors);
 
@@ -132,7 +134,11 @@ const TenantManagement = () => {
 
   const getStatusBadge = (status) => {
     const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
-    return status === "Active" ? `${baseClasses} bg-green-100 text-green-800` : `${baseClasses} bg-gray-100 text-gray-500`;
+    return status === "Active" ? `${baseClasses} bg-green-100 text-green-800` : `${baseClasses} bg-muted text-muted-foreground`;
+  };
+
+  const getStatusText = (active) => {
+    return active ? t('tenantManagement.statusActive') : t('tenantManagement.statusInactive');
   };
 
   const filteredTenants = tenants.filter(tenant => {
@@ -147,48 +153,48 @@ const TenantManagement = () => {
   });
 
   return (
-    <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
+    <div className="p-4 md:p-6 bg-background min-h-screen">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Tenant Management</h1>
-          <p className="text-gray-600">Manage your hostel tenants</p>
+          <h1 className="text-2xl font-bold text-foreground">{t('tenantManagement.title')}</h1>
+          <p className="text-muted-foreground">{t('tenantManagement.subtitle')}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
-            <Download className="h-4 w-4" /> Export
+          <button className="flex items-center gap-2 bg-card text-foreground px-4 py-2 rounded-lg hover:bg-muted transition-colors">
+            <Download className="h-4 w-4" /> {t('tenantManagement.export')}
           </button>
           <button
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
             onClick={() => setShowAddModal(true)}
           >
-            <Plus className="h-4 w-4" /> Add Tenant
+            <Plus className="h-4 w-4" /> {t('tenantManagement.addTenant')}
           </button>
         </div>
       </div>
 
       {/* Search & Filter */}
-      <div className="bg-white rounded-xl shadow p-4 mb-4 md:mb-6 flex flex-col md:flex-row gap-2 md:gap-4">
+          <div className="bg-card rounded-xl shadow p-4 mb-4 md:mb-6 flex flex-col md:flex-row gap-2 md:gap-4">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <input
             type="text"
-            placeholder="Search by Name, Email, or Room"
+            placeholder={t('tenantManagement.searchPlaceholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground placeholder:text-muted-foreground"
           />
         </div>
         <div className="relative">
-          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="pl-10 pr-4 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground"
           >
-            <option value="all">All Status</option>
-            <option value="active">Active</option>
-            <option value="vacated">Vacated</option>
+            <option value="all">{t('tenantManagement.filterAll')}</option>
+            <option value="active">{t('tenantManagement.filterActive')}</option>
+            <option value="vacated">{t('tenantManagement.filterVacated')}</option>
           </select>
         </div>
       </div>
@@ -196,37 +202,37 @@ const TenantManagement = () => {
       {/* Tenant Cards */}
       <div className="flex flex-col gap-4">
         {loading ? (
-          <p className="text-center text-gray-500 p-4">Loading tenants...</p>
+          <p className="text-center text-muted-foreground p-4">{t('tenantManagement.loading')}</p>
         ) : error ? (
           <p className="text-center text-red-500 p-4">{error}</p>
         ) : filteredTenants.length > 0 ? filteredTenants.map(tenant => (
-          <div key={tenant._id} className="bg-white rounded-xl shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div key={tenant._id} className="bg-card rounded-xl shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex-1">
-              <p className="text-gray-800 font-medium">{tenant.firstName} {tenant.lastName}</p>
-              <p className="text-gray-600 text-sm">{tenant.email}</p>
-              <p className="text-gray-600 text-sm">{tenant.phone}</p>
-              <p className="text-gray-600 text-sm">Aadhaar: {tenant.aadharNumber}</p>
-              <p className="text-gray-800 text-sm">{tenant.room?.number || 'No room assigned'} | Move-in: {tenant.moveInDate ? new Date(tenant.moveInDate).toLocaleDateString() : 'N/A'}</p>
+              <p className="text-foreground font-medium">{tenant.firstName} {tenant.lastName}</p>
+              <p className="text-muted-foreground text-sm">{tenant.email}</p>
+              <p className="text-muted-foreground text-sm">{tenant.phone}</p>
+              <p className="text-muted-foreground text-sm">Aadhaar: {tenant.aadharNumber}</p>
+              <p className="text-foreground text-sm">{tenant.room?.number || t('tenantManagement.noRoomAssigned')} | {t('tenantManagement.moveInDate')}: {tenant.moveInDate ? new Date(tenant.moveInDate).toLocaleDateString() : 'N/A'}</p>
             </div>
             <div className="flex items-center gap-2 mt-2 sm:mt-0">
-              <span className={getStatusBadge(tenant.active ? "Active" : "Inactive")}>{tenant.active ? "Active" : "Inactive"}</span>
-              <button className="p-1 text-gray-500 hover:text-blue-500"><Eye className="h-4 w-4" /></button>
-              <button className="p-1 text-gray-500 hover:text-blue-500"><Edit className="h-4 w-4" /></button>
-              <button className="p-1 text-gray-500 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+              <span className={getStatusBadge(tenant.active ? "Active" : "Inactive")}>{getStatusText(tenant.active)}</span>
+              <button className="p-1 text-muted-foreground hover:text-blue-500"><Eye className="h-4 w-4" /></button>
+              <button className="p-1 text-muted-foreground hover:text-blue-500"><Edit className="h-4 w-4" /></button>
+              <button className="p-1 text-muted-foreground hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
             </div>
           </div>
         )) : (
-          <p className="text-center text-gray-500 p-4">No tenants found.</p>
+          <p className="text-center text-muted-foreground p-4">{t('tenantManagement.noTenants')}</p>
         )}
       </div>
 
       {/* Add Tenant Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-lg">
-            <div className="flex justify-between items-center p-4 border-b">
-              <h2 className="text-xl font-semibold text-gray-800">Add New Tenant</h2>
-              <button onClick={() => setShowAddModal(false)} className="text-gray-400 hover:text-gray-600">
+          <div className="bg-card rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-lg">
+            <div className="flex justify-between items-center p-4 border-b border-border">
+              <h2 className="text-xl font-semibold text-foreground">{t('tenantManagement.modalTitle')}</h2>
+              <button onClick={() => setShowAddModal(false)} className="text-muted-foreground hover:text-foreground">
                 <X className="h-6 w-6" />
               </button>
             </div>
@@ -234,28 +240,28 @@ const TenantManagement = () => {
               {/* First Name & Last Name */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-700 font-medium">
-                    First Name <span className="text-red-500">*</span>
+                  <label className="text-foreground font-medium">
+                    {t('tenantManagement.firstName')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.firstName ? "border-red-500" : ""}`}
+                    className={`w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground placeholder:text-muted-foreground ${errors.firstName ? "border-red-500" : ""}`}
                   />
                   {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
                 </div>
                 <div>
-                  <label className="text-gray-700 font-medium">
-                    Last Name <span className="text-red-500">*</span>
+                  <label className="text-foreground font-medium">
+                    {t('tenantManagement.lastName')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.lastName ? "border-red-500" : ""}`}
+                    className={`w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground placeholder:text-muted-foreground ${errors.lastName ? "border-red-500" : ""}`}
                   />
                   {errors.lastName && <p className="text-red-500 text-xs mt-1">{errors.lastName}</p>}
                 </div>
@@ -263,23 +269,23 @@ const TenantManagement = () => {
 
               {/* Email */}
               <div>
-                <label className="text-gray-700 font-medium">
-                  Email <span className="text-red-500">*</span>
+                <label className="text-foreground font-medium">
+                  {t('tenantManagement.email')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.email ? "border-red-500" : ""}`}
+                  className={`w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground placeholder:text-muted-foreground ${errors.email ? "border-red-500" : ""}`}
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
 
               {/* Phone */}
               <div>
-                <label className="text-gray-700 font-medium">
-                  Phone <span className="text-red-500">*</span>
+                <label className="text-foreground font-medium">
+                  {t('tenantManagement.phone')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="tel"
@@ -287,15 +293,15 @@ const TenantManagement = () => {
                   value={formData.phone}
                   onChange={handleInputChange}
                   maxLength="10"
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.phone ? "border-red-500" : ""}`}
+                  className={`w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground placeholder:text-muted-foreground ${errors.phone ? "border-red-500" : ""}`}
                 />
                 {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
               </div>
 
               {/* Aadhaar */}
               <div>
-                <label className="text-gray-700 font-medium">
-                  Aadhaar Number <span className="text-red-500">*</span>
+                <label className="text-foreground font-medium">
+                  {t('tenantManagement.aadharNumber')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -303,7 +309,7 @@ const TenantManagement = () => {
                   maxLength="12"
                   value={formData.aadharNumber}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.aadharNumber ? "border-red-500" : ""}`}
+                  className={`w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground placeholder:text-muted-foreground ${errors.aadharNumber ? "border-red-500" : ""}`}
                 />
                 {errors.aadharNumber && <p className="text-red-500 text-xs mt-1">{errors.aadharNumber}</p>}
               </div>
@@ -311,16 +317,16 @@ const TenantManagement = () => {
               {/* Room & Move-in */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-gray-700 font-medium">
-                    Room Assignment <span className="text-red-500">*</span>
+                  <label className="text-foreground font-medium">
+                    {t('tenantManagement.roomAssignment')} <span className="text-red-500">*</span>
                   </label>
                   <select
                     name="roomAssignment"
                     value={formData.roomAssignment}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.roomAssignment ? "border-red-500" : ""}`}
+                    className={`w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground ${errors.roomAssignment ? "border-red-500" : ""}`}
                   >
-                    <option value="">Select Room</option>
+                    <option value="">{t('tenantManagement.selectRoom')}</option>
                     {rooms.filter(room => room.status === 'available').map(room => (
                       <option key={room._id} value={room._id}>{room.number}</option>
                     ))}
@@ -328,60 +334,60 @@ const TenantManagement = () => {
                   {errors.roomAssignment && <p className="text-red-500 text-xs mt-1">{errors.roomAssignment}</p>}
                 </div>
                 <div>
-                  <label className="text-gray-700 font-medium">
-                    Move-in Date <span className="text-red-500">*</span>
+                  <label className="text-foreground font-medium">
+                    {t('tenantManagement.moveInDateLabel')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="date"
                     name="moveInDate"
                     value={formData.moveInDate}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.moveInDate ? "border-red-500" : ""}`}
+                    className={`w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground ${errors.moveInDate ? "border-red-500" : ""}`}
                   />
                   {errors.moveInDate && <p className="text-red-500 text-xs mt-1">{errors.moveInDate}</p>}
                 </div>
               </div>
 
               {/* Emergency Contact - Optional */}
-              <h3 className="font-medium text-gray-800 mt-2">Emergency Contact (Optional)</h3>
+              <h3 className="font-medium text-foreground mt-2">{t('tenantManagement.emergencyContact')}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input
                   type="text"
                   name="emergencyContactName"
-                  placeholder="Contact Name"
+                  placeholder={t('tenantManagement.contactName')}
                   value={formData.emergencyContactName}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground placeholder:text-muted-foreground"
                 />
                 <input
                   type="text"
                   name="emergencyContactRelationship"
-                  placeholder="Relationship"
+                  placeholder={t('tenantManagement.relationship')}
                   value={formData.emergencyContactRelationship}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground placeholder:text-muted-foreground"
                 />
               </div>
               <input
                 type="tel"
                 name="emergencyContactPhone"
-                placeholder="Emergency Contact Phone"
+                placeholder={t('tenantManagement.emergencyContactPhone')}
                 value={formData.emergencyContactPhone}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground placeholder:text-muted-foreground"
               />
 
               {/* Security Deposit */}
               <div>
-                <label className="text-gray-700 font-medium">
-                  Security Deposit <span className="text-red-500">*</span>
+                <label className="text-foreground font-medium">
+                  {t('tenantManagement.securityDeposit')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
                   name="securityDeposit"
                   value={formData.securityDeposit}
                   onChange={handleInputChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.securityDeposit ? "border-red-500" : ""}`}
+                  className={`w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground ${errors.securityDeposit ? "border-red-500" : ""}`}
                 />
                 {errors.securityDeposit && <p className="text-red-500 text-xs mt-1">{errors.securityDeposit}</p>}
               </div>
@@ -392,14 +398,14 @@ const TenantManagement = () => {
                   type="submit"
                   className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Add Tenant
+                  {t('tenantManagement.addTenantButton')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+                  className="flex-1 bg-card text-foreground py-2 rounded-lg hover:bg-muted transition-colors"
                 >
-                  Cancel
+                  {t('tenantManagement.cancel')}
                 </button>
               </div>
             </form>

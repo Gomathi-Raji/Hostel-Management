@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   User,
   Lock,
@@ -11,21 +11,29 @@ import {
   Sun,
   Moon,
   Monitor,
+  AlertCircle,
+  CheckCircle,
 } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import { useTranslation } from 'react-i18next';
+import apiFetch from "@/lib/apiClient";
 
 const Settings = () => {
+  const { theme, setTheme: updateTheme } = useTheme();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("profile");
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [theme, setTheme] = useState("light");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const [profileData, setProfileData] = useState({
-    firstName: "",
-    lastName: "",
+    name: "",
     email: "",
     phone: "",
-    organization: "",
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -49,11 +57,40 @@ const Settings = () => {
   });
 
   const tabs = [
-    { id: "profile", label: "Profile", icon: User },
-    { id: "password", label: "Password", icon: Lock },
-    { id: "theme", label: "Theme", icon: Palette },
-    { id: "notifications", label: "Notifications", icon: Bell },
+    { id: "profile", label: t('settings.tabs.profile'), icon: User },
+    { id: "password", label: t('settings.tabs.password'), icon: Lock },
+    { id: "theme", label: t('settings.tabs.theme'), icon: Palette },
+    { id: "notifications", label: t('settings.tabs.notifications'), icon: Bell },
   ];
+
+  // Load user data on component mount
+  useEffect(() => {
+    loadUserData();
+  }, []);
+
+  const loadUserData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const userData = await apiFetch('/auth/profile');
+
+      setProfileData({
+        name: userData.name || "",
+        email: userData.email || "",
+        phone: userData.phone || "",
+      });
+
+      if (userData.settings) {
+        // Theme is handled by ThemeContext
+        setNotificationSettings(userData.settings.notifications || notificationSettings);
+      }
+    } catch (err) {
+      setError(err.message || "Failed to load user data");
+      console.error("Error loading user data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleProfileChange = (e) =>
     setProfileData({ ...profileData, [e.target.name]: e.target.value });
@@ -70,28 +107,144 @@ const Settings = () => {
     });
   };
 
-  const handleSaveProfile = () => alert("Profile updated successfully!");
-  const handleSavePassword = () => {
+  const showSuccess = (message) => {
+    setSuccess(message);
+    setTimeout(() => setSuccess(null), 3000);
+  };
+
+  const showError = (message) => {
+    setError(message);
+    setTimeout(() => setError(null), 5000);
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setSaving(true);
+      setError(null);
+      await apiFetch('/auth/profile', {
+        method: 'PUT',
+        body: profileData
+      });
+      showSuccess("Profile updated successfully!");
+    } catch (err) {
+      showError(err.message || "Failed to update profile");
+      console.error("Error updating profile:", err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSavePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("Passwords don't match!");
+      showError("Passwords don't match!");
       return;
     }
-    alert("Password changed successfully!");
-    setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+
+    if (passwordData.newPassword.length < 6) {
+      showError("Password must be at least 6 characters long!");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError(null);
+      await apiFetch('/auth/change-password', {
+        method: 'PUT',
+        body: {
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        }
+      });
+      showSuccess("Password changed successfully!");
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (err) {
+      showError(err.message || "Failed to change password");
+      console.error("Error changing password:", err);
+    } finally {
+      setSaving(false);
+    }
   };
-  const handleSaveNotifications = () =>
-    alert("Notification settings updated successfully!");
-  const handleSaveTheme = () => alert("Theme preference updated successfully!");
+
+  const handleSaveNotifications = async () => {
+    try {
+      setSaving(true);
+      setError(null);
+      await apiFetch('/auth/settings', {
+        method: 'PUT',
+        body: {
+          theme: theme,
+          notifications: notificationSettings
+        }
+      });
+      showSuccess("Notification settings updated successfully!");
+    } catch (err) {
+      showError(err.message || "Failed to update notification settings");
+      console.error("Error updating notifications:", err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveTheme = async () => {
+    try {
+      setSaving(true);
+      setError(null);
+      await apiFetch('/auth/settings', {
+        method: 'PUT',
+        body: {
+          theme: theme,
+          notifications: notificationSettings
+        }
+      });
+      showSuccess("Theme preference updated successfully!");
+    } catch (err) {
+      showError(err.message || "Failed to update theme");
+      console.error("Error updating theme:", err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-background p-4">
       {/* Header */}
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-blue-600">Settings</h1>
-        <p className="text-gray-600 mt-1 text-sm">
-          Manage your account preferences
-        </p>
+        <h1 className="text-2xl font-bold text-foreground">{t('settings.title')}</h1>
+        <p className="text-muted-foreground mt-1 text-sm">{t('settings.subtitle')}</p>
       </div>
+
+      {/* Success/Error Messages */}
+      {error && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <AlertCircle className="h-5 w-5 text-red-400 mr-3" />
+            <div>
+              <h3 className="text-sm font-medium text-red-800">Error</h3>
+              <div className="mt-2 text-sm text-red-700">{error}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="flex">
+            <CheckCircle className="h-5 w-5 text-green-400 mr-3" />
+            <div>
+              <h3 className="text-sm font-medium text-green-800">Success</h3>
+              <div className="mt-2 text-sm text-green-700">{success}</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-2 mb-4">
@@ -102,7 +255,7 @@ const Settings = () => {
             className={`flex-1 flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-all text-center ${
               activeTab === tab.id
                 ? "bg-blue-600 text-white"
-                : "bg-white text-gray-700 hover:bg-gray-100"
+                : "bg-card text-foreground hover:bg-muted"
             }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -112,7 +265,7 @@ const Settings = () => {
       </div>
 
       {/* Content */}
-      <div className="bg-white rounded-lg shadow border border-gray-200 p-4 space-y-6 w-full">
+  <div className="bg-card rounded-lg shadow border border-border p-4 space-y-6 w-full">
         {/* Profile */}
         {activeTab === "profile" && (
           <div className="space-y-4">
@@ -120,18 +273,18 @@ const Settings = () => {
               <User className="h-4 w-4" /> Profile Information
             </h2>
             <div className="grid grid-cols-1 gap-3">
-              {["firstName", "lastName", "email", "phone", "organization"].map(
+              {["name", "email", "phone"].map(
                 (field, idx) => (
                   <div key={idx}>
-                    <label className="text-sm text-gray-700 mb-1 block capitalize">
+                    <label className="text-sm text-foreground mb-1 block capitalize">
                       {field}
                     </label>
                     <input
-                      type="text"
+                      type={field === "email" ? "email" : "text"}
                       name={field}
                       value={profileData[field]}
                       onChange={handleProfileChange}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 )
@@ -140,11 +293,17 @@ const Settings = () => {
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleSaveProfile}
-                className="w-full bg-blue-600 text-white py-2 rounded-md"
+                disabled={saving}
+                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center"
               >
-                <Save className="inline h-4 w-4 mr-1" /> Save
+                {saving ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b border-white mr-2"></div>
+                ) : (
+                  <Save className="inline h-4 w-4 mr-1" />
+                )}
+                Save
               </button>
-              <button className="w-full bg-gray-200 text-gray-700 py-2 rounded-md">
+              <button className="w-full bg-card text-foreground py-2 rounded-md hover:bg-muted transition-colors">
                 <X className="inline h-4 w-4 mr-1" /> Cancel
               </button>
             </div>
@@ -161,7 +320,7 @@ const Settings = () => {
               {["currentPassword", "newPassword", "confirmPassword"].map(
                 (field, idx) => (
                   <div key={idx} className="relative">
-                    <label className="block text-sm text-gray-700 mb-1 capitalize">
+                    <label className="block text-sm text-foreground mb-1 capitalize">
                       {field.replace(/([A-Z])/g, " $1")}
                     </label>
                     <input
@@ -175,7 +334,7 @@ const Settings = () => {
                       name={field}
                       value={passwordData[field]}
                       onChange={handlePasswordChange}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full border border-border rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <button
                       type="button"
@@ -203,11 +362,17 @@ const Settings = () => {
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleSavePassword}
-                className="w-full bg-blue-600 text-white py-2 rounded-md"
+                disabled={saving}
+                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center"
               >
-                <Save className="inline h-4 w-4 mr-1" /> Update
+                {saving ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b border-white mr-2"></div>
+                ) : (
+                  <Save className="inline h-4 w-4 mr-1" />
+                )}
+                Update
               </button>
-              <button className="w-full bg-gray-200 text-gray-700 py-2 rounded-md">
+              <button className="w-full bg-card text-foreground py-2 rounded-md hover:bg-muted transition-colors">
                 <X className="inline h-4 w-4 mr-1" /> Cancel
               </button>
             </div>
@@ -228,37 +393,43 @@ const Settings = () => {
               ].map((option) => (
                 <button
                   key={option.id}
-                  onClick={() => setTheme(option.id)}
+                  onClick={() => updateTheme(option.id)}
                   className={`w-full border-2 rounded-md p-3 text-left ${
-                    theme === option.id ? "border-blue-600 bg-blue-50" : "border-gray-200"
+                    theme === option.id ? "border-blue-600 bg-blue-50" : "border-border"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <option.icon
                       className={`h-5 w-5 ${
-                        theme === option.id ? "text-blue-600" : "text-gray-500"
+                        theme === option.id ? "text-blue-600" : "text-muted-foreground"
                       }`}
                     />
                     <span
                       className={`${
-                        theme === option.id ? "text-blue-600" : "text-gray-700"
+                        theme === option.id ? "text-blue-600" : "text-foreground"
                       } font-medium`}
                     >
                       {option.label}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500">{option.desc}</p>
+                  <p className="text-sm text-muted-foreground">{option.desc}</p>
                 </button>
               ))}
             </div>
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleSaveTheme}
-                className="w-full bg-blue-600 text-white py-2 rounded-md"
+                disabled={saving}
+                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center"
               >
-                <Save className="inline h-4 w-4 mr-1" /> Save
+                {saving ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b border-white mr-2"></div>
+                ) : (
+                  <Save className="inline h-4 w-4 mr-1" />
+                )}
+                Save
               </button>
-              <button className="w-full bg-gray-200 text-gray-700 py-2 rounded-md">
+              <button className="w-full bg-card text-foreground py-2 rounded-md hover:bg-muted transition-colors">
                 <X className="inline h-4 w-4 mr-1" /> Cancel
               </button>
             </div>
@@ -275,7 +446,7 @@ const Settings = () => {
               {Object.entries(notificationSettings.emailNotifications).map(
                 ([key, value]) => (
                   <div key={key} className="flex justify-between items-center">
-                    <span className="capitalize text-gray-700">
+                    <span className="capitalize text-foreground">
                       {key.replace(/([A-Z])/g, " $1")}
                     </span>
                     <button
@@ -299,11 +470,17 @@ const Settings = () => {
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleSaveNotifications}
-                className="w-full bg-blue-600 text-white py-2 rounded-md"
+                disabled={saving}
+                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center"
               >
-                <Save className="inline h-4 w-4 mr-1" /> Save
+                {saving ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b border-white mr-2"></div>
+                ) : (
+                  <Save className="inline h-4 w-4 mr-1" />
+                )}
+                Save
               </button>
-              <button className="w-full bg-gray-200 text-gray-700 py-2 rounded-md">
+              <button className="w-full bg-card text-foreground py-2 rounded-md hover:bg-muted transition-colors">
                 <X className="inline h-4 w-4 mr-1" /> Cancel
               </button>
             </div>

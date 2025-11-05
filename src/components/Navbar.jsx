@@ -4,12 +4,18 @@ import {
   Home,
   FileText,
   HelpCircle,
-  LogOut,
+  User,
   Menu,
   X,
   ChevronDown,
   ChevronUp,
+  Sun,
+  Moon,
 } from "lucide-react";
+import { useTheme } from "@/contexts/ThemeContext";
+import apiFetch, { setToken } from "@/lib/apiClient";
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from './LanguageSelector';
 
 const Navbar = ({ onLogout }) => {
   const location = useLocation();
@@ -18,10 +24,11 @@ const Navbar = ({ onLogout }) => {
   const [isFormsDropdownOpen, setIsFormsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const mobileFormsRef = useRef(null);
+  const { theme, setTheme: updateTheme } = useTheme();
+  const { t } = useTranslation();
 
-  const handleLogout = () => {
-    if (onLogout) onLogout();
-    navigate("/login");
+  const handleThemeToggle = () => {
+    updateTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   // Mobile-specific dropdown handler
@@ -68,14 +75,14 @@ const Navbar = ({ onLogout }) => {
   }, [location.pathname]);
 
   const navItems = [
-    { path: "/dashboard", label: "Home", icon: Home },
-    { path: "/invoices", label: "Invoices", icon: FileText },
-    { path: "/tickets", label: "Tickets", icon: HelpCircle },
+    { path: "/dashboard", label: "navbar.home", icon: Home },
+    { path: "/invoices", label: "navbar.invoices", icon: FileText },
+    { path: "/tickets", label: "navbar.tickets", icon: HelpCircle },
   ];
 
   const formsDropdownItems = [
-    { path: "/vacating-form", label: "Vacating Form" },
-    { path: "/exchange-form", label: "Exchange Form" },
+    { path: "/vacating-form", label: "navbar.forms.vacatingForm" },
+    { path: "/exchange-form", label: "navbar.forms.exchangeForm" },
   ];
 
   const isFormsDropdownActive = formsDropdownItems.some(
@@ -88,7 +95,7 @@ const Navbar = ({ onLogout }) => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-              Hostel Management
+              {t('navbar.logoTitle', 'Hostel Management')}
             </h1>
           </div>
 
@@ -107,7 +114,7 @@ const Navbar = ({ onLogout }) => {
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
+                  <span>{t(item.label)}</span>
                 </Link>
               );
             })}
@@ -124,7 +131,7 @@ const Navbar = ({ onLogout }) => {
                 }`}
               >
                 <FileText className="h-4 w-4" />
-                <span>Forms</span>
+                <span>{t('navbar.forms.label', 'Forms')}</span>
                 {isFormsDropdownOpen ? (
                   <ChevronUp className="h-3 w-3" />
                 ) : (
@@ -145,21 +152,41 @@ const Navbar = ({ onLogout }) => {
                           : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                       }`}
                     >
-                      {item.label}
+                      {t(item.label)}
                     </Link>
                   ))}
                 </div>
               )}
             </div>
 
+            {/* Profile Link */}
+            <Link
+              to="/profile"
+              className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <User className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('navbar.profile')}</span>
+            </Link>
+
+            {/* Theme Toggle */}
             <button
               type="button"
-              onClick={handleLogout}
+              onClick={handleThemeToggle}
               className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
             >
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
+              {theme === 'dark' ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+              <span className="hidden sm:inline">{theme === 'dark' ? t('navbar.theme.light') : t('navbar.theme.dark')}</span>
             </button>
+
+            {/* Language selector */}
+            <div className="flex items-center">
+              <LanguageSelector />
+            </div>
           </div>
 
           {/* Mobile menu button */}
@@ -272,16 +299,31 @@ const Navbar = ({ onLogout }) => {
             </div>
 
             {/* Logout Button */}
+            {/* Profile (mobile) */}
+            <Link
+              to="/profile"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center space-x-2 w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <User className="h-4 w-4" />
+              <span>Profile</span>
+            </Link>
+
+            {/* Theme Toggle - Mobile */}
             <button
               type="button"
               onClick={() => {
-                handleLogout();
+                handleThemeToggle();
                 setIsMobileMenuOpen(false);
               }}
               className="flex items-center space-x-2 w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
-              <LogOut className="h-4 w-4" />
-              <span>Logout</span>
+              {theme === 'dark' ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+              <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
             </button>
           </div>
         </div>

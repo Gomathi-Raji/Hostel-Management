@@ -15,9 +15,11 @@ import {
   UserCheck,
   Mic,
 } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Mock counts - in real app, these would come from API/state
   const pendingTicketsCount = 0;
@@ -28,62 +30,57 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
   const menuItems = [
     { 
       path: "/admin/dashboard", 
-      label: "Dashboard", 
+      label: "admin.menu.dashboard", 
       icon: LayoutDashboard 
     },
     { 
       path: "/admin/tenant-management", 
-      label: "Tenant Management", 
+      label: "admin.menu.tenantManagement", 
       icon: Users 
     },
     { 
       path: "/admin/payment-tracking", 
-      label: "Payment Tracking", 
+      label: "admin.menu.paymentTracking", 
       icon: CreditCard 
     },
     { 
       path: "/admin/tickets", 
-      label: "Tickets", 
+      label: "admin.menu.tickets", 
       icon: AlertTriangle, 
       badge: pendingTicketsCount > 0 ? pendingTicketsCount : null 
     },
     { 
       path: "/admin/form-requests", 
-      label: "Form Requests", 
+      label: "admin.menu.formRequests", 
       icon: ClipboardList, 
       badge: pendingFormsCount > 0 ? pendingFormsCount : null 
     },
     { 
       path: "/admin/expenses", 
-      label: "Expenses Management", 
+      label: "admin.menu.expensesManagement", 
       isMultiline: true,
       icon: Receipt, 
       badge: overdueExpensesCount > 0 ? overdueExpensesCount : null
     },
     { 
       path: "/admin/staff-payroll", 
-      label: "Staff & Payroll", 
+      label: "admin.menu.staffPayroll", 
       icon: UserCheck, 
       badge: pendingPayrollCount > 0 ? pendingPayrollCount : null 
     },
     { 
       path: "/admin/room-occupancy", 
-      label: "Room Occupancy", 
+      label: "admin.menu.roomOccupancy", 
       icon: Building2 
     },
     { 
-      path: "/admin/voice-assistant", 
-      label: "Voice Assistant", 
-      icon: Mic 
-    },
-    { 
       path: "/admin/reports-analytics", 
-      label: "Reports & Analytics", 
+      label: "admin.menu.reportsAnalytics", 
       icon: FileText 
     },
     { 
       path: "/admin/settings", 
-      label: "Settings", 
+      label: "admin.menu.settings", 
       icon: Settings 
     },
   ];
@@ -119,8 +116,8 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
                 <LayoutDashboard className="h-5 w-5 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Admin Panel</h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Management</p>
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-white">{t('admin.panelTitle')}</h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{t('admin.managementSystemShort')}</p>
               </div>
             </div>
             <button
@@ -154,11 +151,11 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
                       <div className="flex-1 min-w-0">
                         {item.isMultiline ? (
                           <div className="text-sm font-medium">
-                            <div className="leading-tight">Expenses</div>
-                            <div className="leading-tight">Management</div>
+                            <div className="leading-tight">{t('admin.menu.expensesLine1')}</div>
+                            <div className="leading-tight">{t('admin.menu.expensesLine2')}</div>
                           </div>
                         ) : (
-                          <span className="text-sm font-medium truncate block">{item.label}</span>
+                          <span className="text-sm font-medium truncate block">{t(item.label)}</span>
                         )}
                       </div>
                     </div>
@@ -187,7 +184,7 @@ const AdminSidebar = ({ isMobileMenuOpen, setIsMobileMenuOpen, onLogout }) => {
               className="w-full flex items-center gap-4 px-4 py-3 rounded-lg transition-all duration-300 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
             >
               <LogOut className="h-5 w-5" />
-              <span className="text-sm">Logout</span>
+              <span className="text-sm">{t('admin.profile.logout')}</span>
             </button>
           </div>
         </div>

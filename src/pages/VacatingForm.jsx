@@ -55,16 +55,16 @@ const VacatingForm = () => {
   if (success) {
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
-          <div className="text-green-600 text-6xl mb-4">✓</div>
-          <h2 className="text-2xl font-bold text-green-900 mb-2">Request Submitted Successfully!</h2>
-          <p className="text-green-800 mb-4">
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-8 text-center">
+          <div className="text-green-600 dark:text-green-400 text-6xl mb-4">✓</div>
+          <h2 className="text-2xl font-bold text-green-900 dark:text-green-100 mb-2">Request Submitted Successfully!</h2>
+          <p className="text-green-800 dark:text-green-200 mb-4">
             Your vacating request has been submitted and is pending approval.
             You will receive an email notification once it's reviewed.
           </p>
           <button
             onClick={() => setSuccess(false)}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            className="bg-green-600 dark:bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors"
           >
             Submit Another Request
           </button>
@@ -85,12 +85,12 @@ const VacatingForm = () => {
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
           <div className="flex">
-            <div className="text-red-600 text-xl mr-3">⚠</div>
+            <div className="text-red-600 dark:text-red-400 text-xl mr-3">⚠</div>
             <div>
-              <h3 className="text-sm font-medium text-red-800">Error submitting request</h3>
-              <div className="mt-2 text-sm text-red-700">{error}</div>
+              <h3 className="text-sm font-medium text-red-800 dark:text-red-200">Error submitting request</h3>
+              <div className="mt-2 text-sm text-red-700 dark:text-red-300">{error}</div>
             </div>
           </div>
         </div>

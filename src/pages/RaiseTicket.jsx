@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 
 const RaiseTicket = () => {
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const RaiseTicket = () => {
     { value: "Medium", label: "Medium" },
     { value: "Low", label: "Low" }
   ];
+  const { t } = useTranslation();
 
   const handleInputChange = (e) => {
     setFormData({
@@ -45,18 +47,16 @@ const RaiseTicket = () => {
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Raise New Ticket</h1>
-        <p className="text-muted-foreground mt-2">
-          Report an issue or request assistance from our support team
-        </p>
+        <h1 className="text-3xl font-bold text-foreground">{t('raiseTicket.heading')}</h1>
+        <p className="text-muted-foreground mt-2">{t('tickets.subtitle')}</p>
       </div>
 
       {/* Form */}
       <div className="bg-card shadow-card rounded-lg border border-border p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-foreground mb-2">
-              Title *
+              <label htmlFor="title" className="block text-sm font-medium text-foreground mb-2">
+              {t('raiseTicket.titleLabel')} *
             </label>
             <input
               type="text"
@@ -64,7 +64,7 @@ const RaiseTicket = () => {
               name="title"
               value={formData.title}
               onChange={handleInputChange}
-              placeholder="Brief description of the issue"
+              placeholder={t('raiseTicket.placeholder.title')}
               className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
@@ -83,7 +83,7 @@ const RaiseTicket = () => {
                 className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                 required
               >
-                <option value="">Select a category</option>
+                <option value="">{t('raiseTicket.categoryLabel')}</option>
                 {categories.map((category) => (
                   <option key={category} value={category}>
                     {category}
@@ -104,10 +104,10 @@ const RaiseTicket = () => {
                 className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
                 required
               >
-                <option value="">Select priority</option>
+                <option value="">{t('raiseTicket.priorityLabel')}</option>
                 {priorities.map((priority) => (
                   <option key={priority.value} value={priority.value}>
-                    {priority.label}
+                    {t(`raiseTicket.priorities.${priority.value.toLowerCase()}`) || priority.label}
                   </option>
                 ))}
               </select>
@@ -115,15 +115,15 @@ const RaiseTicket = () => {
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-foreground mb-2">
-              Description *
+              <label htmlFor="description" className="block text-sm font-medium text-foreground mb-2">
+              {t('raiseTicket.descriptionLabel')} *
             </label>
             <textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              placeholder="Provide detailed information about the issue, including any relevant context or steps to reproduce the problem"
+              placeholder={t('raiseTicket.placeholder.description')}
               rows={6}
               className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
               required
@@ -132,18 +132,18 @@ const RaiseTicket = () => {
 
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <button
+              <button
               type="submit"
               className="flex-1 bg-accent-purple hover:bg-accent-purple/90 text-accent-purple-foreground font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-accent-purple focus:ring-offset-2"
             >
-              Create Ticket
+              {t('raiseTicket.create')}
             </button>
             <button
               type="button"
               onClick={() => navigate("/tickets")}
               className="flex-1 bg-muted hover:bg-muted/80 text-muted-foreground font-medium py-3 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-muted focus:ring-offset-2"
             >
-              Cancel
+              {t('raiseTicket.cancel')}
             </button>
           </div>
         </form>

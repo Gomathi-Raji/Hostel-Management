@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
     proxy: {
       // Proxy API requests to backend running on port 5000
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://project-h-backend.onrender.com',
         changeOrigin: true,
         secure: false,
       },

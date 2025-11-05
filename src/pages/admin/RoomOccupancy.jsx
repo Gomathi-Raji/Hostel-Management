@@ -13,20 +13,12 @@ const RoomOccupancy = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [showModal, setShowModal] = useState(false);
+  const [showAddCards, setShowAddCards] = useState(false);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [formData, setFormData] = useState({
-    roomNumber: "",
-    roomType: "",
-    capacity: "",
-    rentAmount: "",
-    status: "available",
-  });
-
-  const roomTypes = ["Single", "Shared", "Deluxe"];
+  const roomTypes = ["single", "double", "shared"];
 
   // Load rooms on component mount
   useEffect(() => {
@@ -57,7 +49,7 @@ const RoomOccupancy = () => {
       case "maintenance":
         return `${baseClasses} bg-yellow-100 text-yellow-700 border border-yellow-300`;
       default:
-        return `${baseClasses} bg-gray-100 text-gray-700 border border-gray-300`;
+  return `${baseClasses} bg-card text-foreground border border-border`;
     }
   };
 
@@ -74,20 +66,40 @@ const RoomOccupancy = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleAddRoom = async (e) => {
-    e.preventDefault();
+  const handleQuickAddRoom = async (roomType) => {
+    const roomNumber = prompt(`Enter room number for ${roomType} room:`);
+    if (!roomNumber) return;
 
     try {
+      let capacity, rent, type;
+      switch (roomType) {
+        case "Single":
+          capacity = 1;
+          rent = 5000;
+          type = "single";
+          break;
+        case "Double":
+          capacity = 2;
+          rent = 8000;
+          type = "double";
+          break;
+        case "Shared":
+          capacity = 2;
+          rent = 3000;
+          type = "shared";
+          break;
+        default:
+          capacity = 1;
+          rent = 5000;
+          type = "single";
+      }
+
       const roomData = {
-        number: formData.roomNumber,
-        type: formData.roomType,
-        capacity: parseInt(formData.capacity),
-        rentAmount: parseFloat(formData.rentAmount),
-        status: formData.status,
+        number: roomNumber,
+        type: type,
+        capacity: capacity,
+        rent: rent,
+        status: "available",
       };
 
       await apiFetch('/rooms', {
@@ -95,24 +107,12 @@ const RoomOccupancy = () => {
         body: roomData
       });
 
-      alert('Room added successfully!');
-      setShowModal(false);
-      resetForm();
+      alert(`${roomType} room ${roomNumber} added successfully!`);
       loadRooms(); // Reload the rooms list
     } catch (err) {
       console.error('Error adding room:', err);
       alert(err.message || 'Failed to add room');
     }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      roomNumber: "",
-      roomType: "",
-      capacity: "",
-      rentAmount: "",
-      status: "available",
-    });
   };
 
   const filteredRooms = rooms.filter((room) => {
@@ -146,7 +146,7 @@ const RoomOccupancy = () => {
           </p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => setShowAddCards(!showAddCards)}
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
         >
           <Plus className="h-4 w-4" />
@@ -155,7 +155,7 @@ const RoomOccupancy = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-6">
+  <div className="bg-card rounded-xl shadow-lg border border-border p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -164,14 +164,14 @@ const RoomOccupancy = () => {
               placeholder="Search by Room Number, Floor, or Tenant"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground"
             >
               <option value="all">All Status</option>
               <option value="available">Available</option>
@@ -183,14 +183,12 @@ const RoomOccupancy = () => {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground"
             >
               <option value="all">All Types</option>
-              {roomTypes.map((type) => (
-                <option key={type} value={type.toLowerCase()}>
-                  {type}
-                </option>
-              ))}
+              <option value="single">Single</option>
+              <option value="double">Double</option>
+              <option value="shared">Shared</option>
             </select>
           </div>
         </div>
@@ -198,7 +196,7 @@ const RoomOccupancy = () => {
 
       {/* Rooms Grid */}
       {loading ? (
-        <p className="text-center text-gray-500 mt-10">Loading rooms...</p>
+        <p className="text-center text-muted-foreground mt-10">Loading rooms...</p>
       ) : error ? (
         <p className="text-center text-red-500 mt-10">{error}</p>
       ) : filteredRooms.length > 0 ? (
@@ -206,7 +204,7 @@ const RoomOccupancy = () => {
           {filteredRooms.map((room) => (
             <div
               key={room._id}
-              className="bg-white rounded-lg border shadow hover:shadow-lg transition"
+              className="bg-card rounded-lg border shadow hover:shadow-lg transition"
             >
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
@@ -247,111 +245,61 @@ const RoomOccupancy = () => {
           ))}
         </div>
       ) : (
-        <p className="text-center text-gray-500 mt-10">No rooms found.</p>
+        <p className="text-center text-muted-foreground mt-10">No rooms found.</p>
       )}
 
-      {/* Add Room Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 relative max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 hover:bg-gray-200 rounded-full p-1"
+      {/* Add Room Cards */}
+      {showAddCards && (
+        <div className="bg-card rounded-xl shadow-lg border border-border p-6 mb-6">
+          <h3 className="text-lg font-semibold mb-4">Quick Add Room</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Single Room Card */}
+            <div
+              onClick={() => handleQuickAddRoom("Single")}
+              className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 cursor-pointer hover:bg-blue-100 hover:border-blue-300 transition-colors"
             >
-              <X className="h-5 w-5 text-gray-600" />
-            </button>
-            <h2 className="text-xl font-semibold mb-4">Add New Room</h2>
-            <form onSubmit={handleAddRoom} className="space-y-4">
-              {/* Room Number */}
-              <label className="block text-sm font-medium">
-                Room Number <span className="text-red-500">*</span>
-              </label>
-              <input
-                name="roomNumber"
-                value={formData.roomNumber}
-                onChange={handleInputChange}
-                placeholder="Room Number"
-                required
-                className="w-full border px-3 py-2 rounded-lg"
-              />
-
-              {/* Room Type */}
-              <label className="block text-sm font-medium">
-                Room Type <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="roomType"
-                value={formData.roomType}
-                onChange={handleInputChange}
-                required
-                className="w-full border px-3 py-2 rounded-lg"
-              >
-                <option value="">Select Type</option>
-                {roomTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-
-              {/* Capacity */}
-              <label className="block text-sm font-medium">
-                Capacity <span className="text-red-500">*</span>
-              </label>
-              <input
-                name="capacity"
-                type="number"
-                value={formData.capacity}
-                onChange={handleInputChange}
-                placeholder="Room Capacity"
-                required
-                className="w-full border px-3 py-2 rounded-lg"
-              />
-
-              {/* Rent Amount */}
-              <label className="block text-sm font-medium">
-                Rent Amount <span className="text-red-500">*</span>
-              </label>
-              <input
-                name="rentAmount"
-                type="number"
-                value={formData.rentAmount}
-                onChange={handleInputChange}
-                placeholder="Rent Amount"
-                required
-                className="w-full border px-3 py-2 rounded-lg"
-              />
-
-              {/* Status */}
-              <label className="block text-sm font-medium">Status</label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className="w-full border px-3 py-2 rounded-lg"
-              >
-                <option value="available">Available</option>
-                <option value="occupied">Occupied</option>
-                <option value="maintenance">Maintenance</option>
-              </select>
-
-              {/* Submit Buttons */}
-              <div className="flex justify-end gap-3 mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="px-4 py-2 rounded-lg border"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  Add Room
-                </button>
+              <div className="flex items-center gap-3 mb-2">
+                <Home className="h-6 w-6 text-blue-600" />
+                <h4 className="font-semibold text-blue-800">Single Room</h4>
               </div>
-            </form>
+              <p className="text-sm text-blue-600 mb-2">Perfect for individual tenants</p>
+              <div className="text-xs text-blue-500">
+                <div>Capacity: 1</div>
+                <div>Standard amenities</div>
+              </div>
+            </div>
+
+            {/* Double Room Card */}
+            <div
+              onClick={() => handleQuickAddRoom("Double")}
+              className="bg-green-50 border-2 border-green-200 rounded-lg p-4 cursor-pointer hover:bg-green-100 hover:border-green-300 transition-colors"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Users className="h-6 w-6 text-green-600" />
+                <h4 className="font-semibold text-green-800">Double Room</h4>
+              </div>
+              <p className="text-sm text-green-600 mb-2">Premium accommodation for couples</p>
+              <div className="text-xs text-green-500">
+                <div>Capacity: 2</div>
+                <div>Enhanced amenities</div>
+              </div>
+            </div>
+
+            {/* Shared Room Card */}
+            <div
+              onClick={() => handleQuickAddRoom("Shared")}
+              className="bg-purple-50 border-2 border-purple-200 rounded-lg p-4 cursor-pointer hover:bg-purple-100 hover:border-purple-300 transition-colors"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Home className="h-6 w-6 text-purple-600" />
+                <h4 className="font-semibold text-purple-800">Shared Room</h4>
+              </div>
+              <p className="text-sm text-purple-600 mb-2">Cost-effective shared accommodation</p>
+              <div className="text-xs text-purple-500">
+                <div>Capacity: 2-4</div>
+                <div>Shared facilities</div>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import apiFetch, { setToken } from "@/lib/apiClient";
 
 const Register = () => {
@@ -9,8 +10,9 @@ const Register = () => {
     number: "",
     password: "",
     confirmPassword: "",
-    role: "user"
+    role: "tenant"
   });
+  const { t } = useTranslation();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -40,49 +42,49 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="bg-card shadow-card rounded-lg p-8 max-w-md w-full border border-border">
-        <h2 className="text-2xl font-bold text-center text-foreground mb-6">Create Account</h2>
+  <h2 className="text-2xl font-bold text-center text-foreground mb-6">{t('register.title')}</h2>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Name</label>
+            <label className="block text-sm font-medium text-foreground mb-2">{t('register.name')}</label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              placeholder="Enter your name"
+              placeholder={t('register.placeholders.name')}
               className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Email</label>
+            <label className="block text-sm font-medium text-foreground mb-2">{t('register.email')}</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter your email"
+              placeholder={t('register.placeholders.email')}
               className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Phone Number</label>
+            <label className="block text-sm font-medium text-foreground mb-2">{t('register.phone')}</label>
             <input
               type="text"
               name="number"
               value={formData.number}
               onChange={handleChange}
-              placeholder="Enter your phone number"
+              placeholder={t('register.placeholders.phone')}
               className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Role</label>
+            <label className="block text-sm font-medium text-foreground mb-2">{t('register.role')}</label>
             <select
               name="role"
               value={formData.role}
@@ -90,33 +92,33 @@ const Register = () => {
               className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             >
-              <option value="user">User</option>
-              <option value="staff">Staff</option>
-              <option value="admin">Admin</option>
+              <option value="tenant">{t('register.roleOptions.tenant')}</option>
+              <option value="staff">{t('register.roleOptions.staff')}</option>
+              <option value="admin">{t('register.roleOptions.admin')}</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Password</label>
+            <label className="block text-sm font-medium text-foreground mb-2">{t('register.password')}</label>
             <input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Enter your password"
+              placeholder={t('register.placeholders.password')}
               className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">Confirm Password</label>
+            <label className="block text-sm font-medium text-foreground mb-2">{t('register.confirmPassword')}</label>
             <input
               type="password"
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="Confirm your password"
+              placeholder={t('register.placeholders.confirmPassword')}
               className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
@@ -126,14 +128,14 @@ const Register = () => {
             type="submit"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
-            Sign Up
+            {t('register.signup')}
           </button>
         </form>
 
         <p className="text-center mt-6 text-sm text-muted-foreground">
-          Already have an account?{" "}
+          {t('register.haveAccount')} {" "}
           <Link to="/login" className="text-blue-600 hover:underline">
-            Login
+            {t('register.login')}
           </Link>
         </p>
       </div>

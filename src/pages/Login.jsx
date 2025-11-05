@@ -1,15 +1,36 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import apiFetch, { setToken } from "@/lib/apiClient";
+import WelcomeModal from "@/components/WelcomeModal";
+import { useTranslation } from 'react-i18next';
 
 const Login = ({ setIsAuthenticated, setUserType }) => {
   const [activeTab, setActiveTab] = useState("user");
   const [showPassword, setShowPassword] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [userName, setUserName] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   });
+
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+
+  const languages = [
+    { code: 'en', label: 'English' },
+    { code: 'ta', label: 'தமிழ்' },
+    { code: 'te', label: 'తెలుగు' },
+    { code: 'hi', label: 'हिन्दी' },
+    { code: 'ml', label: 'മലയാളം' },
+    { code: 'kn', label: 'ಕನ್ನಡ' },
+  ];
+
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+    try { localStorage.setItem('appLanguage', lng); } catch (e) { /* ignore */ }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -24,6 +45,18 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
         }
         setUserType(activeTab);
         setIsAuthenticated(true);
+
+        // Check if tenant requires onboarding
+        if (activeTab === "user" && res.requiresOnboarding) {
+          navigate('/onboarding');
+          return;
+        }
+
+        // Check if this is first login for tenants
+        if (activeTab === "user" && res.isFirstLogin) {
+          setUserName(res.name);
+          setShowWelcomeModal(true);
+        }
       } catch (err) {
         console.error(err);
         alert(err?.message || "Login failed");
@@ -46,6 +79,20 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="max-w-md w-full">
+        {/* Language selector */}
+        <div className="flex justify-end mb-4">
+          <select
+            aria-label="Select language"
+            defaultValue={i18n.language || 'en'}
+            onChange={(e) => changeLanguage(e.target.value)}
+            className="border border-input rounded-md px-2 py-1 bg-background text-sm"
+          >
+            {languages.map(l => (
+              <option key={l.code} value={l.code}>{l.label}</option>
+            ))}
+          </select>
+        </div>
+
         {/* Tab Selection */}
         <div className="flex mb-8 bg-muted rounded-lg p-1">
           <button
@@ -57,7 +104,7 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            User
+            {t('tabs.user')}
           </button>
           <button
             type="button"
@@ -68,7 +115,7 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Admin
+            {t('tabs.admin')}
           </button>
         </div>
 
@@ -76,17 +123,17 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
         <div className="bg-card shadow-card rounded-lg p-8 border border-border">
           <div className="mb-4">
             <h2 className="text-2xl font-bold text-center text-foreground">
-              Login as {activeTab === "admin" ? "Administrator" : "User"}
+              {t('heading.loginAs', { role: activeTab === 'admin' ? t('tabs.admin') : t('tabs.user') })}
             </h2>
             <p className="text-sm text-center text-muted-foreground mt-2">
-              {activeTab === "admin" ? "Access admin panel" : "Access your account"}
+              {activeTab === 'admin' ? t('subtext.accessAdmin') : t('subtext.accessAccount')}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                Email
+                {t('label.email')}
               </label>
               <input
                 type="email"
@@ -94,7 +141,7 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                placeholder="Your Email Address"
+                placeholder={t('placeholder.email')}
                 className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -102,7 +149,7 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
-                Password
+                {t('label.password')}
               </label>
               <div className="relative">
                 <input
@@ -111,7 +158,7 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  placeholder="Enter your password"
+                  placeholder={t('placeholder.password')}
                   className="w-full px-3 py-2 pr-10 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
@@ -128,7 +175,7 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
             {/* Forgot Password Link */}
             <div className="text-right">
               <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
-                Forgot Password?
+                {t('link.forgotPassword')}
               </Link>
             </div>
 
@@ -141,21 +188,28 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
                   : "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500"
               }`}
             >
-              Login as {activeTab === "admin" ? "Administrator" : "User"}
+              {t('button.loginAs', { role: activeTab === 'admin' ? t('tabs.admin') : t('tabs.user') })}
             </button>
           </form>
 
           {/* Sign In Link */}
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Don't have an account?{" "}
+              {t('helper.dontHaveAccount')}{" "}
               <Link to="/register" className="text-blue-600 hover:underline">
-                Sign Up
+                {t('link.signUp')}
               </Link>
             </p>
           </div>
         </div>
       </div>
+
+      {/* Welcome Modal for First Time Login */}
+      <WelcomeModal
+        isOpen={showWelcomeModal}
+        onClose={() => setShowWelcomeModal(false)}
+        userName={userName}
+      />
     </div>
   );
 };

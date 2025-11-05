@@ -55,7 +55,7 @@ const PaymentTracking = () => {
       case "paid": return `${baseClasses} bg-green-100 text-green-800`;
       case "pending": return `${baseClasses} bg-yellow-100 text-yellow-800`;
       case "overdue": return `${baseClasses} bg-red-100 text-red-800`;
-      default: return `${baseClasses} bg-gray-100 text-gray-500`;
+      default: return `${baseClasses} bg-muted text-muted-foreground`;
     }
   };
 
@@ -111,7 +111,7 @@ const PaymentTracking = () => {
   });
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+  <div className="p-6 bg-background min-h-screen">
       {/* Header Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {Object.entries(stats).map(([key, value]) => {
@@ -119,13 +119,13 @@ const PaymentTracking = () => {
           const colors = { totalAmount: "text-blue-600", paid: "text-green-600", pending: "text-yellow-600", overdue: "text-red-600" };
           const Icon = icons[key];
           return (
-            <div key={key} className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100">
+            <div key={key} className="bg-card rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-500 capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
+                  <p className="text-sm font-medium text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
                   <p className={`text-3xl font-bold mt-1 ${colors[key]}`}>₹{value.toLocaleString()}</p>
                 </div>
-                <div className={`bg-gray-100 p-3 rounded-lg`}>
+                <div className={`bg-muted p-3 rounded-lg`}>
                   <Icon className={`h-8 w-8 ${colors[key]}`} />
                 </div>
               </div>
@@ -137,8 +137,8 @@ const PaymentTracking = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">Payment Tracking</h1>
-          <p className="text-gray-600 mt-1">Monitor and manage tenant payments</p>
+          <h1 className="text-3xl font-bold text-foreground">Payment Tracking</h1>
+          <p className="text-muted-foreground mt-1">Monitor and manage tenant payments</p>
         </div>
         <button
           onClick={handleExportData}
@@ -149,24 +149,24 @@ const PaymentTracking = () => {
       </div>
 
       {/* Search & Filter */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-6">
+          <div className="bg-card rounded-xl shadow-lg border border-border p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <input
               type="text"
               placeholder="Search by Tenant Name or Email"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground placeholder:text-muted-foreground"
             />
           </div>
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="pl-10 pr-8 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground"
             >
               <option value="all">All Statuses</option>
               <option value="paid">Paid</option>
@@ -178,25 +178,25 @@ const PaymentTracking = () => {
       </div>
 
       {/* Payment Records */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-100">
+  <div className="bg-card rounded-xl shadow-lg border border-border">
         {/* Desktop Table */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="p-4 text-left text-sm font-medium text-gray-500">Tenant Name</th>
-                <th className="p-4 text-left text-sm font-medium text-gray-500">Room</th>
-                <th className="p-4 text-left text-sm font-medium text-gray-500">Amount</th>
-                <th className="p-4 text-left text-sm font-medium text-gray-500">Status</th>
-                <th className="p-4 text-left text-sm font-medium text-gray-500">Due Date</th>
-                <th className="p-4 text-left text-sm font-medium text-gray-500">Paid Date</th>
-                <th className="p-4 text-left text-sm font-medium text-gray-500">Actions</th>
+              <tr className="border-b border-border">
+                <th className="p-4 text-left text-sm font-medium text-muted-foreground">Tenant Name</th>
+                <th className="p-4 text-left text-sm font-medium text-muted-foreground">Room</th>
+                <th className="p-4 text-left text-sm font-medium text-muted-foreground">Amount</th>
+                <th className="p-4 text-left text-sm font-medium text-muted-foreground">Status</th>
+                <th className="p-4 text-left text-sm font-medium text-muted-foreground">Due Date</th>
+                <th className="p-4 text-left text-sm font-medium text-muted-foreground">Paid Date</th>
+                <th className="p-4 text-left text-sm font-medium text-muted-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="p-8 text-center text-gray-500">
+                  <td colSpan="7" className="p-8 text-center text-muted-foreground">
                     Loading payments...
                   </td>
                 </tr>
@@ -207,16 +207,16 @@ const PaymentTracking = () => {
                   </td>
                 </tr>
               ) : filteredRecords.length > 0 ? filteredRecords.map(payment => (
-                <tr key={payment._id} className="border-b border-gray-200 hover:bg-gray-50">
-                  <td className="p-4 text-sm font-medium text-gray-800">
+                <tr key={payment._id} className="border-b border-border hover:bg-muted">
+                  <td className="p-4 text-sm font-medium text-foreground">
                     {payment.tenant ? `${payment.tenant.firstName} ${payment.tenant.lastName}` : 'Unknown'}
-                    <div className="text-xs text-gray-500">{payment.tenant?.email || 'N/A'}</div>
+                    <div className="text-xs text-muted-foreground">{payment.tenant?.email || 'N/A'}</div>
                   </td>
-                  <td className="p-4 text-sm text-gray-800">{payment.room?.number || 'N/A'}</td>
-                  <td className="p-4 text-sm font-medium text-gray-800">₹{payment.amount.toLocaleString()}</td>
+                  <td className="p-4 text-sm text-foreground">{payment.room?.number || 'N/A'}</td>
+                  <td className="p-4 text-sm font-medium text-foreground">₹{payment.amount.toLocaleString()}</td>
                   <td className="p-4"><span className={getStatusBadge(payment.status)}>{payment.status}</span></td>
-                  <td className="p-4 text-sm text-gray-800">{payment.dueDate ? new Date(payment.dueDate).toLocaleDateString() : 'N/A'}</td>
-                  <td className="p-4 text-sm text-gray-500">{payment.status === "paid" && payment.paidDate ? new Date(payment.paidDate).toLocaleDateString() : "-"}</td>
+                  <td className="p-4 text-sm text-foreground">{payment.dueDate ? new Date(payment.dueDate).toLocaleDateString() : 'N/A'}</td>
+                  <td className="p-4 text-sm text-muted-foreground">{payment.status === "paid" && payment.paidDate ? new Date(payment.paidDate).toLocaleDateString() : "-"}</td>
                   <td className="p-4 flex flex-col gap-2">
                     {payment.status === "pending" && <button onClick={() => markAsPaid(payment._id)} className="text-xs bg-yellow-600 text-white px-3 py-2 rounded-lg hover:bg-yellow-700 transition-colors font-medium">Mark Paid</button>}
                     {payment.status === "overdue" && <button className="text-xs bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors font-medium">Send Reminder</button>}
@@ -225,7 +225,7 @@ const PaymentTracking = () => {
                 </tr>
               )) : (
                 <tr>
-                  <td colSpan="7" className="p-8 text-center text-gray-500">
+                  <td colSpan="7" className="p-8 text-center text-muted-foreground">
                     {searchTerm || filterStatus !== "all" ? "No records found." : "No records available."}
                   </td>
                 </tr>
@@ -237,24 +237,24 @@ const PaymentTracking = () => {
         {/* Mobile Cards */}
         <div className="md:hidden flex flex-col gap-4 p-4">
           {loading ? (
-            <p className="text-center text-gray-500">Loading payments...</p>
+            <p className="text-center text-muted-foreground">Loading payments...</p>
           ) : error ? (
             <p className="text-center text-red-500">{error}</p>
           ) : filteredRecords.length > 0 ? filteredRecords.map(payment => (
-            <div key={payment._id} className="bg-white border border-gray-200 rounded-lg shadow p-4 flex flex-col gap-2">
+            <div key={payment._id} className="bg-card border border-border rounded-lg shadow p-4 flex flex-col gap-2">
               <div className="flex justify-between items-center">
                 <div>
-                  <div className="font-medium text-gray-800">
+                  <div className="font-medium text-foreground">
                     {payment.tenant ? `${payment.tenant.firstName} ${payment.tenant.lastName}` : 'Unknown'}
                   </div>
-                  <div className="text-xs text-gray-500">{payment.tenant?.email || 'N/A'}</div>
+                  <div className="text-xs text-muted-foreground">{payment.tenant?.email || 'N/A'}</div>
                 </div>
                 <span className={getStatusBadge(payment.status)}>{payment.status}</span>
               </div>
-              <div className="text-sm text-gray-800">Room: {payment.room?.number || 'N/A'}</div>
-              <div className="text-sm text-gray-800">Amount: ₹{payment.amount.toLocaleString()}</div>
-              <div className="text-sm text-gray-500">Due: {payment.dueDate ? new Date(payment.dueDate).toLocaleDateString() : 'N/A'}</div>
-              <div className="text-sm text-gray-500">Paid: {payment.status === "paid" && payment.paidDate ? new Date(payment.paidDate).toLocaleDateString() : "-"}</div>
+              <div className="text-sm text-foreground">Room: {payment.room?.number || 'N/A'}</div>
+              <div className="text-sm text-foreground">Amount: ₹{payment.amount.toLocaleString()}</div>
+              <div className="text-sm text-muted-foreground">Due: {payment.dueDate ? new Date(payment.dueDate).toLocaleDateString() : 'N/A'}</div>
+              <div className="text-sm text-muted-foreground">Paid: {payment.status === "paid" && payment.paidDate ? new Date(payment.paidDate).toLocaleDateString() : "-"}</div>
               <div className="flex flex-wrap gap-2 mt-2">
                 {payment.status === "pending" && <button onClick={() => markAsPaid(payment._id)} className="text-xs bg-yellow-600 text-white px-3 py-2 rounded-lg hover:bg-yellow-700 transition-colors font-medium">Mark Paid</button>}
                 {payment.status === "overdue" && <button className="text-xs bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors font-medium">Send Reminder</button>}
@@ -262,7 +262,7 @@ const PaymentTracking = () => {
               </div>
             </div>
           )) : (
-            <p className="text-center text-gray-500">No records available.</p>
+            <p className="text-center text-muted-foreground">No records available.</p>
           )}
         </div>
       </div>

@@ -4,7 +4,11 @@ let token = null;
 export function setToken(t) {
   token = t;
   try {
-    localStorage.setItem("token", t);
+    if (t) {
+      localStorage.setItem("token", t);
+    } else {
+      localStorage.removeItem("token");
+    }
   } catch (e) {
     // ignore
   }

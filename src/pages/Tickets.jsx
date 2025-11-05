@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import RaiseTicketModal from "../components/RaiseTicketModal";
 import apiFetch from "@/lib/apiClient";
+import { useTranslation } from 'react-i18next';
 
 const Tickets = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -12,6 +13,8 @@ const Tickets = () => {
   useEffect(() => {
     fetchTickets();
   }, []);
+
+  const { t } = useTranslation();
 
   const fetchTickets = async () => {
     try {
@@ -30,15 +33,15 @@ const Tickets = () => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-medium";
     switch (status?.toLowerCase()) {
       case "in_progress":
-        return `${baseClasses} bg-blue-500 text-white`;
+        return `${baseClasses} bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400`;
       case "open":
-        return `${baseClasses} bg-gray-500 text-white`;
+        return `${baseClasses} bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300`;
       case "resolved":
-        return `${baseClasses} bg-green-500 text-white`;
+        return `${baseClasses} bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400`;
       case "closed":
-        return `${baseClasses} bg-gray-400 text-white`;
+        return `${baseClasses} bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400`;
       default:
-        return `${baseClasses} bg-gray-500 text-white`;
+        return `${baseClasses} bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300`;
     }
   };
 
@@ -46,13 +49,13 @@ const Tickets = () => {
     const baseClasses = "px-3 py-1 rounded-full text-xs font-medium";
     switch (priority?.toLowerCase()) {
       case "high":
-        return `${baseClasses} bg-red-500 text-white`;
+        return `${baseClasses} bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400`;
       case "medium":
-        return `${baseClasses} bg-yellow-500 text-white`;
+        return `${baseClasses} bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400`;
       case "low":
-        return `${baseClasses} bg-green-500 text-white`;
+        return `${baseClasses} bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400`;
       default:
-        return `${baseClasses} bg-gray-500 text-white`;
+        return `${baseClasses} bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300`;
     }
   };
 
@@ -94,16 +97,16 @@ const Tickets = () => {
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
           <div className="flex">
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Error loading tickets</h3>
-              <div className="mt-2 text-sm text-red-700">{error}</div>
+              <h3 className="text-sm font-medium text-destructive">{t('tickets.errorLoading')}</h3>
+              <div className="mt-2 text-sm text-destructive/80">{error}</div>
               <button
                 onClick={fetchTickets}
-                className="mt-2 px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                className="mt-2 px-3 py-1 bg-destructive text-destructive-foreground text-sm rounded hover:bg-destructive/90"
               >
-                Retry
+                {t('tickets.refresh')}
               </button>
             </div>
           </div>
@@ -117,15 +120,15 @@ const Tickets = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Support Tickets</h1>
-          <p className="text-muted-foreground mt-2">Manage your support requests and issues</p>
+          <h1 className="text-3xl font-bold text-foreground">{t('tickets.title')}</h1>
+          <p className="text-muted-foreground mt-2">{t('tickets.subtitle', 'Manage your support requests and issues')}</p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
           className="mt-4 sm:mt-0 bg-accent-purple hover:bg-accent-purple/90 text-accent-purple-foreground font-medium py-2 px-4 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-accent-purple focus:ring-offset-2 flex items-center space-x-2"
         >
           <Plus className="h-4 w-4" />
-          <span>Raise New Ticket</span>
+          <span>{t('tickets.raiseNew', 'Raise New Ticket')}</span>
         </button>
       </div>
 
@@ -166,9 +169,9 @@ const Tickets = () => {
 
       {tickets.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground text-lg">No tickets found.</p>
+          <p className="text-muted-foreground text-lg">{t('tickets.noTickets')}</p>
           <p className="text-muted-foreground text-sm mt-2">
-            Create your first support ticket by clicking the "Raise New Ticket" button.
+            {t('tickets.noTicketsHelp', 'Create your first support ticket by clicking the "Raise New Ticket" button.')}
           </p>
         </div>
       )}

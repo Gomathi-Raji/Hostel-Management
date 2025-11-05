@@ -32,7 +32,7 @@ export default function Chatbot() {
   };
 
   return (
-    <div className="chat-container p-6 bg-white rounded-2xl max-w-lg mx-auto">
+  <div className="chat-container p-6 bg-card rounded-2xl max-w-lg mx-auto">
       <div className="flex justify-between mb-2">
         <select value={role} onChange={(e) => setRole(e.target.value)} className="p-2 border rounded">
           <option value="tenant">Tenant</option>

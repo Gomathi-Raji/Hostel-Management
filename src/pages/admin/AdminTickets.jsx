@@ -17,6 +17,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import apiFetch from '@/lib/apiClient';
+import { useTranslation } from 'react-i18next';
 
 const AdminTickets = () => {
   const [tickets, setTickets] = useState([]);
@@ -81,7 +82,7 @@ const AdminTickets = () => {
       "in-progress": "bg-yellow-100 text-yellow-800 border-yellow-200",
       resolved: "bg-green-100 text-green-800 border-green-200",
     };
-    return styles[status] || "bg-gray-100 text-gray-800 border-gray-200";
+    return styles[status] || "bg-muted text-muted-foreground border-border";
   };
 
   const getPriorityBadge = (priority) => {
@@ -90,7 +91,7 @@ const AdminTickets = () => {
       Medium: "bg-orange-50 text-orange-700 border-orange-200",
       Low: "bg-blue-50 text-blue-700 border-blue-200",
     };
-    return styles[priority] || "bg-gray-50 text-gray-700 border-gray-200";
+  return styles[priority] || "bg-background text-foreground border-border";
   };
 
   const getStatusIcon = (status) => {
@@ -133,16 +134,15 @@ const AdminTickets = () => {
   };
 
   const categories = [...new Set(tickets.map((t) => t.category))];
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-6 p-4 md:p-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ticket Management</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Manage and resolve tenant support tickets
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">{t('tickets.title')}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t('tickets.subtitle')}</p>
         </div>
         <div>
           <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
@@ -155,43 +155,43 @@ const AdminTickets = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Total Tickets", value: ticketCounts.total, icon: <AlertTriangle className="h-8 w-8 text-blue-600" /> },
-          { label: "Open", value: ticketCounts.open, icon: <AlertTriangle className="h-8 w-8 text-red-600" /> },
-          { label: "In Progress", value: ticketCounts.inProgress, icon: <Clock className="h-8 w-8 text-yellow-600" /> },
-          { label: "Resolved", value: ticketCounts.resolved, icon: <CheckCircle className="h-8 w-8 text-green-600" /> },
+          { label: t('tickets.stats.total', 'Total Tickets'), value: ticketCounts.total, icon: <AlertTriangle className="h-8 w-8 text-blue-600" /> },
+          { label: t('tickets.stats.open', 'Open'), value: ticketCounts.open, icon: <AlertTriangle className="h-8 w-8 text-red-600" /> },
+          { label: t('tickets.stats.inProgress', 'In Progress'), value: ticketCounts.inProgress, icon: <Clock className="h-8 w-8 text-yellow-600" /> },
+          { label: t('tickets.stats.resolved', 'Resolved'), value: ticketCounts.resolved, icon: <CheckCircle className="h-8 w-8 text-green-600" /> },
         ].map((stat) => (
-          <div key={stat.label} className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 flex items-center gap-4">
+          <div key={stat.label} className="bg-card rounded-xl shadow-sm border border-border p-4 sm:p-6 flex items-center gap-4">
             <div className="flex-shrink-0">{stat.icon}</div>
             <div>
-              <p className="text-sm font-medium text-gray-500">{stat.label}</p>
-              <p className="text-xl sm:text-2xl font-semibold text-gray-900">{stat.value}</p>
+              <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+              <p className="text-xl sm:text-2xl font-semibold text-foreground">{stat.value}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Filters & Search */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-2">
+  <div className="bg-card rounded-xl shadow-sm border border-border p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-2">
         <div className="relative flex-1 max-w-md">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+            <Search className="h-5 w-5 text-muted-foreground" />
           </div>
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+            className="block w-full pl-10 pr-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-background text-foreground placeholder:text-muted-foreground"
             placeholder="Search by subject, user, or room..."
           />
         </div>
 
         <div className="flex flex-wrap gap-2 md:gap-4">
           <div className="flex items-center space-x-2">
-            <Filter className="h-5 w-5 text-gray-400" />
+            <Filter className="h-5 w-5 text-muted-foreground" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="border border-border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-background text-foreground"
             >
               <option value="All">All Status</option>
               <option value="open">Open</option>
@@ -202,7 +202,7 @@ const AdminTickets = () => {
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="border border-border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-background text-foreground"
           >
             <option value="All">All Priority</option>
             <option value="High">High</option>
@@ -212,7 +212,7 @@ const AdminTickets = () => {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="border border-border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-background text-foreground"
           >
             <option value="All">All Categories</option>
             {categories.map((category) => (
@@ -225,12 +225,12 @@ const AdminTickets = () => {
       </div>
 
       {/* Tickets List */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-x-auto">
-        <div className="divide-y divide-gray-200">
+  <div className="bg-card rounded-xl shadow-sm border border-border overflow-x-auto">
+        <div className="divide-y divide-border">
           {loading ? (
-            <div className="p-6 text-center text-gray-500">
+            <div className="p-6 text-center text-muted-foreground">
               <AlertTriangle className="h-12 w-12 mx-auto mb-2 animate-pulse" />
-              <p>Loading tickets...</p>
+              <p>{t('tickets.loading', 'Loading tickets...')}</p>
             </div>
           ) : error ? (
             <div className="p-6 text-center text-red-500">
@@ -238,13 +238,13 @@ const AdminTickets = () => {
               <p>{error}</p>
             </div>
           ) : filteredTickets.length === 0 ? (
-            <div className="p-6 text-center text-gray-500">
+            <div className="p-6 text-center text-muted-foreground">
               <AlertTriangle className="h-12 w-12 mx-auto mb-2" />
-              <p>No tickets found</p>
+              <p>{t('tickets.noTickets')}</p>
             </div>
           ) : (
             filteredTickets.map((ticket) => (
-              <div key={ticket._id} className="p-4 md:p-6 hover:bg-gray-50 transition-colors flex flex-col md:flex-row md:justify-between gap-4">
+              <div key={ticket._id} className="p-4 md:p-6 hover:bg-muted transition-colors flex flex-col md:flex-row md:justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
                     <div
@@ -262,16 +262,16 @@ const AdminTickets = () => {
                     >
                       {ticket.priority}
                     </div>
-                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200">
+                    <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-card text-foreground border border-border">
                       {getCategoryIcon(ticket.category)}
                       <span className="ml-1">{ticket.category}</span>
                     </div>
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-1">
+                  <h3 className="text-lg font-medium text-foreground mb-1">
                     #{ticket._id.slice(-6)} - {ticket.title}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-2">{ticket.description}</p>
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                  <p className="text-sm text-muted-foreground mb-2">{ticket.description}</p>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <User className="h-4 w-4" />
                       <span>{ticket.tenant ? `${ticket.tenant.firstName} ${ticket.tenant.lastName}` : 'Unknown'}</span>
@@ -294,19 +294,19 @@ const AdminTickets = () => {
                   <select
                     value={ticket.status}
                     onChange={(e) => updateTicketStatus(ticket._id, e.target.value)}
-                    className="text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="text-sm border border-border rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-background text-foreground"
                   >
                     <option value="open">Open</option>
                     <option value="in-progress">In Progress</option>
                     <option value="resolved">Resolved</option>
                   </select>
-                  <button className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                  <button className="p-2 text-muted-foreground hover:text-blue-600 hover:bg-muted rounded-lg transition-colors">
                     <Eye className="h-4 w-4" />
                   </button>
-                  <button className="p-2 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
+                  <button className="p-2 text-muted-foreground hover:text-green-600 hover:bg-muted rounded-lg transition-colors">
                     <MessageSquare className="h-4 w-4" />
                   </button>
-                  <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+                  <button className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
                     <MoreVertical className="h-4 w-4" />
                   </button>
                 </div>

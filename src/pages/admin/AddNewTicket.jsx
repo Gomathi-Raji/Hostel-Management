@@ -52,28 +52,28 @@ const AddNewTicket = () => {
   };
 
   return (
-    <div className="p-6 bg-datahub-bg min-h-screen">
+  <div className="p-6 bg-datahub-bg min-h-screen">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-4">
           <button
             onClick={() => navigate("/admin/dashboard")}
-            className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            className="p-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Add New Ticket</h1>
+          <h1 className="text-3xl font-bold text-foreground">Add New Ticket</h1>
         </div>
-        <p className="text-gray-600">Create a new maintenance or payment ticket for tenants</p>
+        <p className="text-muted-foreground">Create a new maintenance or payment ticket for tenants</p>
       </div>
 
       {/* Form */}
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 max-w-4xl">
+  <div className="bg-card rounded-xl shadow-lg border border-gray-200 p-8 max-w-4xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Tenant Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Tenant Name <span className="text-red-500">*</span>
               </label>
               <select
@@ -81,7 +81,7 @@ const AddNewTicket = () => {
                 value={formData.tenantName}
                 onChange={handleInputChange}
                 required
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Select a tenant</option>
                 {tenantOptions.map((tenant, index) => (
@@ -94,7 +94,7 @@ const AddNewTicket = () => {
 
             {/* Issue Category */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Issue Category <span className="text-red-500">*</span>
               </label>
               <select
@@ -102,7 +102,7 @@ const AddNewTicket = () => {
                 value={formData.issueCategory}
                 onChange={handleInputChange}
                 required
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Select category</option>
                 {categoryOptions.map((category, index) => (
@@ -116,7 +116,7 @@ const AddNewTicket = () => {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-foreground mb-2">
               Description <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -126,14 +126,14 @@ const AddNewTicket = () => {
               required
               rows={4}
               placeholder="Provide detailed description of the issue..."
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Priority */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Priority <span className="text-red-500">*</span>
               </label>
               <select
@@ -141,7 +141,7 @@ const AddNewTicket = () => {
                 value={formData.priority}
                 onChange={handleInputChange}
                 required
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Select priority</option>
                 {priorityOptions.map((priority, index) => (
@@ -154,10 +154,10 @@ const AddNewTicket = () => {
 
             {/* Upload Image */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Upload Image (Optional)
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
                 <input
                   type="file"
                   onChange={handleFileChange}
@@ -166,8 +166,8 @@ const AddNewTicket = () => {
                   id="image-upload"
                 />
                 <label htmlFor="image-upload" className="cursor-pointer">
-                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">
+                  <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">
                     {formData.image ? formData.image.name : "Click to upload image"}
                   </p>
                 </label>
