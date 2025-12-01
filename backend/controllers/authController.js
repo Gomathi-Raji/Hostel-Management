@@ -57,3 +57,98 @@ export const updateUserTenant = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      settings: user.settings || {
+        notifications: {
+          emailNotifications: {
+            newTenants: true,
+            paymentReminders: true,
+            maintenanceRequests: true,
+            systemUpdates: false,
+          },
+          appNotifications: {
+            pushNotifications: true,
+            soundAlerts: true,
+            desktopNotifications: false,
+          },
+        },
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  const { name, email, phone } = req.body;
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { name, email, phone },
+      { new: true, runValidators: true }
+    ).select('-password');
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      settings: user.settings,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateSettings = async (req, res) => {
+  const { notifications } = req.body;
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { settings: { notifications } },
+      { new: true, runValidators: true }
+    ).select('-password');
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      settings: user.settings,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const match = await bcrypt.compare(currentPassword, user.password);
+    if (!match) return res.status(400).json({ message: "Current password is incorrect" });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(newPassword, salt);
+    user.password = hashed;
+    await user.save();
+
+    res.json({ message: "Password changed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

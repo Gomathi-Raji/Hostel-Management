@@ -196,3 +196,74 @@ export const getTenantDashboard = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const sendSMSToTenants = async (req, res) => {
+  try {
+    const { tenantIds, message } = req.body;
+
+    if (!tenantIds || !Array.isArray(tenantIds) || tenantIds.length === 0) {
+      return res.status(400).json({ message: "Tenant IDs array is required" });
+    }
+
+    if (!message || typeof message !== 'string' || message.trim() === '') {
+      return res.status(400).json({ message: "Message is required" });
+    }
+
+    const tenants = await Tenant.find({ _id: { $in: tenantIds } }).select('firstName lastName phone');
+
+    if (tenants.length === 0) {
+      return res.status(404).json({ message: "No tenants found" });
+    }
+
+    const { sendSMS } = await import("../utils/sendSMS.js");
+
+    const results = [];
+    for (const tenant of tenants) {
+      const fullMessage = `Hello ${tenant.firstName} ${tenant.lastName}, ${message}`;
+      const result = await sendSMS(tenant.phone, fullMessage, 'admin-notification');
+      results.push({
+        tenantId: tenant._id,
+        name: `${tenant.firstName} ${tenant.lastName}`,
+        phone: tenant.phone,
+        success: result.success,
+        error: result.error || null
+      });
+    }
+
+    const successCount = results.filter(r => r.success).length;
+    const failureCount = results.length - successCount;
+
+    res.json({
+      message: `SMS sent to ${successCount} tenants, ${failureCount} failed`,
+      results
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const sendManualSMS = async (req, res) => {
+  try {
+    const { phone, message } = req.body;
+
+    if (!phone || typeof phone !== 'string' || phone.trim() === '') {
+      return res.status(400).json({ message: "Phone number is required" });
+    }
+
+    if (!message || typeof message !== 'string' || message.trim() === '') {
+      return res.status(400).json({ message: "Message is required" });
+    }
+
+    const { sendSMS } = await import("../utils/sendSMS.js");
+
+    const result = await sendSMS(phone.trim(), message.trim(), 'manual');
+
+    if (result.success) {
+      res.json({ message: "SMS sent successfully", sid: result.sid });
+    } else {
+      res.status(500).json({ message: result.error });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

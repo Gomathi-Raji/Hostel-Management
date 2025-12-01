@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Plus, Download, Eye, Edit, Trash2, X } from 'lucide-react';
+import { Search, Filter, Plus, Download, Eye, Edit, Trash2, X, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import apiFetch from '@/lib/apiClient';
 
@@ -13,6 +13,11 @@ const TenantManagement = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+
+  const [selectedTenants, setSelectedTenants] = useState([]);
+  const [showSMSModal, setShowSMSModal] = useState(false);
+  const [smsMessage, setSmsMessage] = useState("Important notification from hostel management.");
+  const [sendingSMS, setSendingSMS] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -152,6 +157,27 @@ const TenantManagement = () => {
     return matchesSearch && matchesFilter;
   });
 
+  const handleSendSMS = async () => {
+    if (!smsMessage.trim()) return;
+
+    setSendingSMS(true);
+    try {
+      await apiFetch('/tenants/send-sms', {
+        method: 'POST',
+        body: { tenantIds: selectedTenants, message: smsMessage.trim() }
+      });
+      alert('SMS sent successfully!');
+      setShowSMSModal(false);
+      setSelectedTenants([]);
+      setSmsMessage("Important notification from hostel management.");
+    } catch (err) {
+      console.error('Error sending SMS:', err);
+      alert(err.message || 'Failed to send SMS');
+    } finally {
+      setSendingSMS(false);
+    }
+  };
+
   return (
     <div className="p-4 md:p-6 bg-background min-h-screen">
       {/* Header */}
@@ -163,6 +189,13 @@ const TenantManagement = () => {
         <div className="flex flex-wrap gap-2">
           <button className="flex items-center gap-2 bg-card text-foreground px-4 py-2 rounded-lg hover:bg-muted transition-colors">
             <Download className="h-4 w-4" /> {t('tenantManagement.export')}
+          </button>
+          <button
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+            onClick={() => setShowSMSModal(true)}
+            disabled={selectedTenants.length === 0}
+          >
+            <MessageSquare className="h-4 w-4" /> Send SMS ({selectedTenants.length})
           </button>
           <button
             className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
@@ -207,12 +240,26 @@ const TenantManagement = () => {
           <p className="text-center text-red-500 p-4">{error}</p>
         ) : filteredTenants.length > 0 ? filteredTenants.map(tenant => (
           <div key={tenant._id} className="bg-card rounded-xl shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div className="flex-1">
-              <p className="text-foreground font-medium">{tenant.firstName} {tenant.lastName}</p>
-              <p className="text-muted-foreground text-sm">{tenant.email}</p>
-              <p className="text-muted-foreground text-sm">{tenant.phone}</p>
-              <p className="text-muted-foreground text-sm">Aadhaar: {tenant.aadharNumber}</p>
-              <p className="text-foreground text-sm">{tenant.room?.number || t('tenantManagement.noRoomAssigned')} | {t('tenantManagement.moveInDate')}: {tenant.moveInDate ? new Date(tenant.moveInDate).toLocaleDateString() : 'N/A'}</p>
+            <div className="flex items-start gap-2">
+              <input
+                type="checkbox"
+                checked={selectedTenants.includes(tenant._id)}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedTenants([...selectedTenants, tenant._id]);
+                  } else {
+                    setSelectedTenants(selectedTenants.filter(id => id !== tenant._id));
+                  }
+                }}
+                className="mt-1"
+              />
+              <div className="flex-1">
+                <p className="text-foreground font-medium">{tenant.firstName} {tenant.lastName}</p>
+                <p className="text-muted-foreground text-sm">{tenant.email}</p>
+                <p className="text-muted-foreground text-sm">{tenant.phone}</p>
+                <p className="text-muted-foreground text-sm">Aadhaar: {tenant.aadharNumber}</p>
+                <p className="text-foreground text-sm">{tenant.room?.number || t('tenantManagement.noRoomAssigned')} | {t('tenantManagement.moveInDate')}: {tenant.moveInDate ? new Date(tenant.moveInDate).toLocaleDateString() : 'N/A'}</p>
+              </div>
             </div>
             <div className="flex items-center gap-2 mt-2 sm:mt-0">
               <span className={getStatusBadge(tenant.active ? "Active" : "Inactive")}>{getStatusText(tenant.active)}</span>
@@ -409,6 +456,48 @@ const TenantManagement = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Send SMS Modal */}
+      {showSMSModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-card rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto shadow-lg">
+            <div className="flex justify-between items-center p-4 border-b border-border">
+              <h2 className="text-xl font-semibold text-foreground">Send SMS to Selected Tenants</h2>
+              <button onClick={() => setShowSMSModal(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <p className="text-muted-foreground">Selected tenants: {selectedTenants.length}</p>
+              <div>
+                <label className="text-foreground font-medium">Message</label>
+                <textarea
+                  value={smsMessage}
+                  onChange={(e) => setSmsMessage(e.target.value)}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground placeholder:text-muted-foreground"
+                  placeholder="Enter your message..."
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSendSMS}
+                  disabled={sendingSMS || !smsMessage.trim()}
+                  className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                >
+                  {sendingSMS ? 'Sending...' : 'Send SMS'}
+                </button>
+                <button
+                  onClick={() => setShowSMSModal(false)}
+                  className="flex-1 bg-card text-foreground py-2 rounded-lg hover:bg-muted transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

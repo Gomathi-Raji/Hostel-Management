@@ -9,6 +9,21 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, required: true },
     propertyId: { type: mongoose.Schema.Types.ObjectId, ref: "Property" },
     tenantId: { type: mongoose.Schema.Types.ObjectId, ref: "Tenant" }, // For tenant role users
+    settings: {
+      notifications: {
+        emailNotifications: {
+          newTenants: { type: Boolean, default: true },
+          paymentReminders: { type: Boolean, default: true },
+          maintenanceRequests: { type: Boolean, default: true },
+          systemUpdates: { type: Boolean, default: false },
+        },
+        appNotifications: {
+          pushNotifications: { type: Boolean, default: true },
+          soundAlerts: { type: Boolean, default: true },
+          desktopNotifications: { type: Boolean, default: false },
+        },
+      },
+    },
   },
   { timestamps: true }
 );

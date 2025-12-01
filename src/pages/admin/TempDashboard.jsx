@@ -16,6 +16,8 @@ import {
   DollarSign,
   Home,
   AlertTriangle,
+  MessageSquare,
+  X,
 } from "lucide-react";
 import {
   LineChart,
@@ -48,6 +50,10 @@ const AdminDashboard = () => {
   const [revenueData, setRevenueData] = useState([]);
   const [tenantGrowthData, setTenantGrowthData] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
+
+  const [showManualSMSModal, setShowManualSMSModal] = useState(false);
+  const [manualSMSData, setManualSMSData] = useState({ phone: "", message: "" });
+  const [sendingSMS, setSendingSMS] = useState(false);
   const [recentPayments, setRecentPayments] = useState([]);
   const [roomOccupancy, setRoomOccupancy] = useState({
     available: 0,
@@ -70,38 +76,57 @@ const AdminDashboard = () => {
 
       // Fetch all data in parallel
       const [
+        tenantsStats,
+        paymentsStats,
+        roomsStats,
+        expensesStats,
+        ticketsStats,
         tenantsRes,
         paymentsRes,
         roomsRes,
         expensesRes,
         ticketsRes
       ] = await Promise.all([
-        apiFetch("/tenants"),
-        apiFetch("/payments"),
+        apiFetch("/tenants/stats"),
+        apiFetch("/payments/stats"),
+        apiFetch("/rooms/stats"),
+        apiFetch("/expenses/stats"),
+        apiFetch("/tickets/stats"),
+        apiFetch("/tenants?limit=1000"), // Get more tenants for growth chart
+        apiFetch("/payments?limit=1000"), // Get more payments for revenue chart
         apiFetch("/rooms"),
-        apiFetch("/expenses"),
-        apiFetch("/tickets")
+        apiFetch("/expenses?limit=100"),
+        apiFetch("/tickets?limit=100")
       ]);
 
-      // Calculate stats
-      const totalTenants = tenantsRes.tenants?.length || 0;
-      const totalPayments = paymentsRes.payments || [];
-      const monthlyRevenue = totalPayments
-        .filter(p => p.status === 'completed')
-        .reduce((sum, p) => sum + (p.amount || 0), 0);
+      // Calculate stats from stats endpoints
+      const totalTenants = tenantsStats.total || 0;
+      const activeTenants = tenantsStats.active || 0;
+      const monthlyRevenue = paymentsStats.totalAmount || 0;
+      const overduePayments = paymentsStats.byStatus?.find(s => s._id === 'pending')?.count || 0;
 
+      const totalPayments = paymentsRes.payments || [];
       const rooms = roomsRes.rooms || [];
-      const occupiedRooms = rooms.filter(r => r.status === 'occupied').length;
-      const totalRooms = rooms.length;
+      const occupiedRooms = roomsStats.occupied || 0;
+      const totalRooms = roomsStats.total || 0;
       const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
 
-      // Mock overdue payments (in real app, calculate based on due dates)
-      const overduePayments = totalPayments.filter(p =>
-        p.status === 'pending' &&
-        new Date(p.dueDate || p.paidAt) < new Date()
-      ).length;
+      setRoomOccupancy({
+        available: roomsStats.available || 0,
+        occupied: occupiedRooms,
+        maintenance: roomsStats.maintenance || 0,
+        total: totalRooms,
+      });
 
+      // Set main stats
       setStats({
+        totalTenants,
+        monthlyRevenue,
+        occupancyRate,
+        overduePayments,
+      });
+
+      setRoomOccupancy({
         totalTenants,
         monthlyRevenue,
         occupancyRate,
@@ -197,6 +222,29 @@ const AdminDashboard = () => {
       console.error("Dashboard error:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendManualSMS = async () => {
+    if (!manualSMSData.phone.trim() || !manualSMSData.message.trim()) return;
+
+    setSendingSMS(true);
+    try {
+      await apiFetch('/tenants/send-manual-sms', {
+        method: 'POST',
+        body: {
+          phone: manualSMSData.phone.trim(),
+          message: manualSMSData.message.trim()
+        }
+      });
+      alert('SMS sent successfully!');
+      setShowManualSMSModal(false);
+      setManualSMSData({ phone: "", message: "" });
+    } catch (err) {
+      console.error('Error sending SMS:', err);
+      alert(err.message || 'Failed to send SMS');
+    } finally {
+      setSendingSMS(false);
     }
   };
 
@@ -502,6 +550,70 @@ const AdminDashboard = () => {
           ))}
         </div>
       </section>
+
+      {/* ✅ 8. Manual SMS Trigger */}
+      <section className="bg-card rounded-xl shadow-lg border border-border p-6">
+        <h3 className="text-xl font-bold mb-4 text-foreground">Manual SMS Trigger</h3>
+        <p className="text-muted-foreground mb-4">Send SMS to any phone number manually</p>
+        <button
+          onClick={() => setShowManualSMSModal(true)}
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <MessageSquare className="h-4 w-4" />
+          Send Manual SMS
+        </button>
+      </section>
+
+      {/* Manual SMS Modal */}
+      {showManualSMSModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-card rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto shadow-lg">
+            <div className="flex justify-between items-center p-4 border-b border-border">
+              <h2 className="text-xl font-semibold text-foreground">Send Manual SMS</h2>
+              <button onClick={() => setShowManualSMSModal(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="text-foreground font-medium">Phone Number</label>
+                <input
+                  type="tel"
+                  value={manualSMSData.phone}
+                  onChange={(e) => setManualSMSData({ ...manualSMSData, phone: e.target.value })}
+                  placeholder="Enter phone number"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground"
+                />
+              </div>
+              <div>
+                <label className="text-foreground font-medium">Message</label>
+                <textarea
+                  value={manualSMSData.message}
+                  onChange={(e) => setManualSMSData({ ...manualSMSData, message: e.target.value })}
+                  rows={4}
+                  placeholder="Enter your message..."
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 bg-background text-foreground"
+                />
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSendManualSMS}
+                  disabled={sendingSMS || !manualSMSData.phone.trim() || !manualSMSData.message.trim()}
+                  className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  {sendingSMS ? 'Sending...' : 'Send SMS'}
+                </button>
+                <button
+                  onClick={() => setShowManualSMSModal(false)}
+                  className="flex-1 bg-card text-foreground py-2 rounded-lg hover:bg-muted transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
