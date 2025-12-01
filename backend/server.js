@@ -23,7 +23,7 @@ app.use(express.json());
 const frontendEnv = process.env.FRONTEND_URL;
 const allowedOrigins = frontendEnv
 	? frontendEnv.split(",")
-	: ["http://localhost:8080", "http://localhost:5173"];
+	: ["http://localhost:8080", "http://localhost:5173", "https://hostel-management-coral.vercel.app"];
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 
 app.get("/api/test", (req, res) => res.json({ ok: true, time: new Date() }));
