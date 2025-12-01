@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { User, Save, X, DollarSign, UtensilsCrossed, Calendar, Home, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import apiFetch, { setToken } from "@/lib/apiClient";
 
 const Profile = ({ onLogout }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [profile, setProfile] = useState({
     name: "",
@@ -99,11 +101,11 @@ const Profile = ({ onLogout }) => {
       setSaving(true);
       setError(null);
       await apiFetch("/auth/profile", { method: "PUT", body: profile });
-      setSuccess("Profile updated successfully");
+      setSuccess(t("profile.profileUpdated"));
       setIsEditing(false);
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      setError(err.message || "Failed to save profile");
+      setError(err.message || t("profile.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -132,13 +134,13 @@ const Profile = ({ onLogout }) => {
   const renderPersonalDetails = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-foreground">Personal Details</h2>
+        <h2 className="text-xl font-semibold text-foreground">{t("profile.personalDetails")}</h2>
         {!isEditing && (
           <button
             onClick={() => setIsEditing(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
           >
-            Edit Profile
+            {t("profile.editProfile")}
           </button>
         )}
       </div>
@@ -159,7 +161,7 @@ const Profile = ({ onLogout }) => {
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t("profile.fullName")}</label>
               <input 
                 name="name" 
                 value={profile.name} 
@@ -169,7 +171,7 @@ const Profile = ({ onLogout }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Email</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t("profile.email")}</label>
               <input 
                 name="email" 
                 value={profile.email} 
@@ -179,7 +181,7 @@ const Profile = ({ onLogout }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Phone</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t("profile.phone")}</label>
               <input 
                 name="phone" 
                 value={profile.phone} 
@@ -189,7 +191,7 @@ const Profile = ({ onLogout }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Room Number</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t("profile.roomNumber")}</label>
               <input 
                 name="roomNumber" 
                 value={profile.roomNumber} 
@@ -206,7 +208,7 @@ const Profile = ({ onLogout }) => {
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 transition-colors"
             >
               {saving ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> : <Save className="h-4 w-4" />}
-              <span>{saving ? "Saving..." : "Save Changes"}</span>
+              <span>{saving ? t("profile.saving") : t("profile.saveChanges")}</span>
             </button>
             <button 
               onClick={() => {
@@ -216,27 +218,27 @@ const Profile = ({ onLogout }) => {
               className="px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 flex items-center gap-2 transition-colors"
             >
               <X className="h-4 w-4" />
-              <span>Cancel</span>
+              <span>{t("profile.cancel")}</span>
             </button>
           </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Full Name</p>
-            <p className="text-sm font-medium text-foreground">{profile.name || "Not set"}</p>
+            <p className="text-xs text-muted-foreground mb-1">{t("profile.fullName")}</p>
+            <p className="text-sm font-medium text-foreground">{profile.name || t("profile.notSet")}</p>
           </div>
           <div className="p-4 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Email</p>
-            <p className="text-sm font-medium text-foreground">{profile.email || "Not set"}</p>
+            <p className="text-xs text-muted-foreground mb-1">{t("profile.email")}</p>
+            <p className="text-sm font-medium text-foreground">{profile.email || t("profile.notSet")}</p>
           </div>
           <div className="p-4 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Phone</p>
-            <p className="text-sm font-medium text-foreground">{profile.phone || "Not set"}</p>
+            <p className="text-xs text-muted-foreground mb-1">{t("profile.phone")}</p>
+            <p className="text-sm font-medium text-foreground">{profile.phone || t("profile.notSet")}</p>
           </div>
           <div className="p-4 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Room Number</p>
-            <p className="text-sm font-medium text-foreground">{profile.roomNumber || "Not set"}</p>
+            <p className="text-xs text-muted-foreground mb-1">{t("profile.roomNumber")}</p>
+            <p className="text-sm font-medium text-foreground">{profile.roomNumber || t("profile.notSet")}</p>
           </div>
         </div>
       )}
@@ -245,33 +247,33 @@ const Profile = ({ onLogout }) => {
 
   const renderFeeBreakdown = () => (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-foreground">Fee Breakdown</h2>
+      <h2 className="text-xl font-semibold text-foreground">{t("profile.feeBreakdown")}</h2>
       {feeBreakdown ? (
         <div className="space-y-3">
           <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
-            <span className="text-foreground">Room Rent</span>
+            <span className="text-foreground">{t("profile.roomRent")}</span>
             <span className="font-semibold text-foreground">₹{feeBreakdown.roomRent}</span>
           </div>
           <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
-            <span className="text-foreground">Electricity Charges</span>
+            <span className="text-foreground">{t("profile.electricityCharges")}</span>
             <span className="font-semibold text-foreground">₹{feeBreakdown.electricityCharges}</span>
           </div>
           <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
-            <span className="text-foreground">Water Charges</span>
+            <span className="text-foreground">{t("profile.waterCharges")}</span>
             <span className="font-semibold text-foreground">₹{feeBreakdown.waterCharges}</span>
           </div>
           <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
-            <span className="text-foreground">Maintenance</span>
+            <span className="text-foreground">{t("profile.maintenance")}</span>
             <span className="font-semibold text-foreground">₹{feeBreakdown.maintenance}</span>
           </div>
           <div className="flex justify-between items-center p-4 bg-blue-100 dark:bg-blue-900/30 rounded-lg border-2 border-blue-500">
-            <span className="font-semibold text-foreground">Total Monthly Fee</span>
+            <span className="font-semibold text-foreground">{t("profile.totalMonthlyFee")}</span>
             <span className="font-bold text-lg text-blue-600 dark:text-blue-400">₹{feeBreakdown.totalMonthlyFee}</span>
           </div>
         </div>
       ) : (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">Fee breakdown data not available</p>
+          <p className="text-muted-foreground">{t("profile.feeDataNotAvailable")}</p>
         </div>
       )}
     </div>
@@ -279,7 +281,7 @@ const Profile = ({ onLogout }) => {
 
   const renderMenu = () => (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-foreground">Hostel Menu</h2>
+      <h2 className="text-xl font-semibold text-foreground">{t("profile.menu")}</h2>
       {menu.length > 0 ? (
         <div className="space-y-4">
           {menu.map((dayMenu) => (
@@ -287,15 +289,15 @@ const Profile = ({ onLogout }) => {
               <h3 className="font-semibold text-foreground mb-3">{dayMenu.day}</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div>
-                  <p className="text-xs text-muted-foreground">Breakfast</p>
+                  <p className="text-xs text-muted-foreground">{t("profile.breakfast")}</p>
                   <p className="text-sm text-foreground">{dayMenu.breakfast}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Lunch</p>
+                  <p className="text-xs text-muted-foreground">{t("profile.lunch")}</p>
                   <p className="text-sm text-foreground">{dayMenu.lunch}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Dinner</p>
+                  <p className="text-xs text-muted-foreground">{t("profile.dinner")}</p>
                   <p className="text-sm text-foreground">{dayMenu.dinner}</p>
                 </div>
               </div>
@@ -304,7 +306,7 @@ const Profile = ({ onLogout }) => {
         </div>
       ) : (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">Menu data not available</p>
+          <p className="text-muted-foreground">{t("profile.menuDataNotAvailable")}</p>
         </div>
       )}
     </div>
@@ -312,7 +314,7 @@ const Profile = ({ onLogout }) => {
 
   const renderTimetable = () => (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-foreground">Hostel Timetable</h2>
+      <h2 className="text-xl font-semibold text-foreground">{t("profile.timetable")}</h2>
       {timetable.length > 0 ? (
         <div className="space-y-3">
           {timetable.map((slot) => (
@@ -326,7 +328,7 @@ const Profile = ({ onLogout }) => {
         </div>
       ) : (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">Timetable data not available</p>
+          <p className="text-muted-foreground">{t("profile.timetableDataNotAvailable")}</p>
         </div>
       )}
     </div>
@@ -334,24 +336,24 @@ const Profile = ({ onLogout }) => {
 
   const renderRoomCategory = () => (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-foreground">Room Category</h2>
+      <h2 className="text-xl font-semibold text-foreground">{t("profile.roomCategory")}</h2>
       {roomCategory ? (
         <div className="p-6 bg-muted rounded-lg">
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-muted-foreground">Your Room Type</p>
+              <p className="text-sm text-muted-foreground">{t("profile.yourRoomType")}</p>
               <p className="text-xl font-semibold text-foreground">{roomCategory.roomType || "Not Assigned"}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Room Number</p>
+              <p className="text-sm text-muted-foreground">{t("profile.roomNumber")}</p>
               <p className="text-lg font-medium text-foreground">{roomCategory.roomNumber || "Not Assigned"}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Floor</p>
+              <p className="text-sm text-muted-foreground">{t("profile.floor")}</p>
               <p className="text-lg font-medium text-foreground">{roomCategory.floor || "Not Specified"}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Amenities</p>
+              <p className="text-sm text-muted-foreground">{t("profile.amenities")}</p>
               <div className="flex flex-wrap gap-2 mt-2">
                 {roomCategory.amenities && roomCategory.amenities.length > 0 ? (
                   roomCategory.amenities.map((amenity, index) => (
@@ -360,13 +362,13 @@ const Profile = ({ onLogout }) => {
                     </span>
                   ))
                 ) : (
-                  <span className="text-muted-foreground">No amenities listed</span>
+                  <span className="text-muted-foreground">{t("profile.noAmenitiesListed")}</span>
                 )}
               </div>
             </div>
             {roomCategory.description && (
               <div>
-                <p className="text-sm text-muted-foreground">Description</p>
+                <p className="text-sm text-muted-foreground">{t("profile.description")}</p>
                 <p className="text-sm text-foreground">{roomCategory.description}</p>
               </div>
             )}
@@ -374,7 +376,7 @@ const Profile = ({ onLogout }) => {
         </div>
       ) : (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">Room category data not available</p>
+          <p className="text-muted-foreground">{t("profile.roomDataNotAvailable")}</p>
         </div>
       )}
     </div>
@@ -389,8 +391,8 @@ const Profile = ({ onLogout }) => {
             <User className="h-8 w-8" />
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-foreground">My Profile</h1>
-            <p className="text-sm text-muted-foreground">Manage your account and hostel information</p>
+            <h1 className="text-2xl font-bold text-foreground">{t("profile.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("profile.subtitle")}</p>
           </div>
         </div>
       </div>
@@ -408,7 +410,7 @@ const Profile = ({ onLogout }) => {
               }`}
             >
               <User className="h-5 w-5" />
-              <span className="font-medium">Personal Details</span>
+              <span className="font-medium">{t("profile.personalDetails")}</span>
             </button>
             
             <button
@@ -420,7 +422,7 @@ const Profile = ({ onLogout }) => {
               }`}
             >
               <DollarSign className="h-5 w-5" />
-              <span className="font-medium">Fee Breakdown</span>
+              <span className="font-medium">{t("profile.feeBreakdown")}</span>
             </button>
             
             <button
@@ -432,7 +434,7 @@ const Profile = ({ onLogout }) => {
               }`}
             >
               <UtensilsCrossed className="h-5 w-5" />
-              <span className="font-medium">Menu</span>
+              <span className="font-medium">{t("profile.menu")}</span>
             </button>
             
             <button
@@ -444,7 +446,7 @@ const Profile = ({ onLogout }) => {
               }`}
             >
               <Calendar className="h-5 w-5" />
-              <span className="font-medium">Timetable</span>
+              <span className="font-medium">{t("profile.timetable")}</span>
             </button>
             
             <button
@@ -456,7 +458,7 @@ const Profile = ({ onLogout }) => {
               }`}
             >
               <Home className="h-5 w-5" />
-              <span className="font-medium">Room Category</span>
+              <span className="font-medium">{t("profile.roomCategory")}</span>
             </button>
 
             <div className="pt-4 border-t border-border">
@@ -465,7 +467,7 @@ const Profile = ({ onLogout }) => {
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
               >
                 <LogOut className="h-5 w-5" />
-                <span className="font-medium">Logout</span>
+                <span className="font-medium">{t("profile.logout")}</span>
               </button>
             </div>
           </div>

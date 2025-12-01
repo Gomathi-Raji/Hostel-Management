@@ -17,7 +17,7 @@ const WelcomeModal = ({ isOpen, onClose, userName }) => {
           </button>
           <div className="flex items-center gap-3 mb-2">
             <CheckCircle className="h-8 w-8" />
-            <h2 className="text-2xl font-bold">Welcome to HostelHub!</h2>
+            <h2 className="text-2xl font-bold">Welcome to RootnSpace!</h2>
           </div>
           <p className="text-blue-100">Hello {userName}! We're excited to have you here.</p>
         </div>
@@ -27,7 +27,7 @@ const WelcomeModal = ({ isOpen, onClose, userName }) => {
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-foreground mb-3">Get Started with Your Account</h3>
             <p className="text-muted-foreground mb-4">
-              Here's what you can do to make the most of your hostel management experience:
+              Here's what you can do to make the most of your RootnSpace experience:
             </p>
           </div>
 
@@ -69,7 +69,7 @@ const WelcomeModal = ({ isOpen, onClose, userName }) => {
                 <h4 className="font-semibold text-orange-800">Timetable</h4>
               </div>
               <p className="text-sm text-orange-600">
-                Stay updated with hostel events, maintenance schedules, and important dates.
+                Stay updated with RootnSpace events, maintenance schedules, and important dates.
               </p>
             </div>
           </div>

@@ -79,7 +79,7 @@ const VacatingForm = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-foreground">Vacating Form</h1>
         <p className="text-muted-foreground mt-2">
-          Submit your hostel vacation request with the required details
+          Submit your RootnSpace vacation request with the required details
         </p>
       </div>
 
@@ -173,7 +173,7 @@ const VacatingForm = () => {
               name="reason"
               value={formData.reason}
               onChange={handleInputChange}
-              placeholder="Please provide the reason for vacating the hostel (e.g., course completion, job relocation, personal reasons, etc.)"
+              placeholder="Please provide the reason for vacating RootnSpace (e.g., course completion, job relocation, personal reasons, etc.)"
               rows={5}
               className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
               required

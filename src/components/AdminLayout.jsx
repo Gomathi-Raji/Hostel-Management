@@ -226,11 +226,11 @@ const AdminLayout = ({ onLogout }) => {
                 {/* Brand */}
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-blue-600 dark:bg-blue-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">SL</span>
+                    <span className="text-white font-bold text-sm">RS</span>
                   </div>
                   <div>
-                    <h1 className="text-lg font-bold text-foreground">Stay Leap</h1>
-                    <p className="text-xs text-muted-foreground">Data Management</p>
+                    <h1 className="text-lg font-bold text-foreground">RootnSpace</h1>
+                    <p className="text-xs text-muted-foreground">Property Management</p>
                   </div>
                 </div>
               </div>

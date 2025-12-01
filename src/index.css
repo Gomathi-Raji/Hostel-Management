@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Hostel Management Design System - All colors MUST be HSL */
+/* RootnSpace Design System - All colors MUST be HSL */
 
 @layer base {
   :root {
@@ -36,7 +36,7 @@
 
     --radius: 0.75rem;
 
-    /* Hostel Management Colors */
+    /* RootnSpace Colors */
     --mustard-orange: 34 72% 56%;
     --mustard-orange-foreground: 0 0% 100%;
     

@@ -9,7 +9,7 @@ const ReportsAnalytics = () => {
   const recentActivity = { newTenants: 0, paymentsReceived: 0 };
   const analyticsCards = [
     { title: "Payment Data", description: "Detailed payment analytics and trends", icon: DollarSign, color: "text-primary" },
-    { title: "Full Report", description: "Comprehensive hostel management report", icon: FileText, color: "text-accent" },
+    { title: "Full Report", description: "Comprehensive RootnSpace management report", icon: FileText, color: "text-accent" },
     { title: "Advanced Analytics", description: "Deep insights and performance metrics", icon: BarChart3, color: "text-secondary" }
   ];
   const reportTypes = [

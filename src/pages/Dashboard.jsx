@@ -10,9 +10,11 @@ import {
   DollarSign,
   AlertTriangle
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import apiFetch from "@/lib/apiClient";
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const [dashboardData, setDashboardData] = useState({
     userName: "",
     currentRent: 0,
@@ -124,9 +126,9 @@ const Dashboard = () => {
           <div className="flex">
             <AlertTriangle className="h-5 w-5 text-destructive" />
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-destructive">Error loading dashboard</h3>
+              <h3 className="text-sm font-medium text-destructive">{t("dashboard.errorLoading")}</h3>
               <div className="mt-2 text-sm text-destructive/80">{error}</div>
-              <button onClick={fetchDashboardData} className="mt-2 px-3 py-1 bg-destructive text-destructive-foreground text-sm rounded hover:bg-destructive/90">Retry</button>
+              <button onClick={fetchDashboardData} className="mt-2 px-3 py-1 bg-destructive text-destructive-foreground text-sm rounded hover:bg-destructive/90">{t("dashboard.retry")}</button>
             </div>
           </div>
         </div>
@@ -137,8 +139,8 @@ const Dashboard = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">Welcome Back, {dashboardData.userName || "User"}!</h1>
-        <p className="text-muted-foreground mt-2">Here's an overview of your hostel account</p>
+        <h1 className="text-3xl font-bold text-foreground">{t("dashboard.welcomeBack", { name: dashboardData.userName || "User" })}</h1>
+        <p className="text-muted-foreground mt-2">{t("dashboard.overview")}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -146,7 +148,7 @@ const Dashboard = () => {
           <div className="flex items-center">
             <DollarSign className="h-8 w-8 text-orange-600 dark:text-orange-400" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-muted-foreground">Current Rent</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("dashboard.currentRent")}</p>
               <p className="text-2xl font-bold text-foreground">{formatCurrency(dashboardData.currentRent)}</p>
             </div>
           </div>
@@ -156,7 +158,7 @@ const Dashboard = () => {
           <div className="flex items-center">
             <Calendar className="h-8 w-8 text-purple-600 dark:text-purple-400" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-muted-foreground">Due Date</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("dashboard.dueDate")}</p>
               <p className="text-2xl font-bold text-foreground">{dashboardData.dueDate ? formatDate(dashboardData.dueDate) : "N/A"}</p>
             </div>
           </div>
@@ -166,7 +168,7 @@ const Dashboard = () => {
           <div className="flex items-center">
             <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-muted-foreground">Active Issues</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("dashboard.activeIssues")}</p>
               <p className="text-2xl font-bold text-foreground">{dashboardData.activeIssues}</p>
             </div>
           </div>
@@ -176,8 +178,8 @@ const Dashboard = () => {
           <div className="flex items-center">
             <Home className="h-8 w-8 text-green-600 dark:text-green-400" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-muted-foreground">Room Number</p>
-              <p className="text-2xl font-bold text-foreground">{dashboardData.roomNumber || "Not assigned"}</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("dashboard.roomNumber")}</p>
+              <p className="text-2xl font-bold text-foreground">{dashboardData.roomNumber || t("dashboard.notAssigned")}</p>
             </div>
           </div>
         </div>
@@ -186,7 +188,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-card shadow-sm rounded-lg border border-border">
           <div className="p-6 border-b border-border">
-            <h2 className="text-xl font-semibold text-foreground">Recent Invoices</h2>
+            <h2 className="text-xl font-semibold text-foreground">{t("dashboard.recentInvoices")}</h2>
           </div>
           <div className="p-6">
             <div className="space-y-4">
@@ -194,15 +196,15 @@ const Dashboard = () => {
                 displayedInvoices.map((invoice, idx) => (
                   <div key={idx} className="flex items-center justify-between p-4 bg-background rounded-lg">
                     <div className="flex-1">
-                      <p className="font-medium text-foreground">{invoice.type === "rent" ? "Monthly Rent" : invoice.type}</p>
+                      <p className="font-medium text-foreground">{invoice.type === "rent" ? t("dashboard.monthlyRent") : invoice.type}</p>
                       <p className="text-sm text-muted-foreground">{formatCurrency(invoice.amount)}</p>
-                      {invoice.paidAt && <p className="text-xs text-muted-foreground mt-1">Paid on: {formatDate(invoice.paidAt)}</p>}
+                      {invoice.paidAt && <p className="text-xs text-muted-foreground mt-1">{t("dashboard.paidOn", { date: formatDate(invoice.paidAt) })}</p>}
                     </div>
 
                     <div className="flex items-center space-x-3">
                       <span className={getStatusBadge(invoice.status)}>{invoice.status}</span>
                       {isInvoicePaid(invoice) ? (
-                        <button onClick={() => handleDownload(invoice)} className="p-2 rounded-lg transition-all duration-200" title="Download invoice">
+                        <button onClick={() => handleDownload(invoice)} className="p-2 rounded-lg transition-all duration-200" title={t("dashboard.downloadInvoice")}>
                           <Download className="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
                         </button>
                       ) : (
@@ -210,28 +212,26 @@ const Dashboard = () => {
                           <button disabled className="text-muted-foreground cursor-not-allowed p-2 rounded-lg" title="Payment required to download">
                             <Lock className="h-4 w-4" />
                           </button>
-                          <span className="text-xs text-muted-foreground">Payment Required</span>
+                          <span className="text-xs text-muted-foreground">{t("dashboard.paymentRequired")}</span>
                         </div>
                       )}
                     </div>
                   </div>
                 ))
-              ) : (
-                <p className="text-muted-foreground text-center py-4">No recent invoices</p>
-              )}
-
-              {dashboardData.recentInvoices && dashboardData.recentInvoices.length > 3 && (
+                ) : (
+                <p className="text-muted-foreground text-center py-4">{t("dashboard.noRecentInvoices")}</p>
+              )}              {dashboardData.recentInvoices && dashboardData.recentInvoices.length > 3 && (
                 <div className="mt-4 text-center">
                   <button onClick={() => setShowAllInvoices(!showAllInvoices)} className="inline-flex items-center space-x-2 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground bg-background hover:bg-muted rounded-lg transition-colors duration-200">
                     {showAllInvoices ? (
                       <>
                         <ChevronUp className="h-4 w-4" />
-                        <span>Show Less</span>
+                        <span>{t("dashboard.showLess")}</span>
                       </>
                     ) : (
                       <>
                         <ChevronDown className="h-4 w-4" />
-                        <span>Show More ({dashboardData.recentInvoices.length - 3} more)</span>
+                        <span>{t("dashboard.showMore", { count: dashboardData.recentInvoices.length - 3 })}</span>
                       </>
                     )}
                   </button>
@@ -243,7 +243,7 @@ const Dashboard = () => {
 
         <div className="bg-card shadow-sm rounded-lg border border-border">
           <div className="p-6 border-b border-border">
-            <h2 className="text-xl font-semibold text-foreground">Active Tickets</h2>
+            <h2 className="text-xl font-semibold text-foreground">{t("dashboard.activeTickets")}</h2>
           </div>
           <div className="p-6">
             <div className="space-y-4">
@@ -257,11 +257,11 @@ const Dashboard = () => {
                         <span className={getPriorityBadge(ticket.priority)}>{ticket.priority}</span>
                       </div>
                     </div>
-                    <p className="text-sm text-muted-foreground">Created: {formatDate(ticket.createdAt)}</p>
+                    <p className="text-sm text-muted-foreground">{t("dashboard.created", { date: formatDate(ticket.createdAt) })}</p>
                   </div>
                 ))
               ) : (
-                <p className="text-muted-foreground text-center py-4">No active tickets</p>
+                <p className="text-muted-foreground text-center py-4">{t("dashboard.noActiveTickets")}</p>
               )}
             </div>
           </div>

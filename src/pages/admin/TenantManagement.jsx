@@ -16,7 +16,7 @@ const TenantManagement = () => {
 
   const [selectedTenants, setSelectedTenants] = useState([]);
   const [showSMSModal, setShowSMSModal] = useState(false);
-  const [smsMessage, setSmsMessage] = useState("Important notification from hostel management.");
+  const [smsMessage, setSmsMessage] = useState("Important notification from RootnSpace.");
   const [sendingSMS, setSendingSMS] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -169,7 +169,7 @@ const TenantManagement = () => {
       alert('SMS sent successfully!');
       setShowSMSModal(false);
       setSelectedTenants([]);
-      setSmsMessage("Important notification from hostel management.");
+      setSmsMessage("Important notification from RootnSpace.");
     } catch (err) {
       console.error('Error sending SMS:', err);
       alert(err.message || 'Failed to send SMS');

@@ -1,6 +1,6 @@
-# Hostel Management Backend
+# RootnSpace Backend
 
-Express + MongoDB backend for the Hostel Management frontend.
+Express + MongoDB backend for the RootnSpace frontend.
 
 Quick setup
 

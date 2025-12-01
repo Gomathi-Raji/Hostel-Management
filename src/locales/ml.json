@@ -111,7 +111,7 @@
   },
   "tenantManagement": {
     "title": "Tenant Management",
-    "subtitle": "Manage your hostel tenants",
+    "subtitle": "Manage your RootnSpace tenants",
     "export": "Export",
     "addTenant": "Add Tenant",
     "searchPlaceholder": "Search by Name, Email, or Room",

@@ -6,7 +6,7 @@ export default function Chatbot() {
   const [messages, setMessages] = useState([
     {
       sender: 'bot',
-      text: 'Hello! I\'m your Hostel Management Assistant.\n\nThis is a comprehensive hostel management system where tenants can manage their stays, payments, and requests, while admins oversee operations, approvals, and maintenance.'
+      text: 'Hello! I\'m your RootnSpace Assistant.\n\nThis is a comprehensive property management system where tenants can manage their stays, payments, and requests, while admins oversee operations, approvals, and maintenance.'
     }
   ]);
   const [input, setInput] = useState('');

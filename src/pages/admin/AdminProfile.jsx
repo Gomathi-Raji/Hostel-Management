@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { User, Mail, Phone, Save, Lock, Eye, EyeOff, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import apiFetch, { setToken } from "@/lib/apiClient";
 
 const AdminProfile = ({ onLogout }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,7 +80,7 @@ const AdminProfile = ({ onLogout }) => {
         },
       });
 
-      setSuccessMessage("Profile updated successfully!");
+      setSuccessMessage(t("adminProfile.profileUpdated"));
       setIsEditingProfile(false);
       
       // Update profile data with response
@@ -94,7 +96,44 @@ const AdminProfile = ({ onLogout }) => {
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       console.error("Error updating profile:", err);
-      setError(err.message || "Failed to update profile");
+      setError(err.message || t("adminProfile.profileUpdateFailed"));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    try {
+      setIsSaving(true);
+      setError(null);
+      setSuccessMessage("");
+
+      if (passwordData.newPassword !== passwordData.confirmPassword) {
+        setError("Passwords do not match");
+        return;
+      }
+
+      await apiFetch("/auth/change-password", {
+        method: "PUT",
+        body: {
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        },
+      });
+
+      setSuccessMessage(t("adminProfile.passwordChanged"));
+      setIsChangingPassword(false);
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      console.error("Error changing password:", err);
+      setError(err.message || t("adminProfile.passwordChangeFailed"));
     } finally {
       setIsSaving(false);
     }
@@ -115,13 +154,13 @@ const AdminProfile = ({ onLogout }) => {
   const renderProfileSection = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-foreground">Profile Information</h2>
+        <h2 className="text-xl font-semibold text-foreground">{t("adminProfile.profileInformation")}</h2>
         {!isEditingProfile && (
           <button
             onClick={() => setIsEditingProfile(true)}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
           >
-            Edit Profile
+            {t("adminProfile.editProfile")}
           </button>
         )}
       </div>
@@ -143,27 +182,27 @@ const AdminProfile = ({ onLogout }) => {
       {!isEditingProfile ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Full Name</p>
-            <p className="text-sm font-medium text-foreground">{profileData.name || "Not set"}</p>
+            <p className="text-xs text-muted-foreground mb-1">{t("adminProfile.fullName")}</p>
+            <p className="text-sm font-medium text-foreground">{profileData.name || t("adminProfile.notSet")}</p>
           </div>
           <div className="p-4 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Email</p>
+            <p className="text-xs text-muted-foreground mb-1">{t("adminProfile.email")}</p>
             <p className="text-sm font-medium text-foreground">{profileData.email || "Not set"}</p>
           </div>
           <div className="p-4 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Phone</p>
-            <p className="text-sm font-medium text-foreground">{profileData.phone || "Not set"}</p>
+            <p className="text-xs text-muted-foreground mb-1">{t("adminProfile.phone")}</p>
+            <p className="text-sm font-medium text-foreground">{profileData.phone || t("adminProfile.notSet")}</p>
           </div>
           <div className="p-4 bg-muted rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Role</p>
-            <p className="text-sm font-medium text-foreground capitalize">{profileData.role || "Not set"}</p>
+            <p className="text-xs text-muted-foreground mb-1">{t("adminProfile.role")}</p>
+            <p className="text-sm font-medium text-foreground capitalize">{profileData.role || t("adminProfile.notSet")}</p>
           </div>
         </div>
       ) : (
         <form onSubmit={handleSaveProfile} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Full Name</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t("adminProfile.fullName")}</label>
               <input
                 type="text"
                 name="name"
@@ -175,7 +214,7 @@ const AdminProfile = ({ onLogout }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Email</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t("adminProfile.email")}</label>
               <input
                 type="email"
                 name="email"
@@ -187,7 +226,7 @@ const AdminProfile = ({ onLogout }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-foreground mb-2">Phone</label>
+              <label className="block text-sm font-medium text-foreground mb-2">{t("adminProfile.phone")}</label>
               <input
                 type="tel"
                 name="phone"
@@ -199,7 +238,7 @@ const AdminProfile = ({ onLogout }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-muted-foreground mb-2">Role</label>
+              <label className="block text-sm font-medium text-muted-foreground mb-2">{t("adminProfile.role")}</label>
               <input
                 type="text"
                 value={profileData.role}
@@ -216,7 +255,7 @@ const AdminProfile = ({ onLogout }) => {
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 transition-colors"
             >
               {isSaving ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> : <Save className="h-4 w-4" />}
-              <span>{saving ? "Saving..." : "Save Changes"}</span>
+              <span>{isSaving ? t("adminProfile.saving") : t("adminProfile.saveChanges")}</span>
             </button>
             <button
               type="button"
@@ -227,7 +266,7 @@ const AdminProfile = ({ onLogout }) => {
               className="px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 flex items-center gap-2 transition-colors"
             >
               <X className="h-4 w-4" />
-              <span>Cancel</span>
+              <span>{t("adminProfile.cancel")}</span>
             </button>
           </div>
         </form>
@@ -237,7 +276,7 @@ const AdminProfile = ({ onLogout }) => {
 
   const renderPasswordSection = () => (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-foreground">Change Password</h2>
+      <h2 className="text-xl font-semibold text-foreground">{t("adminProfile.passwordSettings")}</h2>
 
       {/* Success Message */}
       {successMessage && (
@@ -260,14 +299,14 @@ const AdminProfile = ({ onLogout }) => {
             className="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center gap-2 mx-auto"
           >
             <Lock className="h-5 w-5" />
-            Change Password
+            {t("adminProfile.changePassword")}
           </button>
         </div>
       ) : (
         <form onSubmit={handleChangePassword} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Current Password
+              {t("adminProfile.currentPassword")}
             </label>
             <div className="relative">
               <input
@@ -294,7 +333,7 @@ const AdminProfile = ({ onLogout }) => {
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              New Password
+              {t("adminProfile.newPassword")}
             </label>
             <div className="relative">
               <input
@@ -325,7 +364,7 @@ const AdminProfile = ({ onLogout }) => {
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Confirm New Password
+              {t("adminProfile.confirmPassword")}
             </label>
             <div className="relative">
               <input
@@ -357,7 +396,7 @@ const AdminProfile = ({ onLogout }) => {
               className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 flex items-center gap-2 transition-colors"
             >
               {isSaving ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> : <Lock className="h-4 w-4" />}
-              <span>{isSaving ? "Changing..." : "Change Password"}</span>
+              <span>{isSaving ? t("adminProfile.saving") : t("adminProfile.changePassword")}</span>
             </button>
             <button
               type="button"
@@ -373,7 +412,7 @@ const AdminProfile = ({ onLogout }) => {
               className="px-4 py-2 bg-muted text-foreground rounded-lg hover:bg-muted/80 flex items-center gap-2 transition-colors"
             >
               <X className="h-4 w-4" />
-              <span>Cancel</span>
+              <span>{t("adminProfile.cancel")}</span>
             </button>
           </div>
         </form>
@@ -390,8 +429,8 @@ const AdminProfile = ({ onLogout }) => {
             <User className="h-8 w-8" />
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-foreground">Admin Profile</h1>
-            <p className="text-sm text-muted-foreground">Manage your account and settings</p>
+            <h1 className="text-2xl font-bold text-foreground">{t("adminProfile.title")}</h1>
+            <p className="text-sm text-muted-foreground">{t("adminProfile.subtitle")}</p>
           </div>
         </div>
       </div>
@@ -409,7 +448,7 @@ const AdminProfile = ({ onLogout }) => {
               }`}
             >
               <User className="h-5 w-5" />
-              <span className="font-medium">Profile Information</span>
+              <span className="font-medium">{t("adminProfile.profileInformation")}</span>
             </button>
 
             <button
@@ -421,7 +460,7 @@ const AdminProfile = ({ onLogout }) => {
               }`}
             >
               <Lock className="h-5 w-5" />
-              <span className="font-medium">Change Password</span>
+              <span className="font-medium">{t("adminProfile.passwordSettings")}</span>
             </button>
 
             <div className="pt-4 border-t border-border">
@@ -430,7 +469,7 @@ const AdminProfile = ({ onLogout }) => {
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
               >
                 <LogOut className="h-5 w-5" />
-                <span className="font-medium">Logout</span>
+                <span className="font-medium">{t("adminProfile.logout")}</span>
               </button>
             </div>
           </div>

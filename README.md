@@ -1,6 +1,6 @@
-we🏨 Hostel Management System
+we🏨 RootnSpace
 
-A responsive web application built with React, Tailwind CSS, and Vite to manage hostel operations efficiently.
+A responsive web application built with React, Tailwind CSS, and Vite to manage property operations efficiently.
 This project provides a user-friendly interface for students, administrators, and staff to manage rooms, tenants, and payments.
 
 🚀 Features

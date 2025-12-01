@@ -364,7 +364,7 @@ const ExpensesManagement = () => {
               </span>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Track and manage all hostel expenses and payments
+              Track and manage all RootnSpace expenses and payments
             </p>
           </div>
           

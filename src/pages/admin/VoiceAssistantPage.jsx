@@ -68,7 +68,7 @@ const VoiceAssistantPage = () => {
             Voice Assistant
           </h1>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Manage your hostel with voice commands
+            Manage your RootnSpace with voice commands
           </p>
         </div>
         
