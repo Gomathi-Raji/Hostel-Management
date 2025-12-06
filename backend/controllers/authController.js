@@ -40,6 +40,7 @@ export const login = async (req, res) => {
       email: user.email,
       phone: user.phone,
       role: user.role,
+      requiresOnboarding: user.role === 'tenant' && !user.tenantId,
       token: generateToken(user._id),
     });
   } catch (error) {

@@ -11,10 +11,12 @@ import {
   AlertTriangle
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import apiFetch from "@/lib/apiClient";
 
 const Dashboard = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [dashboardData, setDashboardData] = useState({
     userName: "",
     currentRent: 0,
@@ -36,6 +38,12 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
+      // First, check user profile
+      const user = await apiFetch("/auth/profile");
+      if (user.role === 'tenant' && !user.tenantId) {
+        navigate('/onboarding');
+        return;
+      }
       const data = await apiFetch("/tenants/dashboard/my-info");
       setDashboardData(data || {});
     } catch (err) {

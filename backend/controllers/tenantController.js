@@ -1,5 +1,6 @@
 import Tenant from "../models/Tenant.js";
 import Room from "../models/Room.js";
+import User from "../models/User.js";
 
 export const getTenants = async (req, res) => {
   try {
@@ -66,6 +67,13 @@ export const addTenant = async (req, res) => {
       securityDeposit
     } = req.body;
 
+    // Check room availability
+    if (roomId) {
+      const room = await Room.findById(roomId);
+      if (!room) return res.status(404).json({ message: "Room not found" });
+      if (room.occupancy >= room.capacity) return res.status(400).json({ message: "Room is fully occupied" });
+    }
+
     const tenant = await Tenant.create({
       firstName,
       lastName,
@@ -81,7 +89,69 @@ export const addTenant = async (req, res) => {
     });
 
     if (roomId) {
-      await Room.findByIdAndUpdate(roomId, { $inc: { occupancy: 1 } });
+      const room = await Room.findByIdAndUpdate(roomId, { $inc: { occupancy: 1 } }, { new: true });
+      if (room && room.occupancy >= room.capacity) {
+        await Room.findByIdAndUpdate(roomId, { status: 'occupied' });
+      }
+    }
+
+    const populatedTenant = await Tenant.findById(tenant._id).populate("room");
+    res.status(201).json(populatedTenant);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const onboardTenant = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (user.tenantId) return res.status(400).json({ message: "User already onboarded" });
+
+    const {
+      aadharNumber,
+      room: roomId,
+      moveInDate,
+      emergencyContactName,
+      emergencyContactRelationship,
+      emergencyContactPhone,
+      securityDeposit
+    } = req.body;
+
+    // Check room availability
+    if (roomId) {
+      const room = await Room.findById(roomId);
+      if (!room) return res.status(404).json({ message: "Room not found" });
+      if (room.occupancy >= room.capacity) return res.status(400).json({ message: "Room is fully occupied" });
+    }
+
+    // Split name into first and last
+    const nameParts = user.name.trim().split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    const tenant = await Tenant.create({
+      firstName,
+      lastName,
+      email: user.email,
+      phone: user.phone,
+      aadharNumber,
+      room: roomId,
+      moveInDate,
+      emergencyContactName,
+      emergencyContactRelationship,
+      emergencyContactPhone,
+      securityDeposit
+    });
+
+    // Update user with tenantId
+    await User.findByIdAndUpdate(user._id, { tenantId: tenant._id });
+
+    if (roomId) {
+      const room = await Room.findByIdAndUpdate(roomId, { $inc: { occupancy: 1 } }, { new: true });
+      if (room && room.occupancy >= room.capacity) {
+        await Room.findByIdAndUpdate(roomId, { status: 'occupied' });
+      }
     }
 
     const populatedTenant = await Tenant.findById(tenant._id).populate("room");

@@ -3,6 +3,7 @@ import {
   getTenants,
   getTenant,
   addTenant,
+  onboardTenant,
   updateTenant,
   deleteTenant,
   getTenantStats,
@@ -19,6 +20,7 @@ router.get("/stats", protect, adminOnly, getTenantStats);
 router.get("/:id", protect, getTenant);
 // only admin can add or delete tenants
 router.post("/", protect, adminOnly, addTenant);
+router.post("/onboard", protect, onboardTenant);
 router.put("/:id", protect, adminOnly, updateTenant);
 router.delete("/:id", protect, adminOnly, deleteTenant);
 

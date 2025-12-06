@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import apiFetch, { setToken } from "@/lib/apiClient";
 
@@ -13,6 +13,7 @@ const Register = () => {
     role: "tenant"
   });
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -32,6 +33,7 @@ const Register = () => {
         });
         if (res.token) setToken(res.token);
         alert("Account created successfully!");
+        navigate('/login');
       } catch (err) {
         console.error(err);
         alert(err?.message || "Registration failed");

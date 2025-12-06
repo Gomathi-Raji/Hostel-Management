@@ -28,7 +28,7 @@ const TenantOnboarding = () => {
   const loadAvailableRooms = async () => {
     try {
       const response = await apiFetch('/rooms');
-      setRooms(response.rooms.filter(room => room.status === 'available') || []);
+      setRooms(response.rooms.filter(room => room.occupancy < room.capacity) || []);
     } catch (error) {
       console.error('Error loading rooms:', error);
     }
@@ -47,8 +47,7 @@ const TenantOnboarding = () => {
     if (!formData.roomAssignment) newErrors.roomAssignment = 'Room selection is required';
     if (!formData.moveInDate) newErrors.moveInDate = 'Move-in date is required';
     if (!formData.securityDeposit) newErrors.securityDeposit = 'Security deposit is required';
-    if (!formData.currentRent) newErrors.currentRent = 'Current rent is required';
-    if (!formData.dueDate) newErrors.dueDate = 'Due date is required';
+    // Removed currentRent and dueDate as required
 
     // Aadhaar validation (12 digits)
     if (formData.aadharNumber && !/^\d{12}$/.test(formData.aadharNumber)) {
@@ -73,9 +72,7 @@ const TenantOnboarding = () => {
         emergencyContactName: formData.emergencyContactName,
         emergencyContactRelationship: formData.emergencyContactRelationship,
         emergencyContactPhone: formData.emergencyContactPhone,
-        securityDeposit: parseFloat(formData.securityDeposit),
-        currentRent: parseFloat(formData.currentRent),
-        dueDate: formData.dueDate
+        securityDeposit: parseFloat(formData.securityDeposit)
       };
 
       await apiFetch('/tenants/onboard', {
@@ -162,7 +159,7 @@ const TenantOnboarding = () => {
             {/* Current Rent */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
-                Current Rent (₹) <span className="text-red-500">*</span>
+                Current Rent (₹)
               </label>
               <input
                 type="number"
@@ -173,7 +170,6 @@ const TenantOnboarding = () => {
                 min="0"
                 step="0.01"
                 className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.currentRent ? 'border-red-500' : 'border-border'}`}
-                required
               />
               {errors.currentRent && <p className="text-red-500 text-xs mt-1">{errors.currentRent}</p>}
             </div>
@@ -181,7 +177,7 @@ const TenantOnboarding = () => {
             {/* Due Date */}
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">
-                Rent Due Date <span className="text-red-500">*</span>
+                Rent Due Date
               </label>
               <input
                 type="date"
@@ -189,7 +185,6 @@ const TenantOnboarding = () => {
                 value={formData.dueDate}
                 onChange={handleInputChange}
                 className={`w-full px-3 py-2 border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.dueDate ? 'border-red-500' : 'border-border'}`}
-                required
               />
               {errors.dueDate && <p className="text-red-500 text-xs mt-1">{errors.dueDate}</p>}
             </div>
