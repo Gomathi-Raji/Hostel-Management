@@ -18,20 +18,14 @@ import {
   ClipboardList,
   Receipt,
   UserCheck,
-  Mic,
-  MicOff,
-  MessageCircle,
 } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
-import Chatbot from "./Chatbot";
 import apiFetch, { setToken } from "@/lib/apiClient";
 import { useTranslation } from 'react-i18next';
 import LanguageSelector from './LanguageSelector';
 
 const AdminLayout = ({ onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [showChatbot, setShowChatbot] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const navigate = useNavigate();
 
@@ -365,63 +359,6 @@ const AdminLayout = ({ onLogout }) => {
             <Outlet />
           </div>
         </main>
-      </div>
-
-      {/* Chatbot Modal */}
-      {showChatbot && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-card rounded-lg p-4 max-w-lg w-full mx-4 relative">
-            <button
-              onClick={() => setShowChatbot(false)}
-              className="absolute top-2 right-2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-6 w-6" />
-            </button>
-            <Chatbot />
-          </div>
-        </div>
-      )}
-
-      {/* ChatbotVoiceButtons - Always visible */}
-      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
-        {/* Voice Assistant Button */}
-        <button
-          onClick={() => {
-            setIsListening(!isListening);
-            if (!isListening) {
-              console.log("Voice Assistant activated - Start listening");
-            } else {
-              console.log("Voice Assistant deactivated - Stop listening");
-            }
-          }}
-          className={`w-14 h-14 ${
-            isListening 
-              ? "bg-red-600 hover:bg-red-700" 
-              : "bg-blue-600 hover:bg-blue-700"
-          } text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 ${
-            isListening 
-              ? "focus:ring-red-300" 
-              : "focus:ring-blue-300"
-          } focus:ring-opacity-50 sm:w-12 sm:h-12`}
-          aria-label={isListening ? "Stop Listening" : "Voice Assistant"}
-          title={isListening ? "Stop Listening" : "Voice Assistant"}
-        >
-          {isListening ? (
-            <MicOff className="h-6 w-6 sm:h-5 sm:w-5" />
-          ) : (
-            <Mic className="h-6 w-6 sm:h-5 sm:w-5" />
-          )}
-        </button>
-
-        {/* Chatbot Button */}
-        <button
-          onClick={() => setShowChatbot(true)}
-          className="w-14 h-14 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-red-300 focus:ring-opacity-50 sm:w-12 sm:h-12"
-          aria-label="Chatbot"
-          title="Chatbot"
-        >
-          <MessageCircle className="h-6 w-6 sm:h-5 sm:w-5" />
-        </button>
       </div>
     </div>
   );
