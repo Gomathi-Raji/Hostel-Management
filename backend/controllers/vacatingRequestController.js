@@ -13,6 +13,7 @@ export const getVacatingRequests = async (req, res) => {
 
     const requests = await VacatingRequest.find(query)
       .populate("tenant", "firstName lastName email phone")
+      .populate("tenant.room", "number")
       .populate("approvedBy", "name email")
       .sort({ createdAt: -1 })
       .limit(limit * 1)
@@ -35,6 +36,7 @@ export const getVacatingRequest = async (req, res) => {
   try {
     const request = await VacatingRequest.findById(req.params.id)
       .populate("tenant", "firstName lastName email phone")
+      .populate("tenant.room", "number")
       .populate("approvedBy", "name email");
     if (!request) return res.status(404).json({ message: "Vacating request not found" });
     res.json(request);

@@ -14,8 +14,8 @@ export const getExchangeRequests = async (req, res) => {
 
     const requests = await ExchangeRequest.find(query)
       .populate("tenant", "firstName lastName email phone")
-      .populate("currentRoom", "roomNumber floor capacity")
-      .populate("desiredRoom", "roomNumber floor capacity")
+      .populate("currentRoom", "number type capacity")
+      .populate("desiredRoom", "number type capacity")
       .populate("approvedBy", "name email")
       .sort({ createdAt: -1 })
       .limit(limit * 1)
@@ -38,8 +38,8 @@ export const getExchangeRequest = async (req, res) => {
   try {
     const request = await ExchangeRequest.findById(req.params.id)
       .populate("tenant", "firstName lastName email phone")
-      .populate("currentRoom", "roomNumber floor capacity")
-      .populate("desiredRoom", "roomNumber floor capacity")
+      .populate("currentRoom", "number type capacity")
+      .populate("desiredRoom", "number type capacity")
       .populate("approvedBy", "name email");
     if (!request) return res.status(404).json({ message: "Exchange request not found" });
     res.json(request);

@@ -44,9 +44,9 @@ const FormRequests = () => {
       const vacatingRequests = vacatingRes.requests.map(req => ({
         id: req._id,
         type: "Vacating",
-        tenantName: `${req.tenant.firstName} ${req.tenant.lastName}`,
-        tenantEmail: req.tenant.email,
-        roomNumber: req.tenant.room?.number || "N/A",
+        tenantName: req.tenant ? `${req.tenant.firstName || ''} ${req.tenant.lastName || ''}`.trim() : 'Unknown Tenant',
+        tenantEmail: req.tenant?.email || 'N/A',
+        roomNumber: req.tenant?.room?.number || "N/A",
         reason: req.reason,
         vacatingDate: new Date(req.vacatingDate).toLocaleDateString(),
         submittedDate: new Date(req.createdAt).toLocaleDateString(),
@@ -62,8 +62,8 @@ const FormRequests = () => {
       const exchangeRequests = exchangeRes.requests.map(req => ({
         id: req._id,
         type: "Exchange",
-        tenantName: `${req.tenant.firstName} ${req.tenant.lastName}`,
-        tenantEmail: req.tenant.email,
+        tenantName: req.tenant ? `${req.tenant.firstName || ''} ${req.tenant.lastName || ''}`.trim() : 'Unknown Tenant',
+        tenantEmail: req.tenant?.email || 'N/A',
         roomNumber: req.currentRoom?.number || req.currentRoom || "N/A",
         preferredRoom: req.desiredRoom?.number || req.desiredRoom || "N/A",
         reason: req.reason,
