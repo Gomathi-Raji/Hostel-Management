@@ -69,6 +69,7 @@ export const getProfile = async (req, res) => {
       email: user.email,
       phone: user.phone,
       role: user.role,
+      tenantId: user.tenantId,
       settings: user.settings || {
         notifications: {
           emailNotifications: {
