@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, Plus, Download, Eye, Edit, Trash2, X, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import apiFetch from '@/lib/apiClient';
+import Pagination from '@/components/Pagination';
 
 const TenantManagement = () => {
   const { t } = useTranslation();
@@ -11,6 +12,7 @@ const TenantManagement = () => {
   const [error, setError] = useState(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingTenant, setEditingTenant] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
@@ -18,6 +20,8 @@ const TenantManagement = () => {
   const [showSMSModal, setShowSMSModal] = useState(false);
   const [smsMessage, setSmsMessage] = useState("Important notification from RootnSpace.");
   const [sendingSMS, setSendingSMS] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -157,6 +161,12 @@ const TenantManagement = () => {
     return matchesSearch && matchesFilter;
   });
 
+  const totalPages = Math.ceil(filteredTenants.length / itemsPerPage);
+  const paginatedTenants = filteredTenants.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Reset to page 1 when filters change
+  useEffect(() => { setCurrentPage(1); }, [searchTerm, filterStatus]);
+
   const handleSendSMS = async () => {
     if (!smsMessage.trim()) return;
 
@@ -175,6 +185,71 @@ const TenantManagement = () => {
       alert(err.message || 'Failed to send SMS');
     } finally {
       setSendingSMS(false);
+    }
+  };
+
+  const handleEditTenant = (tenant) => {
+    setEditingTenant(tenant);
+    setFormData({
+      firstName: tenant.firstName || "",
+      lastName: tenant.lastName || "",
+      email: tenant.email || "",
+      phone: tenant.phone || "",
+      aadharNumber: tenant.aadharNumber || "",
+      roomAssignment: tenant.room?._id || "",
+      moveInDate: tenant.moveInDate ? new Date(tenant.moveInDate).toISOString().split('T')[0] : "",
+      emergencyContactName: tenant.emergencyContactName || "",
+      emergencyContactRelationship: tenant.emergencyContactRelationship || "",
+      emergencyContactPhone: tenant.emergencyContactPhone || "",
+      securityDeposit: tenant.securityDeposit ? String(tenant.securityDeposit) : ""
+    });
+    setShowAddModal(true);
+  };
+
+  const handleUpdateTenant = async (e) => {
+    e.preventDefault();
+    try {
+      const tenantData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        aadharNumber: formData.aadharNumber,
+        room: formData.roomAssignment,
+        moveInDate: formData.moveInDate,
+        emergencyContactName: formData.emergencyContactName,
+        emergencyContactRelationship: formData.emergencyContactRelationship,
+        emergencyContactPhone: formData.emergencyContactPhone,
+        securityDeposit: parseFloat(formData.securityDeposit)
+      };
+
+      await apiFetch(`/tenants/${editingTenant._id}`, {
+        method: 'PUT',
+        body: tenantData
+      });
+
+      alert('Tenant updated successfully!');
+      setShowAddModal(false);
+      setEditingTenant(null);
+      resetForm();
+      loadTenants();
+      loadRooms();
+    } catch (err) {
+      console.error('Error updating tenant:', err);
+      alert(err.message || 'Failed to update tenant');
+    }
+  };
+
+  const handleDeleteTenant = async (tenant) => {
+    if (!window.confirm(`Are you sure you want to delete ${tenant.firstName} ${tenant.lastName}? This action cannot be undone.`)) return;
+    try {
+      await apiFetch(`/tenants/${tenant._id}`, { method: 'DELETE' });
+      alert('Tenant deleted successfully!');
+      loadTenants();
+      loadRooms();
+    } catch (err) {
+      console.error('Error deleting tenant:', err);
+      alert(err.message || 'Failed to delete tenant');
     }
   };
 
@@ -238,7 +313,7 @@ const TenantManagement = () => {
           <p className="text-center text-muted-foreground p-4">{t('tenantManagement.loading')}</p>
         ) : error ? (
           <p className="text-center text-red-500 p-4">{error}</p>
-        ) : filteredTenants.length > 0 ? filteredTenants.map(tenant => (
+        ) : paginatedTenants.length > 0 ? paginatedTenants.map(tenant => (
           <div key={tenant._id} className="bg-card rounded-xl shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex items-start gap-2">
               <input
@@ -257,15 +332,15 @@ const TenantManagement = () => {
                 <p className="text-foreground font-medium">{tenant.firstName} {tenant.lastName}</p>
                 <p className="text-muted-foreground text-sm">{tenant.email}</p>
                 <p className="text-muted-foreground text-sm">{tenant.phone}</p>
-                <p className="text-muted-foreground text-sm">Aadhaar: {tenant.aadharNumber}</p>
+                <p className="text-muted-foreground text-sm">Aadhaar: {tenant.aadharNumber ? `XXXX-XXXX-${tenant.aadharNumber.slice(-4)}` : 'N/A'}</p>
                 <p className="text-foreground text-sm">{tenant.room?.number || t('tenantManagement.noRoomAssigned')} | {t('tenantManagement.moveInDate')}: {tenant.moveInDate ? new Date(tenant.moveInDate).toLocaleDateString() : 'N/A'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 mt-2 sm:mt-0">
               <span className={getStatusBadge(tenant.active ? "Active" : "Inactive")}>{getStatusText(tenant.active)}</span>
               <button className="p-1 text-muted-foreground hover:text-blue-500"><Eye className="h-4 w-4" /></button>
-              <button className="p-1 text-muted-foreground hover:text-blue-500"><Edit className="h-4 w-4" /></button>
-              <button className="p-1 text-muted-foreground hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+              <button onClick={() => handleEditTenant(tenant)} className="p-1 text-muted-foreground hover:text-blue-500"><Edit className="h-4 w-4" /></button>
+              <button onClick={() => handleDeleteTenant(tenant)} className="p-1 text-muted-foreground hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
             </div>
           </div>
         )) : (
@@ -273,17 +348,19 @@ const TenantManagement = () => {
         )}
       </div>
 
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+
       {/* Add Tenant Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-card rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-lg">
             <div className="flex justify-between items-center p-4 border-b border-border">
-              <h2 className="text-xl font-semibold text-foreground">{t('tenantManagement.modalTitle')}</h2>
-              <button onClick={() => setShowAddModal(false)} className="text-muted-foreground hover:text-foreground">
+              <h2 className="text-xl font-semibold text-foreground">{editingTenant ? 'Edit Tenant' : t('tenantManagement.modalTitle')}</h2>
+              <button onClick={() => { setShowAddModal(false); setEditingTenant(null); resetForm(); }} className="text-muted-foreground hover:text-foreground">
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="p-4 space-y-4">
+            <form onSubmit={editingTenant ? handleUpdateTenant : handleSubmit} className="p-4 space-y-4">
               {/* First Name & Last Name */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -445,11 +522,11 @@ const TenantManagement = () => {
                   type="submit"
                   className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  {t('tenantManagement.addTenantButton')}
+                  {editingTenant ? 'Update Tenant' : t('tenantManagement.addTenantButton')}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={() => { setShowAddModal(false); setEditingTenant(null); resetForm(); }}
                   className="flex-1 bg-card text-foreground py-2 rounded-lg hover:bg-muted transition-colors"
                 >
                   {t('tenantManagement.cancel')}

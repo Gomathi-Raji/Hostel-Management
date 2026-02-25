@@ -417,10 +417,10 @@ const AdminDashboard = () => {
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
                   tenant.status === "Active"
-                    ? "bg-green-100 text-green-800"
+                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                     : tenant.status === "Pending"
-                    ? "bg-yellow-100 text-yellow-800"
-                    : "bg-red-100 text-red-800"
+                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                    : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                 }`}
               >
                 {tenant.status}
@@ -459,17 +459,17 @@ const AdminDashboard = () => {
         <div className="space-y-4">
           <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
             <span className="text-sm font-medium text-foreground">Available</span>
-            <span className="text-lg font-bold text-muted-foreground bg-green-100 px-2 py-1 rounded">
+            <span className="text-lg font-bold text-muted-foreground bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">
               {roomOccupancy.available}
             </span>
           </div>
-          <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+          <div className="flex justify-between items-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
             <span className="text-sm font-medium text-foreground">Occupied</span>
-            <span className="text-lg font-bold text-blue-600">
+            <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
               {roomOccupancy.occupied}
             </span>
           </div>
-          <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+          <div className="flex justify-between items-center p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
             <span className="text-sm font-medium text-foreground">
               Maintenance
             </span>

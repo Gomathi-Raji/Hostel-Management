@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Download, Search, Filter, Lock } from "lucide-react";
 import apiFetch from "@/lib/apiClient";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 const Invoices = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -56,21 +58,103 @@ const Invoices = () => {
     return matchesSearch && matchesStatus;
   });
 
+  const generateInvoicePDF = (invoice) => {
+    const doc = new jsPDF();
+    const id = invoice._id?.slice(-8)?.toUpperCase() || "N/A";
+
+    // Header
+    doc.setFontSize(20);
+    doc.setTextColor(88, 28, 135);
+    doc.text("RootnSpace", 14, 22);
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Hostel Management System", 14, 28);
+
+    // Invoice title
+    doc.setFontSize(16);
+    doc.setTextColor(0);
+    doc.text("INVOICE", 150, 22);
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`#INV-${id}`, 150, 28);
+
+    // Line
+    doc.setDrawColor(200);
+    doc.line(14, 34, 196, 34);
+
+    // Details
+    doc.setFontSize(11);
+    doc.setTextColor(0);
+    const y = 44;
+    doc.text(`Type:`, 14, y);
+    doc.text(invoice.type === "rent" ? "Monthly Rent" : (invoice.type || "N/A"), 60, y);
+    doc.text(`Amount:`, 14, y + 8);
+    doc.text(formatCurrency(invoice.amount), 60, y + 8);
+    doc.text(`Method:`, 14, y + 16);
+    doc.text(invoice.method || "N/A", 60, y + 16);
+    doc.text(`Status:`, 14, y + 24);
+    doc.text(invoice.status || "N/A", 60, y + 24);
+    doc.text(`Due Date:`, 14, y + 32);
+    doc.text(invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : "-", 60, y + 32);
+    doc.text(`Paid Date:`, 14, y + 40);
+    doc.text(invoice.paidAt ? new Date(invoice.paidAt).toLocaleDateString() : "-", 60, y + 40);
+    if (invoice.reference) {
+      doc.text(`Reference:`, 14, y + 48);
+      doc.text(invoice.reference, 60, y + 48);
+    }
+    if (invoice.notes) {
+      doc.text(`Notes:`, 14, y + 56);
+      doc.text(invoice.notes.substring(0, 80), 60, y + 56);
+    }
+
+    // Footer
+    doc.setFontSize(9);
+    doc.setTextColor(150);
+    doc.text(`Generated on ${new Date().toLocaleString()}`, 14, 280);
+    doc.text("Thank you for your payment!", 14, 286);
+
+    return doc;
+  };
+
   const handleDownloadAll = () => {
     const paidInvoices = invoices.filter(isInvoicePaid);
     if (paidInvoices.length === 0) {
       alert("No paid invoices available for download.");
       return;
     }
-    alert(`Downloading ${paidInvoices.length} paid invoices...`);
+    // Generate a combined PDF with all paid invoices
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("RootnSpace — All Paid Invoices", 14, 22);
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Generated: ${new Date().toLocaleString()} | Total: ${paidInvoices.length} invoices`, 14, 30);
+
+    doc.autoTable({
+      startY: 38,
+      head: [["#", "Type", "Amount", "Method", "Due Date", "Paid Date", "Reference"]],
+      body: paidInvoices.map((inv, i) => [
+        i + 1,
+        inv.type === "rent" ? "Monthly Rent" : (inv.type || "-"),
+        formatCurrency(inv.amount),
+        inv.method || "-",
+        inv.dueDate ? new Date(inv.dueDate).toLocaleDateString() : "-",
+        inv.paidAt ? new Date(inv.paidAt).toLocaleDateString() : "-",
+        inv.reference || "-",
+      ]),
+    });
+
+    doc.save("all-invoices.pdf");
   };
 
   const handleDownloadInvoice = (invoice) => {
-    if (isInvoicePaid(invoice)) {
-      alert(`Downloading invoice for ${invoice.type} - ${formatCurrency(invoice.amount)}...`);
-    } else {
-      alert(`Invoice cannot be downloaded. Payment is required first.`);
+    if (!isInvoicePaid(invoice)) {
+      alert("Invoice cannot be downloaded. Payment is required first.");
+      return;
     }
+    const doc = generateInvoicePDF(invoice);
+    const id = invoice._id?.slice(-8)?.toUpperCase() || "invoice";
+    doc.save(`invoice-${id}.pdf`);
   };
 
   const paidInvoicesCount = invoices.filter(isInvoicePaid).length;

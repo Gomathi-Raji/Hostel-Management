@@ -163,7 +163,22 @@ export const onboardTenant = async (req, res) => {
 
 export const updateTenant = async (req, res) => {
   try {
-    const tenant = await Tenant.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate("room");
+    const { firstName, lastName, email, phone, aadharNumber, room, moveInDate, emergencyContactName, emergencyContactRelationship, emergencyContactPhone, securityDeposit, active } = req.body;
+    const allowedFields = {};
+    if (firstName !== undefined) allowedFields.firstName = firstName;
+    if (lastName !== undefined) allowedFields.lastName = lastName;
+    if (email !== undefined) allowedFields.email = email;
+    if (phone !== undefined) allowedFields.phone = phone;
+    if (aadharNumber !== undefined) allowedFields.aadharNumber = aadharNumber;
+    if (room !== undefined) allowedFields.room = room;
+    if (moveInDate !== undefined) allowedFields.moveInDate = moveInDate;
+    if (emergencyContactName !== undefined) allowedFields.emergencyContactName = emergencyContactName;
+    if (emergencyContactRelationship !== undefined) allowedFields.emergencyContactRelationship = emergencyContactRelationship;
+    if (emergencyContactPhone !== undefined) allowedFields.emergencyContactPhone = emergencyContactPhone;
+    if (securityDeposit !== undefined) allowedFields.securityDeposit = securityDeposit;
+    if (active !== undefined) allowedFields.active = active;
+
+    const tenant = await Tenant.findByIdAndUpdate(req.params.id, allowedFields, { new: true, runValidators: true }).populate("room");
     if (!tenant) return res.status(404).json({ message: "Tenant not found" });
     res.json(tenant);
   } catch (error) {

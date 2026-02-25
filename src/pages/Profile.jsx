@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { User, Save, X, DollarSign, UtensilsCrossed, Calendar, Home, LogOut } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { User, Save, X, DollarSign, UtensilsCrossed, Calendar, Home, LogOut, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import apiFetch, { setToken } from "@/lib/apiClient";
@@ -19,6 +19,9 @@ const Profile = ({ onLogout }) => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("personal");
+  const [profileImage, setProfileImage] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
   const [feeBreakdown, setFeeBreakdown] = useState(null);
   const [menu, setMenu] = useState([]);
   const [timetable, setTimetable] = useState([]);
@@ -37,6 +40,7 @@ const Profile = ({ onLogout }) => {
           phone: profileData.phone || "",
           roomNumber: profileData.roomNumber || ""
         });
+        if (profileData.profileImage) setProfileImage(profileData.profileImage);
 
         // Load fee breakdown
         try {
@@ -120,6 +124,33 @@ const Profile = ({ onLogout }) => {
       try { setToken(null); } catch (e) {}
       if (onLogout) onLogout();
       navigate('/login');
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setUploadingImage(true);
+      const formData = new FormData();
+      formData.append("profileImage", file);
+
+      const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${apiBase}/auth/profile/upload-image`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Upload failed");
+      setProfileImage(data.profileImage);
+      setSuccess("Profile image updated!");
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError(err.message || "Failed to upload image");
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -387,8 +418,22 @@ const Profile = ({ onLogout }) => {
       {/* Header */}
       <div className="bg-card rounded-lg border border-border p-6">
         <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-blue-600 dark:bg-blue-500 rounded-full flex items-center justify-center text-white">
-            <User className="h-8 w-8" />
+          <div className="relative group">
+            {profileImage ? (
+              <img src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${profileImage}`} alt="Profile" className="w-16 h-16 rounded-full object-cover" />
+            ) : (
+              <div className="w-16 h-16 bg-blue-600 dark:bg-blue-500 rounded-full flex items-center justify-center text-white">
+                <User className="h-8 w-8" />
+              </div>
+            )}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              disabled={uploadingImage}
+            >
+              {uploadingImage ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" /> : <Camera className="h-5 w-5 text-white" />}
+            </button>
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
           </div>
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-foreground">{t("profile.title")}</h1>

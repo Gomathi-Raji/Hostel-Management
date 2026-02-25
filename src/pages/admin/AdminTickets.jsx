@@ -14,20 +14,27 @@ import {
   Mail,
   Phone,
   Tag,
+  Trash2,
+  X,
   TrendingUp,
 } from "lucide-react";
 import apiFetch from '@/lib/apiClient';
 import { useTranslation } from 'react-i18next';
+import Pagination from '@/components/Pagination';
 
 const AdminTickets = () => {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [replyText, setReplyText] = useState("");
 
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Load tickets on component mount
   useEffect(() => {
@@ -62,17 +69,47 @@ const AdminTickets = () => {
     return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
   });
 
+  const totalPages = Math.ceil(filteredTickets.length / itemsPerPage);
+  const paginatedTickets = filteredTickets.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, statusFilter, priorityFilter, categoryFilter]);
+
   const updateTicketStatus = async (ticketId, newStatus) => {
     try {
-      await apiFetch(`/tickets/${ticketId}/status`, {
-        method: 'PATCH',
+      await apiFetch(`/tickets/${ticketId}`, {
+        method: 'PUT',
         body: { status: newStatus }
       });
-      // Reload tickets to get updated data
       loadTickets();
     } catch (err) {
       console.error('Error updating ticket status:', err);
       alert(err.message || 'Failed to update ticket status');
+    }
+  };
+
+  const handleDeleteTicket = async (ticketId) => {
+    if (!window.confirm('Are you sure you want to delete this ticket?')) return;
+    try {
+      await apiFetch(`/tickets/${ticketId}`, { method: 'DELETE' });
+      loadTickets();
+    } catch (err) {
+      alert(err.message || 'Failed to delete ticket');
+    }
+  };
+
+  const handleReply = async (ticket) => {
+    if (!replyText.trim()) return;
+    try {
+      await apiFetch(`/tickets/${ticket._id}`, {
+        method: 'PUT',
+        body: { notes: (ticket.notes ? ticket.notes + '\n' : '') + `[Admin Reply]: ${replyText}` }
+      });
+      alert('Reply added to ticket notes');
+      setReplyText("");
+      setSelectedTicket(null);
+      loadTickets();
+    } catch (err) {
+      alert(err.message || 'Failed to add reply');
     }
   };
 
@@ -243,7 +280,7 @@ const AdminTickets = () => {
               <p>{t('tickets.noTickets')}</p>
             </div>
           ) : (
-            filteredTickets.map((ticket) => (
+            paginatedTickets.map((ticket) => (
               <div key={ticket._id} className="p-4 md:p-6 hover:bg-muted transition-colors flex flex-col md:flex-row md:justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -300,14 +337,14 @@ const AdminTickets = () => {
                     <option value="in-progress">In Progress</option>
                     <option value="resolved">Resolved</option>
                   </select>
-                  <button className="p-2 text-muted-foreground hover:text-blue-600 hover:bg-muted rounded-lg transition-colors">
+                  <button onClick={() => setSelectedTicket(ticket)} className="p-2 text-muted-foreground hover:text-blue-600 hover:bg-muted rounded-lg transition-colors" title="View Details">
                     <Eye className="h-4 w-4" />
                   </button>
-                  <button className="p-2 text-muted-foreground hover:text-green-600 hover:bg-muted rounded-lg transition-colors">
+                  <button onClick={() => { setSelectedTicket(ticket); setReplyText(""); }} className="p-2 text-muted-foreground hover:text-green-600 hover:bg-muted rounded-lg transition-colors" title="Reply">
                     <MessageSquare className="h-4 w-4" />
                   </button>
-                  <button className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors">
-                    <MoreVertical className="h-4 w-4" />
+                  <button onClick={() => handleDeleteTicket(ticket._id)} className="p-2 text-muted-foreground hover:text-red-600 hover:bg-muted rounded-lg transition-colors" title="Delete">
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -315,6 +352,42 @@ const AdminTickets = () => {
           )}
         </div>
       </div>
+
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+
+      {/* Ticket Detail / Reply Modal */}
+      {selectedTicket && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-card rounded-lg w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-lg">
+            <div className="flex justify-between items-center p-4 border-b border-border">
+              <h2 className="text-xl font-semibold text-foreground">Ticket #{selectedTicket._id.slice(-6)}</h2>
+              <button onClick={() => { setSelectedTicket(null); setReplyText(""); }} className="text-muted-foreground hover:text-foreground"><X className="h-6 w-6" /></button>
+            </div>
+            <div className="p-4 space-y-3">
+              <div><span className="font-medium text-foreground">Title:</span> <span className="text-foreground">{selectedTicket.title}</span></div>
+              <div><span className="font-medium text-foreground">Status:</span> <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusBadge(selectedTicket.status)}`}>{selectedTicket.status}</span></div>
+              <div><span className="font-medium text-foreground">Priority:</span> <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${getPriorityBadge(selectedTicket.priority)}`}>{selectedTicket.priority}</span></div>
+              <div><span className="font-medium text-foreground">Category:</span> <span className="text-muted-foreground">{selectedTicket.category}</span></div>
+              <div><span className="font-medium text-foreground">Tenant:</span> <span className="text-muted-foreground">{selectedTicket.tenant ? `${selectedTicket.tenant.firstName} ${selectedTicket.tenant.lastName}` : 'Unknown'}</span></div>
+              <div><span className="font-medium text-foreground">Description:</span><p className="text-muted-foreground mt-1">{selectedTicket.description || 'No description'}</p></div>
+              {selectedTicket.notes && (
+                <div><span className="font-medium text-foreground">Notes:</span><p className="text-muted-foreground mt-1 whitespace-pre-wrap">{selectedTicket.notes}</p></div>
+              )}
+              <div><span className="font-medium text-foreground">Created:</span> <span className="text-muted-foreground">{new Date(selectedTicket.createdAt).toLocaleString()}</span></div>
+
+              {/* Reply Section */}
+              <div className="border-t border-border pt-3">
+                <label className="font-medium text-foreground">Add Reply</label>
+                <textarea value={replyText} onChange={(e) => setReplyText(e.target.value)} rows={3} className="w-full mt-1 px-3 py-2 border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground" placeholder="Type your reply..." />
+                <div className="flex gap-2 mt-2">
+                  <button onClick={() => handleReply(selectedTicket)} disabled={!replyText.trim()} className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50">Send Reply</button>
+                  <button onClick={() => { setSelectedTicket(null); setReplyText(""); }} className="flex-1 bg-card text-foreground py-2 rounded-lg hover:bg-muted border border-border">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -12,6 +12,8 @@ import {
   sendManualSMS,
 } from "../controllers/tenantController.js";
 import { protect, adminOnly } from "../middleware/authMiddleware.js";
+import { addTenantRules, validate } from "../middleware/validators.js";
+import { smsLimiter } from "../middleware/rateLimiter.js";
 
 const router = express.Router();
 
@@ -21,15 +23,15 @@ router.get("/stats", protect, adminOnly, getTenantStats);
 router.get("/dashboard/my-info", protect, getTenantDashboard);
 router.get("/:id", protect, getTenant);
 // only admin can add or delete tenants
-router.post("/", protect, adminOnly, addTenant);
+router.post("/", protect, adminOnly, addTenantRules, validate, addTenant);
 router.post("/onboard", protect, onboardTenant);
 router.put("/:id", protect, adminOnly, updateTenant);
 router.delete("/:id", protect, adminOnly, deleteTenant);
 
 // Send SMS to selected tenants
-router.post("/send-sms", protect, adminOnly, sendSMSToTenants);
+router.post("/send-sms", protect, adminOnly, smsLimiter, sendSMSToTenants);
 
 // Send manual SMS to any number
-router.post("/send-manual-sms", protect, adminOnly, sendManualSMS);
+router.post("/send-manual-sms", protect, adminOnly, smsLimiter, sendManualSMS);
 
 export default router;
