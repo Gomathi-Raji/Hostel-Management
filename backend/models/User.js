@@ -9,6 +9,9 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, required: true },
     propertyId: { type: mongoose.Schema.Types.ObjectId, ref: "Property" },
     tenantId: { type: mongoose.Schema.Types.ObjectId, ref: "Tenant" }, // For tenant role users
+    resetPasswordToken: { type: String },
+    resetPasswordExpire: { type: Date },
+    profileImage: { type: String }, // URL to profile image
     settings: {
       notifications: {
         emailNotifications: {

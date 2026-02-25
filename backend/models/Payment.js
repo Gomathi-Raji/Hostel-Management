@@ -15,5 +15,11 @@ const paymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+paymentSchema.index({ tenant: 1 });
+paymentSchema.index({ status: 1 });
+paymentSchema.index({ createdAt: -1 });
+paymentSchema.index({ tenant: 1, status: 1 });
+paymentSchema.index({ type: 1 });
+
 const Payment = mongoose.model("Payment", paymentSchema);
 export default Payment;

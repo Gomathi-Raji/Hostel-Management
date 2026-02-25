@@ -17,5 +17,9 @@ const exchangeRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+exchangeRequestSchema.index({ tenant: 1, status: 1 });
+exchangeRequestSchema.index({ status: 1 });
+exchangeRequestSchema.index({ createdAt: -1 });
+
 const ExchangeRequest = mongoose.model("ExchangeRequest", exchangeRequestSchema);
 export default ExchangeRequest;

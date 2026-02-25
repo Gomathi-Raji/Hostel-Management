@@ -9,6 +9,7 @@ import {
   getTenantTickets,
 } from "../controllers/ticketController.js";
 import { protect, staffOnly } from "../middleware/authMiddleware.js";
+import { addTicketRules, validate } from "../middleware/validators.js";
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.get("/stats", protect, staffOnly, getTicketStats);
 // Tenant ticket endpoint (must be before /:id)
 router.get("/tenant/my-tickets", protect, getTenantTickets);
 router.get("/:id", protect, staffOnly, getTicket);
-router.post("/", protect, addTicket); // tenants or staff can create
+router.post("/", protect, addTicketRules, validate, addTicket); // tenants or staff can create
 router.put("/:id", protect, staffOnly, updateTicket);
 router.delete("/:id", protect, staffOnly, deleteTicket);
 

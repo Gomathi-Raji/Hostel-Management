@@ -68,7 +68,7 @@ const AddNewTicket = () => {
       </div>
 
       {/* Form */}
-  <div className="bg-card rounded-xl shadow-lg border border-gray-200 p-8 max-w-4xl">
+  <div className="bg-card rounded-xl shadow-lg border border-border p-8 max-w-4xl">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Tenant Name */}

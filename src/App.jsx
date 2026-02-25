@@ -30,6 +30,7 @@ import StaffPayrollManagement from "./pages/admin/StaffPayrollManagement"; // St
 import AdminProfile from "./pages/admin/AdminProfile"; // Admin Profile
 
 import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Profile from "./pages/Profile";
 import TenantOnboarding from "./pages/TenantOnboarding";
 
@@ -131,6 +132,9 @@ const App = () => {
 
           {/* FORGOT PASSWORD */}
           <Route path="/forgot-password" element={<ForgotPassword />} />
+
+          {/* RESET PASSWORD */}
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* REGISTER */}
           <Route

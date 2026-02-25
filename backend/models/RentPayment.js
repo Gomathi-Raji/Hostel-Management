@@ -10,5 +10,9 @@ const rentPaymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+rentPaymentSchema.index({ userId: 1 });
+rentPaymentSchema.index({ status: 1 });
+rentPaymentSchema.index({ dueDate: -1 });
+
 const RentPayment = mongoose.model("RentPayment", rentPaymentSchema);
 export default RentPayment;

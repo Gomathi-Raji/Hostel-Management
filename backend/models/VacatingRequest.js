@@ -16,5 +16,9 @@ const vacatingRequestSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+vacatingRequestSchema.index({ tenant: 1, status: 1 });
+vacatingRequestSchema.index({ status: 1 });
+vacatingRequestSchema.index({ createdAt: -1 });
+
 const VacatingRequest = mongoose.model("VacatingRequest", vacatingRequestSchema);
 export default VacatingRequest;

@@ -18,5 +18,10 @@ const tenantSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+tenantSchema.index({ active: 1 });
+tenantSchema.index({ room: 1 });
+tenantSchema.index({ email: 1 });
+tenantSchema.index({ createdAt: -1 });
+
 const Tenant = mongoose.model("Tenant", tenantSchema);
 export default Tenant;

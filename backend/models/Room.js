@@ -13,5 +13,9 @@ const roomSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+roomSchema.index({ status: 1 });
+roomSchema.index({ active: 1 });
+roomSchema.index({ type: 1, status: 1 });
+
 const Room = mongoose.model("Room", roomSchema);
 export default Room;

@@ -40,6 +40,19 @@ export async function apiFetch(path, options = {}) {
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
 
+  // Auto-logout on 401 (expired/invalid token)
+  if (res.status === 401) {
+    setToken(null);
+    try {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+    } catch (e) {}
+    // Redirect to login if not already there
+    if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
+      window.location.href = "/login";
+    }
+  }
+
   const text = await res.text();
   try {
     const data = text ? JSON.parse(text) : null;

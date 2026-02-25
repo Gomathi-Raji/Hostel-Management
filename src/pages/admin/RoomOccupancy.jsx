@@ -6,6 +6,8 @@ import {
   Users,
   Wrench,
   X,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import apiFetch from '@/lib/apiClient';
 
@@ -17,6 +19,8 @@ const RoomOccupancy = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editingRoom, setEditingRoom] = useState(null);
+  const [editForm, setEditForm] = useState({ number: "", type: "single", capacity: 1, rent: 0, status: "available" });
 
   const roomTypes = ["single", "double", "shared"];
 
@@ -112,6 +116,45 @@ const RoomOccupancy = () => {
     } catch (err) {
       console.error('Error adding room:', err);
       alert(err.message || 'Failed to add room');
+    }
+  };
+
+  const handleEditRoom = (room) => {
+    setEditingRoom(room);
+    setEditForm({
+      number: room.number,
+      type: room.type,
+      capacity: room.capacity,
+      rent: room.rent,
+      status: room.status,
+    });
+  };
+
+  const handleUpdateRoom = async (e) => {
+    e.preventDefault();
+    try {
+      await apiFetch(`/rooms/${editingRoom._id}`, {
+        method: 'PUT',
+        body: editForm
+      });
+      alert('Room updated successfully!');
+      setEditingRoom(null);
+      loadRooms();
+    } catch (err) {
+      console.error('Error updating room:', err);
+      alert(err.message || 'Failed to update room');
+    }
+  };
+
+  const handleDeleteRoom = async (room) => {
+    if (!window.confirm(`Are you sure you want to delete room ${room.number}?`)) return;
+    try {
+      await apiFetch(`/rooms/${room._id}`, { method: 'DELETE' });
+      alert('Room deleted successfully!');
+      loadRooms();
+    } catch (err) {
+      console.error('Error deleting room:', err);
+      alert(err.message || 'Failed to delete room');
     }
   };
 
@@ -240,6 +283,14 @@ const RoomOccupancy = () => {
                     </div>
                   )}
                 </div>
+                <div className="flex gap-2 mt-4 pt-3 border-t border-border">
+                  <button onClick={() => handleEditRoom(room)} className="flex-1 flex items-center justify-center gap-1 text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 py-1.5 rounded-lg transition-colors">
+                    <Edit className="h-3.5 w-3.5" /> Edit
+                  </button>
+                  <button onClick={() => handleDeleteRoom(room)} className="flex-1 flex items-center justify-center gap-1 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 py-1.5 rounded-lg transition-colors">
+                    <Trash2 className="h-3.5 w-3.5" /> Delete
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -300,6 +351,58 @@ const RoomOccupancy = () => {
                 <div>Shared facilities</div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Room Modal */}
+      {editingRoom && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-card rounded-lg w-full max-w-md shadow-lg">
+            <div className="flex justify-between items-center p-4 border-b border-border">
+              <h2 className="text-xl font-semibold text-foreground">Edit Room {editingRoom.number}</h2>
+              <button onClick={() => setEditingRoom(null)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <form onSubmit={handleUpdateRoom} className="p-4 space-y-4">
+              <div>
+                <label className="text-foreground font-medium">Room Number</label>
+                <input type="text" value={editForm.number} onChange={(e) => setEditForm({ ...editForm, number: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground" required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-foreground font-medium">Type</label>
+                  <select value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground">
+                    <option value="single">Single</option>
+                    <option value="double">Double</option>
+                    <option value="shared">Shared</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-foreground font-medium">Status</label>
+                  <select value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground">
+                    <option value="available">Available</option>
+                    <option value="occupied">Occupied</option>
+                    <option value="maintenance">Maintenance</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-foreground font-medium">Capacity</label>
+                  <input type="number" min="1" value={editForm.capacity} onChange={(e) => setEditForm({ ...editForm, capacity: parseInt(e.target.value) })} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground" required />
+                </div>
+                <div>
+                  <label className="text-foreground font-medium">Rent (₹)</label>
+                  <input type="number" min="0" value={editForm.rent} onChange={(e) => setEditForm({ ...editForm, rent: parseInt(e.target.value) })} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground" required />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">Update Room</button>
+                <button type="button" onClick={() => setEditingRoom(null)} className="flex-1 bg-card text-foreground py-2 rounded-lg hover:bg-muted transition-colors border border-border">Cancel</button>
+              </div>
+            </form>
           </div>
         </div>
       )}

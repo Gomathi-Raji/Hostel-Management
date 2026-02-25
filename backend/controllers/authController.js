@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
@@ -70,6 +71,7 @@ export const getProfile = async (req, res) => {
       phone: user.phone,
       role: user.role,
       tenantId: user.tenantId,
+      profileImage: user.profileImage || null,
       settings: user.settings || {
         notifications: {
           emailNotifications: {
@@ -106,8 +108,25 @@ export const updateProfile = async (req, res) => {
       email: user.email,
       phone: user.phone,
       role: user.role,
+      profileImage: user.profileImage || null,
       settings: user.settings,
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const uploadProfileImage = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
+    const imageUrl = `/uploads/${req.file.filename}`;
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { profileImage: imageUrl },
+      { new: true }
+    ).select('-password');
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ profileImage: user.profileImage, message: "Profile image uploaded successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -150,6 +169,54 @@ export const changePassword = async (req, res) => {
     await user.save();
 
     res.json({ message: "Password changed successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: "No account found with that email" });
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = Date.now() + 30 * 60 * 1000; // 30 minutes
+    await user.save();
+
+    // In production, send email with resetToken. For now, return it.
+    res.json({
+      message: "Password reset token generated. Use it within 30 minutes.",
+      resetToken, // In production, send via email instead
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  const { token, password } = req.body;
+  try {
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) return res.status(400).json({ message: "Invalid or expired reset token" });
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.json({ message: "Password reset successful. You can now login with your new password." });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

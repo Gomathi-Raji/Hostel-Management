@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { DollarSign, Clock, AlertTriangle, Download, Search, Filter } from "lucide-react";
+import { DollarSign, Clock, AlertTriangle, Download, Search, Filter, Plus, Trash2, X } from "lucide-react";
 import apiFetch from '@/lib/apiClient';
+import Pagination from '@/components/Pagination';
 
 const PaymentTracking = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [payments, setPayments] = useState([]);
+  const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [paymentForm, setPaymentForm] = useState({ tenant: "", amount: "", method: "online", type: "rent", dueDate: "", status: "pending", notes: "" });
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [stats, setStats] = useState({
     totalAmount: 0,
     paid: 0,
@@ -19,7 +25,17 @@ const PaymentTracking = () => {
   useEffect(() => {
     loadPayments();
     loadPaymentStats();
+    loadTenants();
   }, []);
+
+  const loadTenants = async () => {
+    try {
+      const response = await apiFetch('/tenants');
+      setTenants(response.tenants || []);
+    } catch (err) {
+      console.error('Error loading tenants:', err);
+    }
+  };
 
   const loadPayments = async () => {
     try {
@@ -61,16 +77,62 @@ const PaymentTracking = () => {
 
   const markAsPaid = async (paymentId) => {
     try {
-      await apiFetch(`/payments/${paymentId}/status`, {
-        method: 'PATCH',
-        body: { status: 'paid' }
+      await apiFetch(`/payments/${paymentId}`, {
+        method: 'PUT',
+        body: { status: 'completed', paidAt: new Date().toISOString() }
       });
-      // Reload payments and stats
       loadPayments();
       loadPaymentStats();
     } catch (err) {
       console.error('Error marking payment as paid:', err);
       alert(err.message || 'Failed to mark payment as paid');
+    }
+  };
+
+  const handleAddPayment = async (e) => {
+    e.preventDefault();
+    try {
+      await apiFetch('/payments', {
+        method: 'POST',
+        body: { ...paymentForm, amount: parseFloat(paymentForm.amount) }
+      });
+      alert('Payment added successfully!');
+      setShowAddModal(false);
+      setPaymentForm({ tenant: "", amount: "", method: "online", type: "rent", dueDate: "", status: "pending", notes: "" });
+      loadPayments();
+      loadPaymentStats();
+    } catch (err) {
+      alert(err.message || 'Failed to add payment');
+    }
+  };
+
+  const handleDeletePayment = async (paymentId) => {
+    if (!window.confirm('Are you sure you want to delete this payment record?')) return;
+    try {
+      await apiFetch(`/payments/${paymentId}`, { method: 'DELETE' });
+      loadPayments();
+      loadPaymentStats();
+    } catch (err) {
+      alert(err.message || 'Failed to delete payment');
+    }
+  };
+
+  const handleSendReminder = async (payment) => {
+    if (!payment.tenant?.phone) {
+      alert('Tenant phone number not available');
+      return;
+    }
+    try {
+      await apiFetch('/tenants/send-sms', {
+        method: 'POST',
+        body: {
+          tenantIds: [payment.tenant._id],
+          message: `Your payment of ₹${payment.amount.toLocaleString()} is overdue. Please make the payment at your earliest convenience.`
+        }
+      });
+      alert('Reminder sent successfully!');
+    } catch (err) {
+      alert(err.message || 'Failed to send reminder');
     }
   };
 
@@ -110,6 +172,11 @@ const PaymentTracking = () => {
     return matchesSearch && matchesFilter;
   });
 
+  const totalPages = Math.ceil(filteredRecords.length / itemsPerPage);
+  const paginatedRecords = filteredRecords.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  useEffect(() => { setCurrentPage(1); }, [searchTerm, filterStatus]);
+
   return (
   <div className="p-6 bg-background min-h-screen">
       {/* Header Cards */}
@@ -141,12 +208,20 @@ const PaymentTracking = () => {
           <h1 className="text-3xl font-bold text-foreground">Payment Tracking</h1>
           <p className="text-muted-foreground mt-1">Monitor and manage tenant payments</p>
         </div>
-        <button
-          onClick={handleExportData}
-          className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md border border-blue-700 hover:bg-blue-700 hover:shadow-lg transition-all duration-300"
-        >
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-3 rounded-lg font-semibold shadow-md hover:bg-green-700 transition-all duration-300"
+          >
+            <Plus className="h-5 w-5" /> Add Payment
+          </button>
+          <button
+            onClick={handleExportData}
+            className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md border border-blue-700 hover:bg-blue-700 hover:shadow-lg transition-all duration-300"
+          >
           <Download className="h-5 w-5" /> Export Data
         </button>
+        </div>
       </div>
 
       {/* Search & Filter */}
@@ -207,7 +282,7 @@ const PaymentTracking = () => {
                     {error}
                   </td>
                 </tr>
-              ) : filteredRecords.length > 0 ? filteredRecords.map(payment => (
+              ) : paginatedRecords.length > 0 ? paginatedRecords.map(payment => (
                 <tr key={payment._id} className="border-b border-border hover:bg-muted">
                   <td className="p-4 text-sm font-medium text-foreground">
                     {payment.tenant ? `${payment.tenant.firstName} ${payment.tenant.lastName}` : 'Unknown'}
@@ -220,8 +295,8 @@ const PaymentTracking = () => {
                   <td className="p-4 text-sm text-muted-foreground">{payment.status === "paid" && payment.paidDate ? new Date(payment.paidDate).toLocaleDateString() : "-"}</td>
                   <td className="p-4 flex flex-col gap-2">
                     {payment.status === "pending" && <button onClick={() => markAsPaid(payment._id)} className="text-xs bg-yellow-600 text-white px-3 py-2 rounded-lg hover:bg-yellow-700 transition-colors font-medium">Mark Paid</button>}
-                    {payment.status === "overdue" && <button className="text-xs bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors font-medium">Send Reminder</button>}
-                    <button className="text-xs text-blue-600 hover:text-blue-800">View</button>
+                    {payment.status === "overdue" && <button onClick={() => handleSendReminder(payment)} className="text-xs bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors font-medium">Send Reminder</button>}
+                    <button onClick={() => handleDeletePayment(payment._id)} className="text-xs text-red-600 hover:text-red-800">Delete</button>
                   </td>
                 </tr>
               )) : (
@@ -241,7 +316,7 @@ const PaymentTracking = () => {
             <p className="text-center text-muted-foreground">Loading payments...</p>
           ) : error ? (
             <p className="text-center text-red-500">{error}</p>
-          ) : filteredRecords.length > 0 ? filteredRecords.map(payment => (
+          ) : paginatedRecords.length > 0 ? paginatedRecords.map(payment => (
             <div key={payment._id} className="bg-card border border-border rounded-lg shadow p-4 flex flex-col gap-2">
               <div className="flex justify-between items-center">
                 <div>
@@ -258,8 +333,8 @@ const PaymentTracking = () => {
               <div className="text-sm text-muted-foreground">Paid: {payment.status === "paid" && payment.paidDate ? new Date(payment.paidDate).toLocaleDateString() : "-"}</div>
               <div className="flex flex-wrap gap-2 mt-2">
                 {payment.status === "pending" && <button onClick={() => markAsPaid(payment._id)} className="text-xs bg-yellow-600 text-white px-3 py-2 rounded-lg hover:bg-yellow-700 transition-colors font-medium">Mark Paid</button>}
-                {payment.status === "overdue" && <button className="text-xs bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors font-medium">Send Reminder</button>}
-                <button className="text-xs text-blue-600 hover:text-blue-800">View</button>
+                {payment.status === "overdue" && <button onClick={() => handleSendReminder(payment)} className="text-xs bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition-colors font-medium">Send Reminder</button>}
+                <button onClick={() => handleDeletePayment(payment._id)} className="text-xs text-red-600 hover:text-red-800">Delete</button>
               </div>
             </div>
           )) : (
@@ -267,6 +342,75 @@ const PaymentTracking = () => {
           )}
         </div>
       </div>
+
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+
+      {/* Add Payment Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-card rounded-lg w-full max-w-md shadow-lg">
+            <div className="flex justify-between items-center p-4 border-b border-border">
+              <h2 className="text-xl font-semibold text-foreground">Add Payment</h2>
+              <button onClick={() => setShowAddModal(false)} className="text-muted-foreground hover:text-foreground"><X className="h-6 w-6" /></button>
+            </div>
+            <form onSubmit={handleAddPayment} className="p-4 space-y-4">
+              <div>
+                <label className="text-foreground font-medium">Tenant <span className="text-red-500">*</span></label>
+                <select value={paymentForm.tenant} onChange={(e) => setPaymentForm({ ...paymentForm, tenant: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground" required>
+                  <option value="">Select Tenant</option>
+                  {tenants.map(t => <option key={t._id} value={t._id}>{t.firstName} {t.lastName}</option>)}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-foreground font-medium">Amount (₹) <span className="text-red-500">*</span></label>
+                  <input type="number" min="1" value={paymentForm.amount} onChange={(e) => setPaymentForm({ ...paymentForm, amount: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground" required />
+                </div>
+                <div>
+                  <label className="text-foreground font-medium">Type</label>
+                  <select value={paymentForm.type} onChange={(e) => setPaymentForm({ ...paymentForm, type: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground">
+                    <option value="rent">Rent</option>
+                    <option value="deposit">Deposit</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-foreground font-medium">Method</label>
+                  <select value={paymentForm.method} onChange={(e) => setPaymentForm({ ...paymentForm, method: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground">
+                    <option value="online">Online</option>
+                    <option value="cash">Cash</option>
+                    <option value="card">Card</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="check">Check</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-foreground font-medium">Status</label>
+                  <select value={paymentForm.status} onChange={(e) => setPaymentForm({ ...paymentForm, status: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground">
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-foreground font-medium">Due Date</label>
+                <input type="date" value={paymentForm.dueDate} onChange={(e) => setPaymentForm({ ...paymentForm, dueDate: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground" />
+              </div>
+              <div>
+                <label className="text-foreground font-medium">Notes</label>
+                <textarea value={paymentForm.notes} onChange={(e) => setPaymentForm({ ...paymentForm, notes: e.target.value })} className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground" rows={2} />
+              </div>
+              <div className="flex gap-2">
+                <button type="submit" className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">Add Payment</button>
+                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 bg-card text-foreground py-2 rounded-lg hover:bg-muted border border-border">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
