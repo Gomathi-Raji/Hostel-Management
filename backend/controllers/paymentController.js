@@ -67,7 +67,8 @@ export const getPayment = async (req, res) => {
 
 export const addPayment = async (req, res) => {
   try {
-    const payment = await Payment.create(req.body);
+    const { tenant, amount, method, paidAt, notes, status, reference, dueDate, type } = req.body;
+    const payment = await Payment.create({ tenant, amount, method, paidAt, notes, status, reference, dueDate, type });
     const populatedPayment = await Payment.findById(payment._id).populate("tenant", "firstName lastName email phone");
     res.status(201).json(populatedPayment);
   } catch (error) {
@@ -77,7 +78,18 @@ export const addPayment = async (req, res) => {
 
 export const updatePayment = async (req, res) => {
   try {
-    const payment = await Payment.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    const { tenant, amount, method, paidAt, notes, status, reference, dueDate, type } = req.body;
+    const allowedFields = {};
+    if (tenant !== undefined) allowedFields.tenant = tenant;
+    if (amount !== undefined) allowedFields.amount = amount;
+    if (method !== undefined) allowedFields.method = method;
+    if (paidAt !== undefined) allowedFields.paidAt = paidAt;
+    if (notes !== undefined) allowedFields.notes = notes;
+    if (status !== undefined) allowedFields.status = status;
+    if (reference !== undefined) allowedFields.reference = reference;
+    if (dueDate !== undefined) allowedFields.dueDate = dueDate;
+    if (type !== undefined) allowedFields.type = type;
+    const payment = await Payment.findByIdAndUpdate(req.params.id, allowedFields, { new: true })
       .populate("tenant", "firstName lastName email phone");
     if (!payment) return res.status(404).json({ message: "Payment not found" });
     res.json(payment);
@@ -90,7 +102,7 @@ export const deletePayment = async (req, res) => {
   try {
     const payment = await Payment.findById(req.params.id);
     if (!payment) return res.status(404).json({ message: "Payment not found" });
-    await payment.remove();
+    await Payment.findByIdAndDelete(req.params.id);
     res.json({ message: "Payment removed" });
   } catch (error) {
     res.status(500).json({ message: error.message });

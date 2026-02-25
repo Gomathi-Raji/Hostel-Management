@@ -82,7 +82,7 @@ const Register = () => {
     try {
       const res = await apiFetch("/auth/register", {
         method: "POST",
-        body: { name: formData.name, email: formData.email, phone: formData.number, password: formData.password, role: formData.role },
+        body: { name: formData.name, email: formData.email, phone: formData.number, password: formData.password },
       });
       if (res.token) setToken(res.token);
       alert("Account created successfully!");
@@ -172,22 +172,6 @@ const Register = () => {
               required
               disabled={isOtpSent}
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">{t('register.role')}</label>
-            <select
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-              required
-              disabled={isOtpSent}
-            >
-              <option value="tenant">{t('register.roleOptions.tenant')}</option>
-              <option value="staff">{t('register.roleOptions.staff')}</option>
-              <option value="admin">{t('register.roleOptions.admin')}</option>
-            </select>
           </div>
 
           <div>

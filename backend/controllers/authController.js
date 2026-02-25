@@ -7,13 +7,13 @@ const generateToken = (id) => {
 };
 
 export const register = async (req, res) => {
-  const { name, email, phone, password, role } = req.body;
+  const { name, email, phone, password } = req.body;
   try {
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ message: "User already exists" });
     const salt = await bcrypt.genSalt(10);
     const hashed = await bcrypt.hash(password, salt);
-    const user = await User.create({ name, email, phone, password: hashed, role });
+    const user = await User.create({ name, email, phone, password: hashed, role: "tenant" });
     res.status(201).json({
       id: user._id,
       name: user.name,

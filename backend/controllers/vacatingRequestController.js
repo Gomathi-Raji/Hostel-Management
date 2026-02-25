@@ -12,8 +12,11 @@ export const getVacatingRequests = async (req, res) => {
     }
 
     const requests = await VacatingRequest.find(query)
-      .populate("tenant", "firstName lastName email phone")
-      .populate("tenant.room", "number")
+      .populate({
+        path: "tenant",
+        select: "firstName lastName email phone",
+        populate: { path: "room", select: "number" }
+      })
       .populate("approvedBy", "name email")
       .sort({ createdAt: -1 })
       .limit(limit * 1)
@@ -35,8 +38,11 @@ export const getVacatingRequests = async (req, res) => {
 export const getVacatingRequest = async (req, res) => {
   try {
     const request = await VacatingRequest.findById(req.params.id)
-      .populate("tenant", "firstName lastName email phone")
-      .populate("tenant.room", "number")
+      .populate({
+        path: "tenant",
+        select: "firstName lastName email phone",
+        populate: { path: "room", select: "number" }
+      })
       .populate("approvedBy", "name email");
     if (!request) return res.status(404).json({ message: "Vacating request not found" });
     res.json(request);
@@ -95,7 +101,15 @@ export const addVacatingRequest = async (req, res) => {
 
 export const updateVacatingRequest = async (req, res) => {
   try {
-    const request = await VacatingRequest.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    const { status, approvedBy, approvalDate, rejectionReason, finalSettlementAmount, securityDepositRefund } = req.body;
+    const allowedFields = {};
+    if (status !== undefined) allowedFields.status = status;
+    if (approvedBy !== undefined) allowedFields.approvedBy = approvedBy;
+    if (approvalDate !== undefined) allowedFields.approvalDate = approvalDate;
+    if (rejectionReason !== undefined) allowedFields.rejectionReason = rejectionReason;
+    if (finalSettlementAmount !== undefined) allowedFields.finalSettlementAmount = finalSettlementAmount;
+    if (securityDepositRefund !== undefined) allowedFields.securityDepositRefund = securityDepositRefund;
+    const request = await VacatingRequest.findByIdAndUpdate(req.params.id, allowedFields, { new: true })
       .populate("tenant", "firstName lastName email phone")
       .populate("approvedBy", "name email");
     if (!request) return res.status(404).json({ message: "Vacating request not found" });
@@ -109,7 +123,7 @@ export const deleteVacatingRequest = async (req, res) => {
   try {
     const request = await VacatingRequest.findById(req.params.id);
     if (!request) return res.status(404).json({ message: "Vacating request not found" });
-    await request.remove();
+    await VacatingRequest.findByIdAndDelete(req.params.id);
     res.json({ message: "Vacating request removed" });
   } catch (error) {
     res.status(500).json({ message: error.message });

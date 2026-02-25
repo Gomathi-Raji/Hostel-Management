@@ -10,6 +10,6 @@ router.get("/profile", protect, getProfile);
 router.put("/profile", protect, updateProfile);
 router.put("/settings", protect, updateSettings);
 router.put("/change-password", protect, changePassword);
-router.put("/update-tenant", updateUserTenant);
+router.put("/update-tenant", protect, updateUserTenant);
 
 export default router;

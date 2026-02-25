@@ -11,6 +11,7 @@ import {
   ChevronUp,
   Sun,
   Moon,
+  LogOut,
 } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import apiFetch, { setToken } from "@/lib/apiClient";
@@ -29,6 +30,17 @@ const Navbar = ({ onLogout }) => {
 
   const handleThemeToggle = () => {
     updateTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await apiFetch('/auth/logout', { method: 'POST' });
+    } catch (e) {
+      // ignore logout API errors
+    }
+    setToken(null);
+    if (onLogout) onLogout();
+    navigate('/login');
   };
 
   // Mobile-specific dropdown handler
@@ -187,6 +199,17 @@ const Navbar = ({ onLogout }) => {
             <div className="flex items-center">
               <LanguageSelector />
             </div>
+
+            {/* Logout Button */}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              title={t('navbar.logout', 'Logout')}
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('navbar.logout', 'Logout')}</span>
+            </button>
           </div>
 
           {/* Mobile menu button */}
@@ -221,12 +244,12 @@ const Navbar = ({ onLogout }) => {
                   }`}
                 >
                   <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
+                  <span>{t(item.label)}</span>
                 </Link>
               );
             })}
 
-            {/* Forms Dropdown - Mobile */}
+            {/* Forms Dropdown - Mobile */}}
             <div className="space-y-1" ref={mobileFormsRef}>
               <div
                 onClick={handleMobileFormsToggle}
@@ -247,7 +270,7 @@ const Navbar = ({ onLogout }) => {
               >
                 <div className="flex items-center space-x-2 pointer-events-none">
                   <FileText className="h-4 w-4" />
-                  <span>Forms</span>
+                  <span>{t('navbar.forms.label', 'Forms')}</span>
                 </div>
                 <div
                   className="pointer-events-none transition-transform duration-200"
@@ -292,7 +315,7 @@ const Navbar = ({ onLogout }) => {
                         animationDelay: `${index * 50}ms`,
                       }}
                     >
-                      {item.label}
+                      {t(item.label)}
                     </Link>
                   ))}
               </div>
@@ -306,7 +329,7 @@ const Navbar = ({ onLogout }) => {
               className="flex items-center space-x-2 w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
             >
               <User className="h-4 w-4" />
-              <span>Profile</span>
+              <span>{t('navbar.profile', 'Profile')}</span>
             </Link>
 
             {/* Theme Toggle - Mobile */}
@@ -323,7 +346,20 @@ const Navbar = ({ onLogout }) => {
               ) : (
                 <Moon className="h-4 w-4" />
               )}
-              <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+              <span>{theme === 'dark' ? t('navbar.theme.light', 'Light Mode') : t('navbar.theme.dark', 'Dark Mode')}</span>
+            </button>
+
+            {/* Logout Button - Mobile */}
+            <button
+              type="button"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                handleLogout();
+              }}
+              className="flex items-center space-x-2 w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>{t('navbar.logout', 'Logout')}</span>
             </button>
           </div>
         </div>

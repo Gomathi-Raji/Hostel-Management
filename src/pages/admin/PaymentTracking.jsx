@@ -117,13 +117,14 @@ const PaymentTracking = () => {
         {Object.entries(stats).map(([key, value]) => {
           const icons = { totalAmount: DollarSign, paid: DollarSign, pending: Clock, overdue: AlertTriangle };
           const colors = { totalAmount: "text-blue-600", paid: "text-green-600", pending: "text-yellow-600", overdue: "text-red-600" };
+          const isAmount = key === 'totalAmount';
           const Icon = icons[key];
           return (
             <div key={key} className="bg-card rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-border">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
-                  <p className={`text-3xl font-bold mt-1 ${colors[key]}`}>₹{value.toLocaleString()}</p>
+                  <p className={`text-3xl font-bold mt-1 ${colors[key]}`}>{isAmount ? `₹${value.toLocaleString()}` : value.toLocaleString()}</p>
                 </div>
                 <div className={`bg-muted p-3 rounded-lg`}>
                   <Icon className={`h-8 w-8 ${colors[key]}`} />

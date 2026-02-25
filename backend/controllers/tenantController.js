@@ -180,7 +180,7 @@ export const deleteTenant = async (req, res) => {
       await Room.findByIdAndUpdate(tenant.room, { $inc: { occupancy: -1 } });
     }
 
-    await tenant.remove();
+    await Tenant.findByIdAndDelete(req.params.id);
     res.json({ message: "Tenant removed" });
   } catch (error) {
     res.status(500).json({ message: error.message });

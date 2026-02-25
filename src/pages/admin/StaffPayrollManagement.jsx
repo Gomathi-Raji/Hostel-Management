@@ -438,7 +438,7 @@ const StaffPayrollManagement = () => {
     total: staffMembers.length,
     active: staffMembers.filter(s => s.status === "Active").length,
     inactive: staffMembers.filter(s => s.status === "Inactive").length,
-    avgAttendance: Math.round(staffMembers.reduce((sum, staff) => sum + staff.attendanceRate, 0) / staffMembers.length),
+    avgAttendance: staffMembers.length > 0 ? Math.round(staffMembers.reduce((sum, staff) => sum + staff.attendanceRate, 0) / staffMembers.length) : 0,
     totalSalaryBudget: staffMembers.filter(s => s.status === "Active").reduce((sum, staff) => sum + staff.salary, 0)
   };
 

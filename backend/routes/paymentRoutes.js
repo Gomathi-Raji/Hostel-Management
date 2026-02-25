@@ -14,12 +14,11 @@ const router = express.Router();
 
 router.get("/", protect, adminOnly, getPayments);
 router.get("/stats", protect, adminOnly, getPaymentStats);
+// Tenant payment/invoice endpoint (must be before /:id)
+router.get("/tenant/my-payments", protect, getTenantPayments);
 router.get("/:id", protect, adminOnly, getPayment);
 router.post("/", protect, adminOnly, addPayment);
 router.put("/:id", protect, adminOnly, updatePayment);
 router.delete("/:id", protect, adminOnly, deletePayment);
-
-// Tenant payment/invoice endpoint
-router.get("/tenant/my-payments", protect, getTenantPayments);
 
 export default router;
