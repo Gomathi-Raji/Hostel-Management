@@ -41,7 +41,8 @@ const ExpensesManagement = () => {
     pending: 0,
     pendingAmount: 0,
     approved: 0,
-    approvedAmount: 0
+    approvedAmount: 0,
+    overdue: 0
   });
   
   // Form state
@@ -114,7 +115,8 @@ const ExpensesManagement = () => {
         pending: statsData.byStatus?.find(s => s._id === 'pending')?.count || 0,
         pendingAmount: statsData.byStatus?.find(s => s._id === 'pending')?.total || 0,
         approved: statsData.byStatus?.find(s => s._id === 'approved')?.count || 0,
-        approvedAmount: statsData.byStatus?.find(s => s._id === 'approved')?.total || 0
+        approvedAmount: statsData.byStatus?.find(s => s._id === 'approved')?.total || 0,
+        overdue: statsData.byStatus?.find(s => s._id === 'overdue')?.count || 0
       });
     } catch (err) {
       console.error('Error loading expense stats:', err);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { setToken } from "@/lib/apiClient";
+import apiFetch, { setToken, loadToken } from "@/lib/apiClient";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Login from "./pages/Login";
@@ -39,20 +39,32 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const initializeApp = () => {
+    const initializeApp = async () => {
       try {
-        console.log("🔄 Clearing previous session data...");
-        localStorage.removeItem("isAuthenticated");
-        localStorage.removeItem("userType");
-        localStorage.removeItem("authToken");
-        sessionStorage.clear();
-        
+        const token = loadToken();
+        if (token) {
+          // Validate existing token by fetching profile
+          const profile = await apiFetch('/auth/profile');
+          if (profile && profile.role) {
+            setIsAuthenticated(true);
+            setUserType(profile.role === 'admin' ? 'admin' : 'user');
+            console.log("✅ Session restored for:", profile.role);
+          } else {
+            // Invalid token/profile
+            setToken(null);
+            setIsAuthenticated(false);
+            setUserType("user");
+          }
+        } else {
+          setIsAuthenticated(false);
+          setUserType("user");
+          console.log("✅ No session found - User must login");
+        }
+      } catch (error) {
+        console.log("Session expired or invalid - User must login");
+        setToken(null);
         setIsAuthenticated(false);
         setUserType("user");
-        
-        console.log("✅ App initialized - User must login");
-      } catch (error) {
-        console.error("Error initializing app:", error);
       } finally {
         setIsLoading(false);
       }

@@ -28,7 +28,7 @@ const TenantOnboarding = () => {
   const loadAvailableRooms = async () => {
     try {
       const response = await apiFetch('/rooms');
-      setRooms(response.rooms.filter(room => room.occupancy < room.capacity) || []);
+      setRooms((response.rooms || []).filter(room => room.occupancy < room.capacity));
     } catch (error) {
       console.error('Error loading rooms:', error);
     }

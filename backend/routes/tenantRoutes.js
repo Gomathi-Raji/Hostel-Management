@@ -17,15 +17,14 @@ const router = express.Router();
 
 router.get("/", protect, getTenants);
 router.get("/stats", protect, adminOnly, getTenantStats);
+// Tenant dashboard endpoint (must be before /:id)
+router.get("/dashboard/my-info", protect, getTenantDashboard);
 router.get("/:id", protect, getTenant);
 // only admin can add or delete tenants
 router.post("/", protect, adminOnly, addTenant);
 router.post("/onboard", protect, onboardTenant);
 router.put("/:id", protect, adminOnly, updateTenant);
 router.delete("/:id", protect, adminOnly, deleteTenant);
-
-// Tenant dashboard endpoint
-router.get("/dashboard/my-info", protect, getTenantDashboard);
 
 // Send SMS to selected tenants
 router.post("/send-sms", protect, adminOnly, sendSMSToTenants);

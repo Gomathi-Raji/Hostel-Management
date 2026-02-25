@@ -132,7 +132,7 @@ export const deleteExchangeRequest = async (req, res) => {
   try {
     const request = await ExchangeRequest.findById(req.params.id);
     if (!request) return res.status(404).json({ message: "Exchange request not found" });
-    await request.remove();
+    await ExchangeRequest.findByIdAndDelete(req.params.id);
     res.json({ message: "Exchange request removed" });
   } catch (error) {
     res.status(500).json({ message: error.message });

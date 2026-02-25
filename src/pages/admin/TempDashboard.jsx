@@ -126,21 +126,6 @@ const AdminDashboard = () => {
         overduePayments,
       });
 
-      setRoomOccupancy({
-        totalTenants,
-        monthlyRevenue,
-        occupancyRate,
-        overduePayments,
-      });
-
-      // Set room occupancy
-      setRoomOccupancy({
-        available: rooms.filter(r => r.status === 'available').length,
-        occupied: occupiedRooms,
-        maintenance: rooms.filter(r => r.status === 'maintenance').length,
-        total: totalRooms,
-      });
-
       // Process recent payments (last 5)
       const recentPaymentsData = totalPayments
         .slice(-5)

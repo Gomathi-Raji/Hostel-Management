@@ -91,7 +91,7 @@ export const deleteExpense = async (req, res) => {
   try {
     const expense = await Expense.findById(req.params.id);
     if (!expense) return res.status(404).json({ message: "Expense not found" });
-    await expense.remove();
+    await Expense.findByIdAndDelete(req.params.id);
     res.json({ message: "Expense removed" });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -53,24 +53,6 @@ const ChatbotVoiceButtons = () => {
       >
         <MessageCircle className="h-6 w-6 sm:h-5 sm:w-5" />
       </button>
-
-      {/* Mobile Responsive Adjustments */}
-      <style jsx>{`
-        @media (max-width: 640px) {
-          .fixed {
-            bottom: 1rem;
-            right: 1rem;
-          }
-          .w-14 {
-            width: 3rem;
-            height: 3rem;
-          }
-          .h-6 {
-            width: 1.25rem;
-            height: 1.25rem;
-          }
-        }
-      `}</style>
     </div>
   );
 };

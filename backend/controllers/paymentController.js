@@ -90,7 +90,7 @@ export const deletePayment = async (req, res) => {
   try {
     const payment = await Payment.findById(req.params.id);
     if (!payment) return res.status(404).json({ message: "Payment not found" });
-    await payment.remove();
+    await Payment.findByIdAndDelete(req.params.id);
     res.json({ message: "Payment removed" });
   } catch (error) {
     res.status(500).json({ message: error.message });
