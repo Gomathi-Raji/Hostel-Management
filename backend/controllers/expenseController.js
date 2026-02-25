@@ -65,7 +65,8 @@ export const getExpense = async (req, res) => {
 
 export const addExpense = async (req, res) => {
   try {
-    const expense = await Expense.create(req.body);
+    const { category, subcategory, amount, description, supplier, paymentMethod, date, dueDate, status, approvedBy, paidBy, receipt, notes } = req.body;
+    const expense = await Expense.create({ category, subcategory, amount, description, supplier, paymentMethod, date, dueDate, status, approvedBy, paidBy, receipt, notes });
     const populatedExpense = await Expense.findById(expense._id)
       .populate("approvedBy", "name")
       .populate("paidBy", "name");
@@ -77,7 +78,22 @@ export const addExpense = async (req, res) => {
 
 export const updateExpense = async (req, res) => {
   try {
-    const expense = await Expense.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    const { category, subcategory, amount, description, supplier, paymentMethod, date, dueDate, status, approvedBy, paidBy, receipt, notes } = req.body;
+    const allowedFields = {};
+    if (category !== undefined) allowedFields.category = category;
+    if (subcategory !== undefined) allowedFields.subcategory = subcategory;
+    if (amount !== undefined) allowedFields.amount = amount;
+    if (description !== undefined) allowedFields.description = description;
+    if (supplier !== undefined) allowedFields.supplier = supplier;
+    if (paymentMethod !== undefined) allowedFields.paymentMethod = paymentMethod;
+    if (date !== undefined) allowedFields.date = date;
+    if (dueDate !== undefined) allowedFields.dueDate = dueDate;
+    if (status !== undefined) allowedFields.status = status;
+    if (approvedBy !== undefined) allowedFields.approvedBy = approvedBy;
+    if (paidBy !== undefined) allowedFields.paidBy = paidBy;
+    if (receipt !== undefined) allowedFields.receipt = receipt;
+    if (notes !== undefined) allowedFields.notes = notes;
+    const expense = await Expense.findByIdAndUpdate(req.params.id, allowedFields, { new: true })
       .populate("approvedBy", "name")
       .populate("paidBy", "name");
     if (!expense) return res.status(404).json({ message: "Expense not found" });

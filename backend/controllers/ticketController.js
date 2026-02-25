@@ -62,7 +62,8 @@ export const getTicket = async (req, res) => {
 
 export const addTicket = async (req, res) => {
   try {
-    const ticket = await Ticket.create(req.body);
+    const { title, description, tenant, status, assignedTo, priority, category, notes } = req.body;
+    const ticket = await Ticket.create({ title, description, tenant, status, assignedTo, priority, category, notes });
     const populatedTicket = await Ticket.findById(ticket._id)
       .populate("tenant")
       .populate("assignedTo", "name email");
@@ -74,7 +75,16 @@ export const addTicket = async (req, res) => {
 
 export const updateTicket = async (req, res) => {
   try {
-    const ticket = await Ticket.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    const { title, description, status, assignedTo, priority, category, notes } = req.body;
+    const allowedFields = {};
+    if (title !== undefined) allowedFields.title = title;
+    if (description !== undefined) allowedFields.description = description;
+    if (status !== undefined) allowedFields.status = status;
+    if (assignedTo !== undefined) allowedFields.assignedTo = assignedTo;
+    if (priority !== undefined) allowedFields.priority = priority;
+    if (category !== undefined) allowedFields.category = category;
+    if (notes !== undefined) allowedFields.notes = notes;
+    const ticket = await Ticket.findByIdAndUpdate(req.params.id, allowedFields, { new: true })
       .populate("tenant")
       .populate("assignedTo", "name email");
     if (!ticket) return res.status(404).json({ message: "Ticket not found" });

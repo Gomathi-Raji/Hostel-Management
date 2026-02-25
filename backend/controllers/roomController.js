@@ -52,7 +52,8 @@ export const getRoom = async (req, res) => {
 
 export const addRoom = async (req, res) => {
   try {
-    const room = await Room.create(req.body);
+    const { number, type, rent, capacity, status } = req.body;
+    const room = await Room.create({ number, type, rent, capacity, status });
     res.status(201).json(room);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -61,7 +62,15 @@ export const addRoom = async (req, res) => {
 
 export const updateRoom = async (req, res) => {
   try {
-    const room = await Room.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { number, type, rent, capacity, status, occupancy } = req.body;
+    const allowedFields = {};
+    if (number !== undefined) allowedFields.number = number;
+    if (type !== undefined) allowedFields.type = type;
+    if (rent !== undefined) allowedFields.rent = rent;
+    if (capacity !== undefined) allowedFields.capacity = capacity;
+    if (status !== undefined) allowedFields.status = status;
+    if (occupancy !== undefined) allowedFields.occupancy = occupancy;
+    const room = await Room.findByIdAndUpdate(req.params.id, allowedFields, { new: true });
     if (!room) return res.status(404).json({ message: "Room not found" });
     res.json(room);
   } catch (error) {

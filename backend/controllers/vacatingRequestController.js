@@ -101,7 +101,15 @@ export const addVacatingRequest = async (req, res) => {
 
 export const updateVacatingRequest = async (req, res) => {
   try {
-    const request = await VacatingRequest.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    const { status, approvedBy, approvalDate, rejectionReason, finalSettlementAmount, securityDepositRefund } = req.body;
+    const allowedFields = {};
+    if (status !== undefined) allowedFields.status = status;
+    if (approvedBy !== undefined) allowedFields.approvedBy = approvedBy;
+    if (approvalDate !== undefined) allowedFields.approvalDate = approvalDate;
+    if (rejectionReason !== undefined) allowedFields.rejectionReason = rejectionReason;
+    if (finalSettlementAmount !== undefined) allowedFields.finalSettlementAmount = finalSettlementAmount;
+    if (securityDepositRefund !== undefined) allowedFields.securityDepositRefund = securityDepositRefund;
+    const request = await VacatingRequest.findByIdAndUpdate(req.params.id, allowedFields, { new: true })
       .populate("tenant", "firstName lastName email phone")
       .populate("approvedBy", "name email");
     if (!request) return res.status(404).json({ message: "Vacating request not found" });

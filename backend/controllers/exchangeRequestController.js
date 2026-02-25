@@ -116,7 +116,14 @@ export const addExchangeRequest = async (req, res) => {
 
 export const updateExchangeRequest = async (req, res) => {
   try {
-    const request = await ExchangeRequest.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    const { status, approvedBy, approvalDate, rejectionReason, exchangeDate } = req.body;
+    const allowedFields = {};
+    if (status !== undefined) allowedFields.status = status;
+    if (approvedBy !== undefined) allowedFields.approvedBy = approvedBy;
+    if (approvalDate !== undefined) allowedFields.approvalDate = approvalDate;
+    if (rejectionReason !== undefined) allowedFields.rejectionReason = rejectionReason;
+    if (exchangeDate !== undefined) allowedFields.exchangeDate = exchangeDate;
+    const request = await ExchangeRequest.findByIdAndUpdate(req.params.id, allowedFields, { new: true })
       .populate("tenant", "firstName lastName email phone")
       .populate("currentRoom", "roomNumber floor capacity")
       .populate("desiredRoom", "roomNumber floor capacity")
