@@ -436,7 +436,7 @@ const AdminDashboard = () => {
         <div className="space-y-4">
           {recentPayments.map((payment, index) => (
             <div
-              key={index}
+              key={payment._id || `payment-${payment.tenant}-${payment.date}`}
               className="flex items-center justify-between p-3 bg-muted rounded-lg"
             >
               <div>
@@ -498,7 +498,7 @@ const AdminDashboard = () => {
             { icon: Settings, label: "Manage Rooms" },
           ].map((action, index) => (
             <button
-              key={index}
+              key={action.label}
               className="flex flex-col items-center p-4 bg-muted rounded-xl shadow-sm hover:scale-105 transition-transform duration-200"
             >
               <action.icon className="h-6 w-6 mb-2 text-muted-foreground" />
@@ -516,7 +516,7 @@ const AdminDashboard = () => {
         <div className="space-y-3">
           {systemStatus.map((service, index) => (
             <div
-              key={index}
+              key={service.name}
               className="flex items-center justify-between p-3 rounded-lg bg-muted"
             >
               <div className="flex items-center space-x-3">

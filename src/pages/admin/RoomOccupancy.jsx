@@ -277,7 +277,7 @@ const RoomOccupancy = () => {
                       <span>Tenants:</span>
                       <ul className="list-disc list-inside">
                         {room.tenants.map((tenant, i) => (
-                          <li key={i}>{tenant}</li>
+                          <li key={`${room._id}-tenant-${tenant}`}>{tenant}</li>
                         ))}
                       </ul>
                     </div>

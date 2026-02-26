@@ -72,7 +72,6 @@ const Login = ({ setIsAuthenticated, setUserType }) => {
   };
 
   const handleTabChange = (tabType) => {
-    console.log("🔄 Tab changed to:", tabType); // DEBUG LOG
     setActiveTab(tabType);
   };
 

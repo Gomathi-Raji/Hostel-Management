@@ -37,7 +37,6 @@ const RaiseTicket = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Creating ticket:", formData);
     // Here you would typically send the data to your backend
     alert("Ticket created successfully!");
     navigate("/tickets");

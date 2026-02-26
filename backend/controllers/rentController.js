@@ -147,7 +147,7 @@ export const seedMockData = async (req, res) => {
 
     // Create mock users with hashed passwords
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash("password123", salt);
+    const hashedPassword = await bcrypt.hash(process.env.MOCK_PASSWORD || "MockP@ss2024!", salt);
 
     const users = await User.insertMany([
       {

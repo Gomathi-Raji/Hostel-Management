@@ -275,7 +275,7 @@ const Settings = () => {
             <div className="grid grid-cols-1 gap-3">
               {["name", "email", "phone"].map(
                 (field, idx) => (
-                  <div key={idx}>
+                  <div key={field}>
                     <label className="text-sm text-foreground mb-1 block capitalize">
                       {field}
                     </label>
@@ -319,7 +319,7 @@ const Settings = () => {
             <div className="space-y-3">
               {["currentPassword", "newPassword", "confirmPassword"].map(
                 (field, idx) => (
-                  <div key={idx} className="relative">
+                  <div key={field} className="relative">
                     <label className="block text-sm text-foreground mb-1 capitalize">
                       {field.replace(/([A-Z])/g, " $1")}
                     </label>

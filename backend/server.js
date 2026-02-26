@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import helmet from "helmet";
 import path from "path";
 import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
@@ -38,10 +39,11 @@ for (const envVar of optionalEnvVars) {
 connectDB();
 
 const app = express();
+app.use(helmet());
 app.use(express.json());
 // Allow frontend origin from env or common dev ports (Vite defaults)
 const frontendEnv = process.env.FRONTEND_URL;
-const allowedOrigins = ["https://hostel-management-coral.vercel.app"];
+const allowedOrigins = [];
 if (frontendEnv) {
   allowedOrigins.push(...frontendEnv.split(","));
 } else {

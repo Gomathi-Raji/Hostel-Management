@@ -135,7 +135,7 @@ const Profile = ({ onLogout }) => {
       const formData = new FormData();
       formData.append("profileImage", file);
 
-      const apiBase = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+      const apiBase = import.meta.env.VITE_API_BASE || "/api";
       const token = localStorage.getItem("token");
       const res = await fetch(`${apiBase}/auth/profile/upload-image`, {
         method: "POST",
@@ -388,7 +388,7 @@ const Profile = ({ onLogout }) => {
               <div className="flex flex-wrap gap-2 mt-2">
                 {roomCategory.amenities && roomCategory.amenities.length > 0 ? (
                   roomCategory.amenities.map((amenity, index) => (
-                    <span key={index} className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-sm">
+                    <span key={amenity} className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-sm">
                       {amenity}
                     </span>
                   ))
@@ -420,7 +420,7 @@ const Profile = ({ onLogout }) => {
         <div className="flex items-center space-x-4">
           <div className="relative group">
             {profileImage ? (
-              <img src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${profileImage}`} alt="Profile" className="w-16 h-16 rounded-full object-cover" />
+              <img src={`${import.meta.env.VITE_API_BASE?.replace('/api', '') || ''}${profileImage}`} alt="Profile" className="w-16 h-16 rounded-full object-cover" />
             ) : (
               <div className="w-16 h-16 bg-blue-600 dark:bg-blue-500 rounded-full flex items-center justify-center text-white">
                 <User className="h-8 w-8" />

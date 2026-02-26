@@ -54,7 +54,7 @@ export default function Chatbot() {
       </div>
       <div ref={boxRef} className="chat-box h-96 overflow-y-auto p-4 border border-border rounded-lg bg-background">
         {messages.map((msg, i) => (
-          <div key={i} className={`my-2 p-2 rounded-lg ${msg.sender === 'user' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 ml-8' : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 mr-8'}`}>
+          <div key={`${msg.sender}-${i}-${msg.text.slice(0, 10)}`} className={`my-2 p-2 rounded-lg ${msg.sender === 'user' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 ml-8' : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 mr-8'}`}>
             <b className="text-xs uppercase text-muted-foreground">{msg.sender === 'user' ? 'You' : 'Bot'}</b>
             <p className="text-sm whitespace-pre-wrap mt-0.5">{msg.text}</p>
           </div>

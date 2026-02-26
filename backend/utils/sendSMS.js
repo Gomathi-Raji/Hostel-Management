@@ -28,7 +28,6 @@ if (!fs.existsSync(path.dirname(logFilePath))) {
 }
 
 export const sendSMS = async (to, message, type) => {
-  console.log('Attempting to send SMS:', { to, type, messageLength: message.length });
   if (!client) {
     const errorMsg = 'Twilio client not initialized. Check credentials.';
     console.error(errorMsg);
@@ -45,13 +44,11 @@ export const sendSMS = async (to, message, type) => {
   }
 
   try {
-    console.log('Sending SMS via Twilio...');
     const result = await client.messages.create({
       body: message,
       from: fromNumber,
       to: to,
     });
-    console.log('SMS sent successfully, SID:', result.sid);
 
     // Log to file
     const logEntry = `${new Date().toISOString()} - To: ${to}, Type: ${type}, Status: sent, SID: ${result.sid}\nMessage: ${message}\n\n`;

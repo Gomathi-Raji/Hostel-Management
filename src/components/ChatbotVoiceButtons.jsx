@@ -7,16 +7,13 @@ const ChatbotVoiceButtons = () => {
   const handleVoiceAssistant = () => {
     setIsListening(!isListening);
     if (!isListening) {
-      console.log("Voice Assistant activated - Start listening");
       // Add your voice assistant start logic here
     } else {
-      console.log("Voice Assistant deactivated - Stop listening");
       // Add your voice assistant stop logic here
     }
   };
 
   const handleChatbot = () => {
-    console.log("Chatbot opened");
     // Add your chatbot logic here
   };
 
