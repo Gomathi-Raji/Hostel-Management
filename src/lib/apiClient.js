@@ -46,7 +46,9 @@ export async function apiFetch(path, options = {}) {
     try {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-    } catch (e) {}
+    } catch (e) {
+      // localStorage cleanup failed — non-critical
+    }
     // Redirect to login if not already there
     if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
       window.location.href = "/login";

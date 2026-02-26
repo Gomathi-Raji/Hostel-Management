@@ -15,12 +15,12 @@ import UserLayout from "./components/UserLayout";
 import AdminLayout from "./components/AdminLayout";
 
 // Admin Pages
-import AdminDashboard from "./pages/admin/TempDashboard"; 
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import TenantManagement from "./pages/admin/TenantManagement";
 import PaymentTracking from "./pages/admin/PaymentTracking";
 import PaymentTicketDetail from "./pages/admin/PaymentTicketDetail";
 import AddNewTicket from "./pages/admin/AddNewTicket";
-import ReportsAnalytics from "./pages/admin/TempReportsAnalytics";
+import ReportsAnalytics from "./pages/admin/ReportsAnalytics";
 import RoomOccupancy from "./pages/admin/RoomOccupancy";
 import Settings from "./pages/admin/Settings";
 import AdminTickets from "./pages/admin/AdminTickets";
@@ -28,6 +28,7 @@ import FormRequests from "./pages/admin/FormRequests";
 import ExpensesManagement from "./pages/admin/ExpensesManagement"; // Expenses Management
 import StaffPayrollManagement from "./pages/admin/StaffPayrollManagement"; // Staff & Payroll
 import AdminProfile from "./pages/admin/AdminProfile"; // Admin Profile
+import VoiceAssistantPage from "./pages/admin/VoiceAssistantPage";
 
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -49,7 +50,6 @@ const App = () => {
           if (profile && profile.role) {
             setIsAuthenticated(true);
             setUserType(profile.role === 'admin' ? 'admin' : 'user');
-            console.log("✅ Session restored for:", profile.role);
           } else {
             // Invalid token/profile
             setToken(null);
@@ -59,10 +59,8 @@ const App = () => {
         } else {
           setIsAuthenticated(false);
           setUserType("user");
-          console.log("✅ No session found - User must login");
         }
       } catch (error) {
-        console.log("Session expired or invalid - User must login");
         setToken(null);
         setIsAuthenticated(false);
         setUserType("user");
@@ -75,17 +73,14 @@ const App = () => {
   }, []);
 
   const handleSetIsAuthenticated = (value) => {
-    console.log("🔑 Setting authentication to:", value);
     setIsAuthenticated(value);
   };
 
   const handleSetUserType = (type) => {
-    console.log("🔄 Setting user type to:", type);
     setUserType(type);
   };
 
   const handleLogout = () => {
-    console.log("🚪 Logging out user");
     setIsAuthenticated(false);
     setUserType("user");
     localStorage.clear();
@@ -95,7 +90,7 @@ const App = () => {
   // Ensure token is cleared when logging out
   useEffect(() => {
     if (!isAuthenticated) {
-      try { setToken(null); } catch (e) {}
+      try { setToken(null); } catch (e) { /* token cleanup failed */ }
     }
   }, [isAuthenticated]);
 
@@ -283,6 +278,7 @@ const App = () => {
             <Route path="reports-analytics" element={<ReportsAnalytics />} />
             <Route path="settings" element={<Settings />} />
             <Route path="profile" element={<AdminProfile />} />
+            <Route path="voice-assistant" element={<VoiceAssistantPage />} />
           </Route>
 
           {/* DEFAULT ROUTE */}

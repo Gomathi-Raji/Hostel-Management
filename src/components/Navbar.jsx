@@ -249,7 +249,7 @@ const Navbar = ({ onLogout }) => {
               );
             })}
 
-            {/* Forms Dropdown - Mobile */}}
+            {/* Forms Dropdown - Mobile */}
             <div className="space-y-1" ref={mobileFormsRef}>
               <div
                 onClick={handleMobileFormsToggle}

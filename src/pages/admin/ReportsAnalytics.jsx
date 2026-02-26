@@ -108,7 +108,7 @@ const ReportsAnalytics = () => {
             <table className="w-full text-sm">
               <thead><tr className="border-b border-border"><th className="text-left py-2 text-foreground">Month</th><th className="text-right py-2 text-foreground">Income</th><th className="text-right py-2 text-foreground">Expense</th><th className="text-right py-2 text-foreground">Profit</th></tr></thead>
               <tbody>{reportData.monthly.map((m, i) => (
-                <tr key={i} className="border-b border-border/50"><td className="py-2 text-muted-foreground">{m.month}</td><td className="text-right text-green-600 dark:text-green-400">₹{m.income.toLocaleString()}</td><td className="text-right text-red-600 dark:text-red-400">₹{m.expense.toLocaleString()}</td><td className="text-right text-foreground font-medium">₹{m.profit.toLocaleString()}</td></tr>
+                <tr key={m.month || i} className="border-b border-border/50"><td className="py-2 text-muted-foreground">{m.month}</td><td className="text-right text-green-600 dark:text-green-400">₹{m.income.toLocaleString()}</td><td className="text-right text-red-600 dark:text-red-400">₹{m.expense.toLocaleString()}</td><td className="text-right text-foreground font-medium">₹{m.profit.toLocaleString()}</td></tr>
               ))}</tbody>
             </table>
           </div>
@@ -117,7 +117,7 @@ const ReportsAnalytics = () => {
               <h4 className="font-medium text-foreground mt-4 mb-2">Payment Methods (This Month)</h4>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {reportData.byMethod.map((m, i) => (
-                  <div key={i} className="bg-muted/50 rounded-lg p-3"><p className="text-xs text-muted-foreground capitalize">{m._id || "N/A"}</p><p className="text-sm font-semibold text-foreground">₹{m.total.toLocaleString()} ({m.count})</p></div>
+                  <div key={m._id || `method-${i}`} className="bg-muted/50 rounded-lg p-3"><p className="text-xs text-muted-foreground capitalize">{m._id || "N/A"}</p><p className="text-sm font-semibold text-foreground">₹{m.total.toLocaleString()} ({m.count})</p></div>
                 ))}
               </div>
             </div>
@@ -226,7 +226,7 @@ const ReportsAnalytics = () => {
       {/* Analytics Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 mb-6">
         {analyticsCards.map((card, idx) => (
-          <div key={idx} onClick={card.action} className="bg-card rounded-lg border border-border shadow p-4 md:p-6 hover:shadow-lg transition-shadow cursor-pointer">
+          <div key={card.title} onClick={card.action} className="bg-card rounded-lg border border-border shadow p-4 md:p-6 hover:shadow-lg transition-shadow cursor-pointer">
             <div className="flex items-center justify-between mb-3">
               <card.icon className={`h-6 w-6 ${card.color}`} />
               <button className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400">View Details</button>

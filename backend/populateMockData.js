@@ -32,7 +32,7 @@ const populateMockData = async () => {
     console.log('Cleared existing data');
 
     // Create Users (3-5 of each role)
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    const hashedPassword = await bcrypt.hash(process.env.MOCK_PASSWORD || 'MockP@ss2024!', 10);
 
     const users = [
       // Admins
@@ -382,9 +382,9 @@ const populateMockData = async () => {
     console.log(`- Exchange Requests: ${createdExchangeRequests.length}`);
 
     console.log('\n=== Sample Login Credentials ===');
-    console.log('Admin: admin1@example.com / password123');
-    console.log('Staff: staff1@example.com / password123');
-    console.log('Tenant: john@example.com / password123');
+    console.log('Admin: admin1@example.com / <MOCK_PASSWORD env var or MockP@ss2024!>');
+    console.log('Staff: staff1@example.com / <MOCK_PASSWORD env var or MockP@ss2024!>');
+    console.log('Tenant: john@example.com / <MOCK_PASSWORD env var or MockP@ss2024!>');
 
   } catch (error) {
     console.error('Error populating mock data:', error);

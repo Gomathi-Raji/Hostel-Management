@@ -444,23 +444,19 @@ const StaffPayrollManagement = () => {
 
   // Export functions
   const exportStaffData = () => {
-    console.log("Exporting staff data:", filteredStaff);
     alert("Staff data exported successfully!");
   };
 
   const exportPayrollData = () => {
-    console.log("Exporting payroll data:", filteredPayroll);
     alert("Payroll data exported successfully!");
   };
 
   const generateSalarySlip = (recordId) => {
     const record = payrollRecords.find(r => r.id === recordId);
-    console.log("Generating salary slip for:", record);
     alert(`Salary slip generated for ${record.staffName}`);
   };
 
   const processPayroll = () => {
-    console.log("Processing payroll for all pending records");
     alert("Payroll processing initiated!");
   };
 

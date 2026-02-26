@@ -188,10 +188,12 @@ export const forgotPassword = async (req, res) => {
     user.resetPasswordExpire = Date.now() + 30 * 60 * 1000; // 30 minutes
     await user.save();
 
-    // In production, send email with resetToken. For now, return it.
+    // TODO: In production, send email with resetToken link
+    // For now, we construct a frontend reset link
+    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
     res.json({
-      message: "Password reset token generated. Use it within 30 minutes.",
-      resetToken, // In production, send via email instead
+      message: "Password reset link has been generated. Check your email.",
+      resetUrl, // In production, send this via email and remove from response
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

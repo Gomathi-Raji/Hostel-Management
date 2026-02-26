@@ -46,7 +46,6 @@ const AddNewTicket = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Ticket submitted:", formData);
     // Handle form submission
     navigate("/admin/dashboard");
   };
@@ -85,7 +84,7 @@ const AddNewTicket = () => {
               >
                 <option value="">Select a tenant</option>
                 {tenantOptions.map((tenant, index) => (
-                  <option key={index} value={tenant}>
+                  <option key={tenant} value={tenant}>
                     {tenant}
                   </option>
                 ))}
@@ -106,7 +105,7 @@ const AddNewTicket = () => {
               >
                 <option value="">Select category</option>
                 {categoryOptions.map((category, index) => (
-                  <option key={index} value={category}>
+                  <option key={category} value={category}>
                     {category}
                   </option>
                 ))}
@@ -145,7 +144,7 @@ const AddNewTicket = () => {
               >
                 <option value="">Select priority</option>
                 {priorityOptions.map((priority, index) => (
-                  <option key={index} value={priority}>
+                  <option key={priority} value={priority}>
                     {priority}
                   </option>
                 ))}

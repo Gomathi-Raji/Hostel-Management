@@ -202,7 +202,7 @@ const Dashboard = () => {
             <div className="space-y-4">
               {displayedInvoices && displayedInvoices.length > 0 ? (
                 displayedInvoices.map((invoice, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-4 bg-background rounded-lg">
+                  <div key={invoice._id || idx} className="flex items-center justify-between p-4 bg-background rounded-lg">
                     <div className="flex-1">
                       <p className="font-medium text-foreground">{invoice.type === "rent" ? t("dashboard.monthlyRent") : invoice.type}</p>
                       <p className="text-sm text-muted-foreground">{formatCurrency(invoice.amount)}</p>

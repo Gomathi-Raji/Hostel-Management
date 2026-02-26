@@ -2,8 +2,19 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import ChatLog from '../models/ChatLog.js';
 import User from '../models/User.js';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-1.5-pro' });
+let genAI = null;
+let model = null;
+
+function getModel() {
+  if (!model) {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is not configured. Chat functionality is unavailable.');
+    }
+    genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    model = genAI.getGenerativeModel({ model: process.env.GEMINI_MODEL || 'gemini-1.5-pro' });
+  }
+  return model;
+}
 
 const tenantChatFlow = `
 1. My Room: If user asks about room, respond with room number, roommates and move-in validity. Offer Room Change option and if user requests, ask for reason and log as a "room_change_request".
@@ -23,7 +34,6 @@ const adminChatFlow = `
 Always keep actions logged and ask for confirmation before performing destructive actions.`;
 
 export const handleChat = async (req, res) => {
-  console.log('Chat request received:', { message: req.body.message, role: req.body.role, user: req.user?.name });
   try {
     const { message, role } = req.body;
     const userId = req.user?._id || null;
@@ -36,11 +46,9 @@ export const handleChat = async (req, res) => {
 
     // Call Gemini model
     const prompt = `${contextPrompt}\nUser: ${message}\nAssistant:`;
-    console.log('Calling Gemini with prompt length:', prompt.length);
-    const response = await model.generateContent(prompt);
+    const response = await getModel().generateContent(prompt);
     // response may be in different shape depending on SDK; try to extract text
     const reply = response?.response?.text ? response.response.text() : (response?.candidates?.[0]?.content || JSON.stringify(response));
-    console.log('Gemini reply length:', reply.length);
 
     // Update log with reply
     log.reply = reply;
